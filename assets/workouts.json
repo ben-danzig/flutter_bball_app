@@ -1,0 +1,57 @@
+{
+  "id": "foundational_ball_control_and_finishing",
+  "name": "Foundational Ball Control & Finishing",
+  "objective": "Develop adaptable dribble control and master finishing through contact and in chaotic situations.",
+  "estimatedDuration": 25,
+  "drills": [
+    {
+      "drillId": "off_hand_freestyle",
+      "name": "Off-Hand Freestyle",
+      "description": "Dribble continuously with your weak hand, using any moves you want. Stay low and keep your eyes up.",
+      "type": "TIMED",
+      "config": {
+        "sets": 2,
+        "duration": 60
+      }
+    },
+    {
+      "drillId": "over_line_pulls",
+      "name": "Over-Line Pulls",
+      "description": "Place the ball over a line on the court, then quickly pull it back with a sharp in-and-out or crossover move. Alternate hands.",
+      "type": "TIMED",
+      "config": {
+        "sets": 2,
+        "duration": 45
+      }
+    },
+    {
+      "drillId": "net_tap_finishes",
+      "name": "Net Tap Finishes",
+      "description": "Start under the rim. Jump up and tap the net with the ball before finishing a layup. Helps with body control and finishing high. Alternate sides.",
+      "type": "REP_BASED",
+      "config": {
+        "sets": 1,
+        "targetMakes": 10
+      }
+    },
+    {
+      "drillId": "body_touch_finishing",
+      "name": "Body-Touch Finishing",
+      "description": "Drive from the wing. As you gather for the layup, touch the ball to your hip or shoulder to protect it from defenders before finishing.",
+      "type": "REP_BASED",
+      "config": {
+        "sets": 1,
+        "targetMakes": 10
+      }
+    },
+    {
+      "drillId": "finishers_gauntlet",
+      "name": "The Finisher's Gauntlet",
+      "description": "Make 20 layups from various angles around the hoop as quickly as you can. The clock stops when you hit 20 makes.",
+      "type": "MAKE_TARGET_TIMED",
+      "config": {
+        "targetMakes": 20
+      }
+    }
+  ]
+}
