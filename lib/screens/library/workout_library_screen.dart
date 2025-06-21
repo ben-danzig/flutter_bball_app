@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bball_app/models/workout_blueprint.dart';
 import 'package:flutter_bball_app/repositories/workout_repository.dart';
+import 'package:flutter_bball_app/screens/detail/workout_detail_screen.dart';
 
 class WorkoutLibraryScreen extends StatefulWidget {
   const WorkoutLibraryScreen({super.key});
@@ -55,7 +56,19 @@ class _WorkoutLibraryScreenState extends State<WorkoutLibraryScreen> {
                 // State 3: Data loaded successfully
                 if (snapshot.hasData) {
                   final blueprint = snapshot.data!;
-                  return _WorkoutCard(blueprint: blueprint);
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => WorkoutDetailScreen(
+                            blueprint: blueprint,
+                          ),
+                        ),
+                      );
+                    },
+                    child: _WorkoutCard(blueprint: blueprint),
+                  );
                 }
                 // Default state (should not be reached)
                 return const Center(child: Text('No workout found.'));
