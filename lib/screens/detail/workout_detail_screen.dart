@@ -2,100 +2,111 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bball_app/models/workout_blueprint.dart';
 
 class WorkoutDetailScreen extends StatelessWidget {
-  final WorkoutBlueprint blueprint;
+  final WorkoutBlueprint workout;
 
-  const WorkoutDetailScreen({
-    super.key,
-    required this.blueprint,
-  });
+  const WorkoutDetailScreen({super.key, required this.workout});
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+
     return Scaffold(
+      backgroundColor: const Color(0xFF111827),
       appBar: AppBar(
-        title: Text(blueprint.name),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
+        title: Text(workout.name),
+        backgroundColor: const Color(0xFF1f2937),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              blueprint.name,
-              style: const TextStyle(
-                fontSize: 34,
-                fontWeight: FontWeight.w900,
+      body: CustomScrollView(
+        slivers: [
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    workout.name.toUpperCase(),
+                    style: textTheme.headlineSmall?.copyWith(
+                      color: const Color(0xFFf9fafb),
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    workout.objective,
+                    style: textTheme.titleMedium?.copyWith(
+                      color: const Color(0xFF9ca3af),
+                    ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 8),
-            Text(
-              blueprint.objective,
-              style: const TextStyle(
-                fontSize: 16,
-                color: Colors.grey,
-              ),
+          ),
+          SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (context, index) {
+                final drill = workout.drills[index];
+                return Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  child: Container(
+                    padding: const EdgeInsets.all(16.0),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1f2937),
+                      borderRadius: BorderRadius.circular(12.0),
+                      border: Border.all(color: const Color(0xFF4b5563)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          drill.name,
+                          style: textTheme.titleLarge?.copyWith(
+                            color: const Color(0xFFf9fafb),
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          drill.description,
+                          style: textTheme.bodyMedium?.copyWith(
+                            color: const Color(0xFF9ca3af),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+              childCount: workout.drills.length,
             ),
-            const SizedBox(height: 24),
-            Text(
-              '${blueprint.estimatedDuration} MINS • ${blueprint.drills.length} DRILLS',
-              style: const TextStyle(
-                fontSize: 12,
-                color: Colors.grey,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 24),
-            const Text(
-              'Drills',
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Expanded(
-              child: ListView.builder(
-                itemCount: blueprint.drills.length,
-                itemBuilder: (context, index) {
-                  final drill = blueprint.drills[index];
-                  return ListTile(
-                    title: Text(drill.name),
-                    subtitle: Text(drill.description),
-                    trailing: _buildDrillTypeIndicator(drill.type),
-                  );
+          ),
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF3b82f6),
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                ),
+                onPressed: () {
+                  // TODO: Navigate to Active Workout Screen
                 },
+                child: Text(
+                  'Start Workout',
+                  style: textTheme.titleMedium?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
-  }
-
-  Widget _buildDrillTypeIndicator(String type) {
-    IconData icon;
-    Color color;
-
-    switch (type) {
-      case 'TIMED':
-        icon = Icons.timer;
-        color = Colors.blue;
-        break;
-      case 'REP_BASED':
-        icon = Icons.repeat;
-        color = Colors.green;
-        break;
-      case 'MAKE_TARGET_TIMED':
-        icon = Icons.sports_basketball;
-        color = Colors.orange;
-        break;
-      default:
-        icon = Icons.help_outline;
-        color = Colors.grey;
-    }
-
-    return Icon(icon, color: color);
   }
 }

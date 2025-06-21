@@ -44,7 +44,7 @@
   - **Outputs:** `onTap` functionality on the workout card that pushes a new route using `Navigator.push()`.
   - **Validation:** A widget test that simulates a tap on the card and verifies that the `WorkoutDetailScreen` is pushed to the navigator stack.
 
-- [ ] **T2.3: Build Workout Detail Screen**
+- [x] **T2.3: Build Workout Detail Screen**
   - **Description:** Build the screen that shows the detailed list of drills for the selected workout, matching Mockup #1.
   - **Inputs:** A `WorkoutBlueprint` object passed as an argument.
   - **Outputs:** A `lib/screens/detail/workout_detail_screen.dart` widget.

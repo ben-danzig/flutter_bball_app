@@ -11,113 +11,121 @@ class WorkoutLibraryScreen extends StatefulWidget {
 }
 
 class _WorkoutLibraryScreenState extends State<WorkoutLibraryScreen> {
-  // A Future to hold the result of our repository call
   late Future<WorkoutBlueprint> _workoutBlueprintFuture;
   final WorkoutRepository _workoutRepository = WorkoutRepository();
 
   @override
   void initState() {
     super.initState();
-    // Start loading the data as soon as the widget is created
     _workoutBlueprintFuture = _workoutRepository.getWorkoutBlueprint();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 40), // For status bar spacing
-            const Text(
-              'Workouts',
-              style: TextStyle(fontSize: 34, fontWeight: FontWeight.w900),
-            ),
-            const Text(
-              'Choose a workout to start your session.',
-              style: TextStyle(fontSize: 16, color: Colors.grey),
-            ),
-            const SizedBox(height: 24),
+    final textTheme = Theme.of(context).textTheme;
 
-            // FutureBuilder handles the loading/error/success states for us
-            FutureBuilder<WorkoutBlueprint>(
-              future: _workoutBlueprintFuture,
-              builder: (context, snapshot) {
-                // State 1: Still loading
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-                // State 2: Error loading data
-                if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
-                }
-                // State 3: Data loaded successfully
-                if (snapshot.hasData) {
-                  final blueprint = snapshot.data!;
-                  return GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => WorkoutDetailScreen(
-                            blueprint: blueprint,
+    return Scaffold(
+      backgroundColor: const Color(0xFF111827),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 20),
+              Text(
+                'Workouts',
+                style: textTheme.headlineLarge?.copyWith(
+                  color: const Color(0xFFf9fafb),
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Choose a workout to start your session.',
+                style: textTheme.titleMedium?.copyWith(
+                  color: const Color(0xFF9ca3af),
+                ),
+              ),
+              const SizedBox(height: 24),
+              FutureBuilder<WorkoutBlueprint>(
+                future: _workoutBlueprintFuture,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (snapshot.hasError) {
+                    return Center(
+                        child: Text('Error: ${snapshot.error}',
+                            style: const TextStyle(color: Colors.white)));
+                  }
+                  if (snapshot.hasData) {
+                    final workout = snapshot.data!;
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                WorkoutDetailScreen(workout: workout),
                           ),
-                        ),
-                      );
-                    },
-                    child: _WorkoutCard(blueprint: blueprint),
-                  );
-                }
-                // Default state (should not be reached)
-                return const Center(child: Text('No workout found.'));
-              },
-            ),
-          ],
+                        );
+                      },
+                      child: _WorkoutCard(workout: workout),
+                    );
+                  }
+                  return const Center(
+                      child: Text('No workout found.',
+                          style: TextStyle(color: Colors.white)));
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-// A private helper widget for the card UI to keep the build method clean
 class _WorkoutCard extends StatelessWidget {
-  final WorkoutBlueprint blueprint;
-  const _WorkoutCard({required this.blueprint});
+  final WorkoutBlueprint workout;
+  const _WorkoutCard({required this.workout});
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.grey[850],
+        color: const Color(0xFF1f2937),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey[800]!),
+        border: Border.all(color: const Color(0xFF4b5563)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            blueprint.name,
-            style: const TextStyle(
-              fontSize: 22,
+            workout.name,
+            style: textTheme.headlineSmall?.copyWith(
+              color: const Color(0xFF3b82f6),
               fontWeight: FontWeight.bold,
-              color: Color(0xFF60A5FA), // Light Blue
             ),
           ),
           const SizedBox(height: 8),
           Text(
-            blueprint.objective,
-            style: const TextStyle(fontSize: 14, color: Colors.grey),
+            workout.objective,
+            style: textTheme.bodyLarge?.copyWith(
+              color: const Color(0xFF9ca3af),
+            ),
           ),
           const SizedBox(height: 16),
           Text(
-            '${blueprint.estimatedDuration} MINS • ${blueprint.drills.length} DRILLS',
-            style: const TextStyle(
-                fontSize: 12,
-                color: Colors.grey,
-                fontWeight: FontWeight.bold),
+            '${workout.estimatedDuration} MINS • ${workout.drills.length} DRILLS',
+            style: textTheme.bodySmall?.copyWith(
+              color: const Color(0xFF9ca3af),
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ],
       ),

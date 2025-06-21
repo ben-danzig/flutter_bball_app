@@ -39,7 +39,7 @@ void main() {
                   context,
                   MaterialPageRoute(
                     builder: (context) => WorkoutDetailScreen(
-                      blueprint: sampleBlueprint,
+                      workout: sampleBlueprint,
                     ),
                   ),
                 );
@@ -60,9 +60,10 @@ void main() {
 
     // Verify we're on the detail screen
     expect(find.byType(WorkoutDetailScreen), findsOneWidget);
-    expect(find.text('Test Workout'), findsWidgets); // Title appears in app bar and body
+    expect(find.text('Test Workout'), findsOneWidget); // Title appears in app bar
+    expect(find.text('TEST WORKOUT'), findsOneWidget); // Title appears in body
     expect(find.text('Test objective'), findsOneWidget);
-    expect(find.text('Drills'), findsOneWidget);
+    // The word "Drills:" is no longer in the UI, it's just a list of drills.
     expect(find.text('Test Drill'), findsOneWidget);
   });
 }
