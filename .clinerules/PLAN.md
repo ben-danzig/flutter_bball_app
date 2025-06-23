@@ -62,7 +62,7 @@
   - **Outputs:** A `lib/services/workout_state.dart` file.
   - **Validation:** A unit test that creates a `WorkoutState` instance, starts a workout, and asserts that the initial state (current drill, etc.) is correct.
 
-- [ ] **T3.2: Build Active Workout Screen**
+- [x] **T3.2: Build Active Workout Screen**
   - **Description:** Build the main screen that listens to the `WorkoutState` and dynamically displays the correct UI for the current drill.
   - **Inputs:** `WorkoutState` service.
   - **Outputs:** A `lib/screens/active/active_workout_screen.dart` widget.

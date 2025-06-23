@@ -7,75 +7,52 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 
 void main() {
-  testWidgets('ActiveWorkoutScreen shows correct UI for timed drill',
-      (WidgetTester tester) async {
-    // 1. Create a mock WorkoutState
-    final workoutState = WorkoutState();
-    final blueprint = WorkoutBlueprint(
-      id: 'test',
-      name: 'Test Workout',
-      objective: 'Test objective',
-      estimatedDuration: 10,
+  // Helper function to create a mock blueprint with a single drill of a given type
+  WorkoutBlueprint createMockBlueprint(String drillType) {
+    return WorkoutBlueprint(
+      id: 'mock_id',
+      name: 'Mock Workout',
+      objective: '',
+      estimatedDuration: 1,
       drills: [
-        Drill(
-          drillId: 'drill1',
-          name: 'Timed Drill',
-          description: 'A timed drill',
-          type: 'TIMED',
-          config: {'duration': 60},
-        ),
+        Drill(drillId: 'd1', name: 'Mock Drill', description: '', type: drillType, config: {})
       ],
     );
+  }
+
+  // Helper function to wrap our screen in the necessary providers for testing
+  Widget createTestableScreen(WorkoutState state) {
+    return ChangeNotifierProvider.value(
+      value: state,
+      child: const MaterialApp(home: ActiveWorkoutScreen()),
+    );
+  }
+
+  testWidgets('displays TimedDrillView for TIMED drill type', (WidgetTester tester) async {
+    // ARRANGE
+    final workoutState = WorkoutState();
+    final blueprint = createMockBlueprint('TIMED');
     workoutState.startWorkout(blueprint);
 
-    // 2. Pump the widget with the provider
-    await tester.pumpWidget(
-      ChangeNotifierProvider<WorkoutState>.value(
-        value: workoutState,
-        child: const MaterialApp(
-          home: ActiveWorkoutScreen(),
-        ),
-      ),
-    );
+    // ACT
+    await tester.pumpWidget(createTestableScreen(workoutState));
 
-    // 3. Verify the correct UI is shown
-    expect(find.text('Timer UI for Timed Drill'), findsOneWidget);
-    expect(find.text('Rep Counter UI for Timed Drill'), findsNothing);
+    // ASSERT
+    expect(find.textContaining('Placeholder for TIMED drill'), findsOneWidget);
+    expect(find.textContaining('REP_BASED'), findsNothing);
   });
 
-  testWidgets('ActiveWorkoutScreen shows correct UI for rep-based drill',
-      (WidgetTester tester) async {
-    // 1. Create a mock WorkoutState
+  testWidgets('displays RepBasedDrillView for REP_BASED drill type', (WidgetTester tester) async {
+    // ARRANGE
     final workoutState = WorkoutState();
-    final blueprint = WorkoutBlueprint(
-      id: 'test',
-      name: 'Test Workout',
-      objective: 'Test objective',
-      estimatedDuration: 10,
-      drills: [
-        Drill(
-          drillId: 'drill2',
-          name: 'Rep-Based Drill',
-          description: 'A rep-based drill',
-          type: 'REP_BASED',
-          config: {'reps': 10, 'sets': 3},
-        ),
-      ],
-    );
+    final blueprint = createMockBlueprint('REP_BASED');
     workoutState.startWorkout(blueprint);
 
-    // 2. Pump the widget with the provider
-    await tester.pumpWidget(
-      ChangeNotifierProvider<WorkoutState>.value(
-        value: workoutState,
-        child: const MaterialApp(
-          home: ActiveWorkoutScreen(),
-        ),
-      ),
-    );
+    // ACT
+    await tester.pumpWidget(createTestableScreen(workoutState));
 
-    // 3. Verify the correct UI is shown
-    expect(find.text('Rep Counter UI for Rep-Based Drill'), findsOneWidget);
-    expect(find.text('Timer UI for Rep-Based Drill'), findsNothing);
+    // ASSERT
+    expect(find.textContaining('Placeholder for REP_BASED drill'), findsOneWidget);
+    expect(find.textContaining('TIMED'), findsNothing);
   });
 }

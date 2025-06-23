@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:flutter_bball_app/services/workout_state.dart';
 import 'package:flutter_bball_app/models/drill.dart';
+import 'package:flutter_bball_app/services/workout_state.dart';
+import 'package:provider/provider.dart';
 
 class ActiveWorkoutScreen extends StatelessWidget {
   const ActiveWorkoutScreen({super.key});
@@ -10,37 +10,106 @@ class ActiveWorkoutScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<WorkoutState>(
       builder: (context, workoutState, child) {
-        final drill = workoutState.currentDrill;
-        if (drill == null) {
+        // If no workout is active, show an empty state (or navigate back).
+        // This is a safeguard.
+        if (!workoutState.isWorkoutStarted) {
           return const Scaffold(
-            body: Center(
-              child: Text("Workout Complete!"),
-            ),
+            body: Center(child: Text('No active workout.')),
           );
         }
 
+        final drill = workoutState.currentDrill!;
+
         return Scaffold(
-          appBar: AppBar(
-            title: Text(drill.name),
-          ),
-          body: Center(
-            child: _buildDrillWidget(drill),
+          body: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              children: [
+                // This is the top "context" bar from our mockups
+                const SizedBox(height: 40),
+                const Text(
+                  'UP NEXT: Drill Name Here', // We will make this dynamic later
+                  style: TextStyle(color: Colors.grey),
+                ),
+
+                // The main display area, which will change dynamically
+                Expanded(
+                  child: _buildDrillView(drill),
+                ),
+
+                // This is the bottom progress bar from our mockups
+                const LinearProgressIndicator(value: 0.5), // Placeholder value
+                const SizedBox(height: 16),
+              ],
+            ),
           ),
         );
       },
     );
   }
 
-  Widget _buildDrillWidget(Drill drill) {
+  // This method acts as a router to select the correct UI for the drill type
+  Widget _buildDrillView(Drill drill) {
     switch (drill.type) {
       case 'TIMED':
-        return Text('Timer UI for ${drill.name}');
+        return _TimedDrillView(drill: drill);
       case 'REP_BASED':
-        return Text('Rep Counter UI for ${drill.name}');
+        return _RepBasedDrillView(drill: drill);
       case 'MAKE_TARGET_TIMED':
-        return Text('Make Target Timed UI for ${drill.name}');
+        return _MakeTargetTimedDrillView(drill: drill);
       default:
-        return Text('Unknown drill type');
+        return Center(child: Text('Unknown drill type: ${drill.type}'));
     }
+  }
+}
+
+// --- Placeholder Widgets ---
+// In the next tasks, we will build these out fully.
+
+class _TimedDrillView extends StatelessWidget {
+  final Drill drill;
+  const _TimedDrillView({required this.drill});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Text(
+        'Placeholder for TIMED drill:\n${drill.name}',
+        textAlign: TextAlign.center,
+        style: const TextStyle(fontSize: 24),
+      ),
+    );
+  }
+}
+
+class _RepBasedDrillView extends StatelessWidget {
+  final Drill drill;
+  const _RepBasedDrillView({required this.drill});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Text(
+        'Placeholder for REP_BASED drill:\n${drill.name}',
+        textAlign: TextAlign.center,
+        style: const TextStyle(fontSize: 24),
+      ),
+    );
+  }
+}
+
+class _MakeTargetTimedDrillView extends StatelessWidget {
+  final Drill drill;
+  const _MakeTargetTimedDrillView({required this.drill});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Text(
+        'Placeholder for MAKE_TARGET_TIMED drill:\n${drill.name}',
+        textAlign: TextAlign.center,
+        style: const TextStyle(fontSize: 24),
+      ),
+    );
   }
 }
