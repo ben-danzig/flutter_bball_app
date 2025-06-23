@@ -1,0 +1,75 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bball_app/models/drill.dart';
+import 'package:flutter_bball_app/screens/active/widgets/make_target_timed_drill_widget.dart';
+import 'package:flutter_bball_app/services/workout_state.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/mockito.dart';
+import 'package:provider/provider.dart';
+
+class MockWorkoutState extends Mock implements WorkoutState {}
+
+void main() {
+  late MockWorkoutState mockWorkoutState;
+
+  setUp(() {
+    mockWorkoutState = MockWorkoutState();
+  });
+
+  testWidgets('MakeTargetTimedDrillWidget works correctly', (WidgetTester tester) async {
+    final drill = Drill(
+      drillId: 'make_target_drill',
+      name: 'Test Make Target Drill',
+      description: '',
+      type: 'MAKE_TARGET_TIMED',
+      config: {'targetMakes': 2},
+    );
+
+    await tester.pumpWidget(
+      ChangeNotifierProvider<WorkoutState>.value(
+        value: mockWorkoutState,
+        child: MaterialApp(
+          home: Scaffold(
+            body: MakeTargetTimedDrillWidget(drill: drill),
+          ),
+        ),
+      ),
+    );
+
+    // Initial state
+    expect(find.text('Test Make Target Drill'), findsOneWidget);
+    expect(find.text('00:00'), findsOneWidget);
+    expect(find.text('0 / 2 MAKES'), findsOneWidget);
+    expect(find.widgetWithText(ElevatedButton, '+1 MAKE'), findsOneWidget);
+
+    // Advance timer
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('00:01'), findsOneWidget);
+
+    // Add a make
+    await tester.tap(find.widgetWithText(ElevatedButton, '+1 MAKE'));
+    await tester.pump();
+    expect(find.text('1 / 2 MAKES'), findsOneWidget);
+
+    // Advance timer again
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('00:02'), findsOneWidget);
+
+    // Add final make to complete the drill
+    await tester.tap(find.widgetWithText(ElevatedButton, '+1 MAKE'));
+    await tester.pump();
+    expect(find.text('2 / 2 MAKES'), findsOneWidget);
+
+    // Verify timer has stopped
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('00:02'), findsOneWidget); // Should not have changed
+
+    // Verify UI changed to "FINISH DRILL"
+    expect(find.widgetWithText(ElevatedButton, '+1 MAKE'), findsNothing);
+    expect(find.widgetWithText(ElevatedButton, 'FINISH DRILL'), findsOneWidget);
+
+    // Tap finish and verify state is advanced
+    await tester.tap(find.widgetWithText(ElevatedButton, 'FINISH DRILL'));
+    await tester.pump();
+    verify(mockWorkoutState.nextDrill()).called(1);
+  });
+}

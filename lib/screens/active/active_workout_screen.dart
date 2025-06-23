@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bball_app/models/drill.dart';
+import 'package:flutter_bball_app/screens/active/widgets/make_target_timed_drill_widget.dart';
 import 'package:flutter_bball_app/screens/active/widgets/rep_based_drill_widget.dart';
 import 'package:flutter_bball_app/screens/active/widgets/timed_drill_widget.dart';
 import 'package:flutter_bball_app/services/workout_state.dart';
@@ -58,28 +59,11 @@ class ActiveWorkoutScreen extends StatelessWidget {
       case 'REP_BASED':
         return RepBasedDrillWidget(key: ValueKey(drill.drillId), drill: drill);
       case 'MAKE_TARGET_TIMED':
-        return _MakeTargetTimedDrillView(drill: drill);
+        return MakeTargetTimedDrillWidget(key: ValueKey(drill.drillId), drill: drill);
       default:
         return Center(child: Text('Unknown drill type: ${drill.type}'));
     }
   }
 }
 
-// --- Placeholder Widgets ---
-// In the next tasks, we will build these out fully.
-
-class _MakeTargetTimedDrillView extends StatelessWidget {
-  final Drill drill;
-  const _MakeTargetTimedDrillView({required this.drill});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Text(
-        'Placeholder for MAKE_TARGET_TIMED drill:\n${drill.name}',
-        textAlign: TextAlign.center,
-        style: const TextStyle(fontSize: 24),
-      ),
-    );
-  }
-}
+// All placeholder widgets have been replaced.

@@ -80,7 +80,7 @@
   - **Outputs:** A widget with a make/target counter and a "LOG SET" button that opens a modal. Saving the modal updates the `WorkoutState`.
   - **Validation:** A widget test that simulates tapping "LOG SET", verifies the modal appears, simulates data entry, and verifies that the correct logging method is called on a mock `WorkoutState`.
 
-- [ ] **T3.5: Implement Make Target Timed Drill Logic**
+- [x] **T3.5: Implement Make Target Timed Drill Logic**
   - **Description:** Implement the UI for the `MAKE_TARGET_TIMED` drill type.
   - **Inputs:** A `Drill` object of type `MAKE_TARGET_TIMED`.
   - **Outputs:** A widget with an upward-counting timer and a make counter.
