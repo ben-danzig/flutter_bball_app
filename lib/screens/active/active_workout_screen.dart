@@ -53,7 +53,7 @@ class ActiveWorkoutScreen extends StatelessWidget {
   Widget _buildDrillView(Drill drill) {
     switch (drill.type) {
       case 'TIMED':
-        return TimedDrillWidget(drill: drill);
+        return TimedDrillWidget(key: ValueKey(drill.drillId), drill: drill);
       case 'REP_BASED':
         return _RepBasedDrillView(drill: drill);
       case 'MAKE_TARGET_TIMED':

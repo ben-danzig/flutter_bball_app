@@ -88,4 +88,55 @@ void main() {
     // Verify that nextDrill was called
     verify(mockWorkoutState.nextDrill()).called(1);
   });
+
+  testWidgets('Timer resets when drill changes', (WidgetTester tester) async {
+    final drill1 = Drill(
+      drillId: 'drill1',
+      name: 'First Drill',
+      description: '',
+      type: 'TIMED',
+      config: {'duration': 10},
+    );
+    final drill2 = Drill(
+      drillId: 'drill2',
+      name: 'Second Drill',
+      description: '',
+      type: 'TIMED',
+      config: {'duration': 20},
+    );
+
+    // A helper widget to simulate the parent rebuilding with a new drill
+    Widget buildWidget(Drill drill) {
+      return ChangeNotifierProvider<WorkoutState>.value(
+        value: mockWorkoutState,
+        child: MaterialApp(
+          home: Scaffold(
+            body: TimedDrillWidget(
+              key: ValueKey(drill.drillId),
+              drill: drill,
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Pump the first drill
+    await tester.pumpWidget(buildWidget(drill1));
+    expect(find.text('10'), findsOneWidget);
+
+    // Advance time a bit
+    await tester.pump(const Duration(seconds: 2));
+    expect(find.text('8'), findsOneWidget);
+
+    // Now, rebuild with the second drill
+    await tester.pumpWidget(buildWidget(drill2));
+
+    // The timer should have reset to the new duration
+    expect(find.text('20'), findsOneWidget);
+    expect(find.text('Second Drill'), findsOneWidget);
+
+    // Advance time again to make sure the new timer is running
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('19'), findsOneWidget);
+  });
 }

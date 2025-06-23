@@ -68,7 +68,7 @@
   - **Outputs:** A `lib/screens/active/active_workout_screen.dart` widget.
   - **Validation:** A widget test that provides a mock `WorkoutState` and verifies that changing the current drill `type` in the state correctly switches between showing a Timer UI vs. a Rep Counter UI.
 
-- [ ] **T3.3: Implement Timed Drill Logic**
+- [x] **T3.3: Implement Timed Drill Logic**
   - **Description:** Implement the specific UI and timer logic for drills with `type: "TIMED"`.
   - **Inputs:** A `Drill` object of type `TIMED`.
   - **Outputs:** A widget that displays a countdown timer. When the timer finishes, it calls a method on `WorkoutState` to advance to the next drill.
