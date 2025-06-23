@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bball_app/models/workout_blueprint.dart';
+import 'package:flutter_bball_app/screens/active/active_workout_screen.dart';
+import 'package:flutter_bball_app/services/workout_state.dart';
+import 'package:provider/provider.dart';
 
 class WorkoutDetailScreen extends StatelessWidget {
   final WorkoutBlueprint workout;
@@ -93,7 +96,13 @@ class WorkoutDetailScreen extends StatelessWidget {
                   ),
                 ),
                 onPressed: () {
-                  // TODO: Navigate to Active Workout Screen
+                  Provider.of<WorkoutState>(context, listen: false)
+                      .startWorkout(workout);
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const ActiveWorkoutScreen(),
+                    ),
+                  );
                 },
                 child: Text(
                   'Start Workout',
