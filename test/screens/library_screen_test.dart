@@ -26,6 +26,6 @@ void main() {
         find.text(
             'Develop adaptable dribble control and master finishing through contact and in chaotic situations.'),
         findsOneWidget);
-    expect(find.text('25 MINS • 3 DRILLS'), findsOneWidget);
+    expect(find.text('25 MINS • 5 DRILLS'), findsOneWidget);
   });
 }

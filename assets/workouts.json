@@ -10,20 +10,14 @@
         "name": "Off-Hand Freestyle",
         "description": "Dribble continuously with your weak hand, using any moves you want. Stay low and keep your eyes up.",
         "type": "TIMED",
-        "config": {
-          "sets": 2,
-          "duration": 60
-        }
+        "config": { "sets": 2, "duration": 60 }
       },
       {
         "drillId": "over_line_pulls",
         "name": "Over-Line Pulls",
         "description": "Place the ball over a line on the court, then quickly pull it back with a sharp in-and-out or crossover move. Alternate hands.",
         "type": "TIMED",
-        "config": {
-          "sets": 2,
-          "duration": 45
-        }
+        "config": { "sets": 2, "duration": 45 }
       },
       {
         "drillId": "net_tap_finishes",
@@ -207,6 +201,63 @@
         "description": "3 combo move on the 3pt wing (ex. cross, BTL, cross), then pull up from 3. Start with right hand.",
         "type": "MAKE_TARGET_TIMED",
         "config": { "targetMakes": 10 }
+      }
+    ]
+  },
+  {
+    "id": "7_spot_3pt_challenge",
+    "name": "7-Spot 3-Point Challenge",
+    "objective": "Make 5 3-point shots from 7 positions on the court in as little time as possible.",
+    "estimatedDuration": 20,
+    "drills": [
+      {
+        "drillId": "3pt_left_corner",
+        "name": "3-Point Challenge: Left Corner",
+        "description": "Make 5 3-pointers from the left corner.",
+        "type": "MAKE_TARGET_TIMED",
+        "config": { "targetMakes": 5 }
+      },
+      {
+        "drillId": "3pt_left_wing",
+        "name": "3-Point Challenge: Left Wing",
+        "description": "Make 5 3-pointers from the left wing.",
+        "type": "MAKE_TARGET_TIMED",
+        "config": { "targetMakes": 5 }
+      },
+      {
+        "drillId": "3pt_left_elbow_extended",
+        "name": "3-Point Challenge: Left Elbow Extended",
+        "description": "Make 5 3-pointers from the left elbow extended.",
+        "type": "MAKE_TARGET_TIMED",
+        "config": { "targetMakes": 5 }
+      },
+      {
+        "drillId": "3pt_top_of_key",
+        "name": "3-Point Challenge: Top of the Key",
+        "description": "Make 5 3-pointers from the top of the key.",
+        "type": "MAKE_TARGET_TIMED",
+        "config": { "targetMakes": 5 }
+      },
+      {
+        "drillId": "3pt_right_elbow_extended",
+        "name": "3-Point Challenge: Right Elbow Extended",
+        "description": "Make 5 3-pointers from the right elbow extended.",
+        "type": "MAKE_TARGET_TIMED",
+        "config": { "targetMakes": 5 }
+      },
+      {
+        "drillId": "3pt_right_wing",
+        "name": "3-Point Challenge: Right Wing",
+        "description": "Make 5 3-pointers from the right wing.",
+        "type": "MAKE_TARGET_TIMED",
+        "config": { "targetMakes": 5 }
+      },
+      {
+        "drillId": "3pt_right_corner",
+        "name": "3-Point Challenge: Right Corner",
+        "description": "Make 5 3-pointers from the right corner.",
+        "type": "MAKE_TARGET_TIMED",
+        "config": { "targetMakes": 5 }
       }
     ]
   }
