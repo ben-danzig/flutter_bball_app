@@ -101,7 +101,7 @@ class WorkoutState extends ChangeNotifier {
   void endWorkout() {
     _blueprint = null;
     _currentDrillIndex = 0;
-    _sessionResults.clear();
+    // Results are cleared when a new workout starts
     notifyListeners();
   }
 }

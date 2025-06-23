@@ -104,7 +104,7 @@
   - **Outputs:** A `lib/screens/active/injury_log_screen.dart` widget. The "FINISH & SAVE" button calls the `StorageService`.
   - **Validation:** A widget test that simulates selecting a feeling, entering text, and tapping "FINISH & SAVE", then verifies that the `saveSession` method on a mock `StorageService` is called.
 
-- [ ] **T4.3: Build Workout Summary Screen**
+- [x] **T4.3: Build Workout Summary Screen**
   - **Description:** Build the screen (Mockup #7) that displays the results from a completed session.
   - **Inputs:** A `WorkoutSession` object.
   - **Outputs:** A `lib/screens/summary/workout_summary_screen.dart` widget.

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bball_app/screens/summary/workout_summary_screen.dart';
 import 'package:flutter_bball_app/services/storage_service.dart';
 import 'package:flutter_bball_app/services/workout_state.dart';
 import 'package:provider/provider.dart';
@@ -121,7 +122,12 @@ class _InjuryLogScreenState extends State<InjuryLogScreen> {
 
     _storageService.saveSession(session).then((_) {
       workoutState.endWorkout();
-      Navigator.of(context).popUntil((route) => route.isFirst);
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(
+          builder: (context) => WorkoutSummaryScreen(session: session),
+        ),
+        (route) => route.isFirst,
+      );
     });
   }
 }
