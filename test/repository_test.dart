@@ -8,17 +8,29 @@ void main() {
   // which requires the Flutter framework to be initialized.
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  test('WorkoutRepository should load and parse the workout blueprint correctly', () async {
+  test('WorkoutRepository should load and parse all workout blueprints',
+      () async {
     // 1. ARRANGE: Create an instance of our repository.
     final workoutRepository = WorkoutRepository();
 
     // 2. ACT: Call the method we want to test.
-    final blueprint = await workoutRepository.getWorkoutBlueprint();
+    final blueprints = await workoutRepository.getAllWorkoutBlueprints();
 
     // 3. ASSERT: Verify the result is what we expect.
-    expect(blueprint, isA<WorkoutBlueprint>());
-    expect(blueprint.name, 'Foundational Ball Control & Finishing');
-    expect(blueprint.drills.length, 5);
-    expect(blueprint.drills.first.name, 'Off-Hand Freestyle');
+    // We should have 2 workouts now: the original and our test one.
+    expect(blueprints, isA<List<WorkoutBlueprint>>());
+    expect(blueprints.length, 2);
+
+    // Check the production workout
+    final prodWorkout =
+        blueprints.firstWhere((b) => b.id == 'foundational_ball_control_and_finishing');
+    expect(prodWorkout.name, 'Foundational Ball Control & Finishing');
+    expect(prodWorkout.drills.length, 5);
+
+    // Check the test workout
+    final testWorkout =
+        blueprints.firstWhere((b) => b.id == 'comprehensive_short_test');
+    expect(testWorkout.name, 'Quick Test Workout (All Types)');
+    expect(testWorkout.drills.length, 3);
   });
 }

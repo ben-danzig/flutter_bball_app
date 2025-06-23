@@ -1,0 +1,31 @@
+[
+  {
+    "id": "comprehensive_short_test",
+    "name": "Quick Test Workout (All Types)",
+    "objective": "A short workout for quickly testing all drill types.",
+    "estimatedDuration": 1,
+    "drills": [
+      {
+        "drillId": "short_timed_drill",
+        "name": "Test: Timed Drill",
+        "description": "A 3-second timed drill.",
+        "type": "TIMED",
+        "config": { "sets": 1, "duration": 3 }
+      },
+      {
+        "drillId": "short_rep_drill",
+        "name": "Test: Rep-Based Drill",
+        "description": "Log 1 set of 2 reps.",
+        "type": "REP_BASED",
+        "config": { "sets": 1, "targetMakes": 2 }
+      },
+      {
+        "drillId": "short_make_target_timed",
+        "name": "Test: Make Target Timed",
+        "description": "Get 2 makes as fast as possible.",
+        "type": "MAKE_TARGET_TIMED",
+        "config": { "targetMakes": 2 }
+      }
+    ]
+  }
+]

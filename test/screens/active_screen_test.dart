@@ -9,13 +9,33 @@ import 'package:provider/provider.dart';
 void main() {
   // Helper function to create a mock blueprint with a single drill of a given type
   WorkoutBlueprint createMockBlueprint(String drillType) {
+    Map<String, int> config;
+    switch (drillType) {
+      case 'TIMED':
+        config = {'duration': 10};
+        break;
+      case 'REP_BASED':
+        config = {'targetMakes': 5};
+        break;
+      case 'MAKE_TARGET_TIMED':
+        config = {'targetMakes': 10};
+        break;
+      default:
+        config = {};
+    }
+
     return WorkoutBlueprint(
       id: 'mock_id',
       name: 'Mock Workout',
       objective: '',
       estimatedDuration: 1,
       drills: [
-        Drill(drillId: 'd1', name: 'Mock Drill', description: '', type: drillType, config: {})
+        Drill(
+            drillId: 'd1',
+            name: 'Mock Drill',
+            description: '',
+            type: drillType,
+            config: config)
       ],
     );
   }
@@ -38,7 +58,10 @@ void main() {
     await tester.pumpWidget(createTestableScreen(workoutState));
 
     // ASSERT
-    expect(find.textContaining('Placeholder for TIMED drill'), findsOneWidget);
+    // We no longer have a placeholder, we have the real widget.
+    // Let's check for the drill name and the initial time.
+    expect(find.text('Mock Drill'), findsOneWidget);
+    expect(find.text('10'), findsOneWidget);
     expect(find.textContaining('REP_BASED'), findsNothing);
   });
 

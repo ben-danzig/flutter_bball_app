@@ -11,13 +11,13 @@ class WorkoutLibraryScreen extends StatefulWidget {
 }
 
 class _WorkoutLibraryScreenState extends State<WorkoutLibraryScreen> {
-  late Future<WorkoutBlueprint> _workoutBlueprintFuture;
+  late Future<List<WorkoutBlueprint>> _workoutBlueprintsFuture;
   final WorkoutRepository _workoutRepository = WorkoutRepository();
 
   @override
   void initState() {
     super.initState();
-    _workoutBlueprintFuture = _workoutRepository.getWorkoutBlueprint();
+    _workoutBlueprintsFuture = _workoutRepository.getAllWorkoutBlueprints();
   }
 
   @override
@@ -48,36 +48,47 @@ class _WorkoutLibraryScreenState extends State<WorkoutLibraryScreen> {
                 ),
               ),
               const SizedBox(height: 24),
-              FutureBuilder<WorkoutBlueprint>(
-                future: _workoutBlueprintFuture,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-                  if (snapshot.hasError) {
-                    return Center(
-                        child: Text('Error: ${snapshot.error}',
-                            style: const TextStyle(color: Colors.white)));
-                  }
-                  if (snapshot.hasData) {
-                    final workout = snapshot.data!;
-                    return GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                WorkoutDetailScreen(workout: workout),
-                          ),
-                        );
-                      },
-                      child: _WorkoutCard(workout: workout),
-                    );
-                  }
-                  return const Center(
-                      child: Text('No workout found.',
-                          style: TextStyle(color: Colors.white)));
-                },
+              Expanded(
+                child: FutureBuilder<List<WorkoutBlueprint>>(
+                  future: _workoutBlueprintsFuture,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    if (snapshot.hasError) {
+                      return Center(
+                          child: Text('Error: ${snapshot.error}',
+                              style: const TextStyle(color: Colors.white)));
+                    }
+                    if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+                      final workouts = snapshot.data!;
+                      return ListView.builder(
+                        itemCount: workouts.length,
+                        itemBuilder: (context, index) {
+                          final workout = workouts[index];
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 16.0),
+                            child: GestureDetector(
+                              onTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        WorkoutDetailScreen(workout: workout),
+                                  ),
+                                );
+                              },
+                              child: _WorkoutCard(workout: workout),
+                            ),
+                          );
+                        },
+                      );
+                    }
+                    return const Center(
+                        child: Text('No workouts found.',
+                            style: TextStyle(color: Colors.white)));
+                  },
+                ),
               ),
             ],
           ),
