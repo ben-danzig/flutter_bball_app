@@ -11,8 +11,11 @@ class WorkoutRepository {
     try {
       final String prodJsonString =
           await rootBundle.loadString('assets/workouts.json');
-      final Map<String, dynamic> prodJsonMap = jsonDecode(prodJsonString);
-      allBlueprints.add(WorkoutBlueprint.fromJson(prodJsonMap));
+      final List<dynamic> prodJsonList = jsonDecode(prodJsonString);
+      final List<WorkoutBlueprint> prodBlueprints = prodJsonList
+          .map((json) => WorkoutBlueprint.fromJson(json))
+          .toList();
+      allBlueprints.addAll(prodBlueprints);
     } catch (e) {
       // Handle error if the main workout file is missing or corrupt
       print('Error loading production workout: $e');

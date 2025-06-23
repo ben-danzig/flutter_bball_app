@@ -17,9 +17,9 @@ void main() {
     final blueprints = await workoutRepository.getAllWorkoutBlueprints();
 
     // 3. ASSERT: Verify the result is what we expect.
-    // We should have 2 workouts now: the original and our test one.
+    // We should have 4 workouts now: 3 from production and 1 from test.
     expect(blueprints, isA<List<WorkoutBlueprint>>());
-    expect(blueprints.length, 2);
+    expect(blueprints.length, 4);
 
     // Check the production workout
     final prodWorkout =
