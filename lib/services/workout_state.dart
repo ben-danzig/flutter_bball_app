@@ -1,13 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bball_app/models/drill.dart';
+import 'package:flutter_bball_app/models/drill_result.dart';
 import 'package:flutter_bball_app/models/workout_blueprint.dart';
-
-// A placeholder for our future DrillResult model
-class DrillResult {
-  final String drillId;
-  //... more properties to come later
-  DrillResult({required this.drillId});
-}
 
 class WorkoutState extends ChangeNotifier {
   WorkoutBlueprint? _blueprint;
@@ -17,6 +11,8 @@ class WorkoutState extends ChangeNotifier {
 
   // Public getters to safely access the state
   bool get isWorkoutStarted => _blueprint != null;
+  bool get isWorkoutComplete => _blueprint != null && _currentDrillIndex >= totalDrills;
+  WorkoutBlueprint? get workoutBlueprint => _blueprint;
   bool get isPaused => _isPaused;
   Drill? get currentDrill {
     if (_blueprint == null || _currentDrillIndex >= _blueprint!.drills.length) {
@@ -62,18 +58,42 @@ class WorkoutState extends ChangeNotifier {
 
   // Method to advance to the next drill
   void nextDrill() {
-    if (_currentDrillIndex < totalDrills - 1) {
+    if (_currentDrillIndex < totalDrills) {
       _currentDrillIndex++;
       notifyListeners();
-    } else {
-      // Handle workout completion later
-      endWorkout();
     }
   }
 
   // Method to log the result of a completed drill
-  void logDrillResult(DrillResult result) {
+  void _logDrillResult(DrillResult result) {
     _sessionResults.add(result);
+  }
+
+  void logTimedDrill() {
+    if (currentDrill == null) return;
+    _logDrillResult(DrillResult(
+      drillId: currentDrill!.drillId,
+      elapsedSeconds: currentDrill!.config['duration'],
+    ));
+    notifyListeners();
+  }
+
+  void logRepBasedDrill({required int makes}) {
+    if (currentDrill == null) return;
+    _logDrillResult(DrillResult(
+      drillId: currentDrill!.drillId,
+      makes: makes,
+    ));
+    notifyListeners();
+  }
+
+  void logMakeTargetTimedDrill({required int elapsedSeconds}) {
+    if (currentDrill == null) return;
+    _logDrillResult(DrillResult(
+      drillId: currentDrill!.drillId,
+      elapsedSeconds: elapsedSeconds,
+      makes: currentDrill!.config['targetMakes'],
+    ));
     notifyListeners();
   }
 

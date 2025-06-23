@@ -13,7 +13,7 @@ void main() {
   late Directory tempDir;
 
   setUp(() async {
-    storageService = StorageService();
+    storageService = StorageService.instance;
     tempDir = await Directory.systemTemp.createTemp();
 
     // Mock the path_provider platform channel

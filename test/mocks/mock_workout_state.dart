@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bball_app/models/drill.dart';
+import 'package:flutter_bball_app/models/drill_result.dart';
 import 'package:flutter_bball_app/models/workout_blueprint.dart';
 import 'package:flutter_bball_app/services/workout_state.dart';
 
@@ -18,9 +19,16 @@ class FakeWorkoutState extends ChangeNotifier implements WorkoutState {
 
   int nextDrillCallCount = 0;
   int togglePauseCallCount = 0;
+  DrillResult? lastLoggedResult;
 
   @override
   bool get isWorkoutStarted => _blueprint != null;
+
+  @override
+  bool get isWorkoutComplete => _blueprint != null && _currentDrillIndex >= totalDrills;
+
+  @override
+  WorkoutBlueprint? get workoutBlueprint => _blueprint;
 
   @override
   bool get isPaused => _isPaused;
@@ -64,16 +72,17 @@ class FakeWorkoutState extends ChangeNotifier implements WorkoutState {
     _currentDrillIndex = 0;
     _isPaused = false;
     _sessionResults.clear();
+    nextDrillCallCount = 0;
+    togglePauseCallCount = 0;
+    lastLoggedResult = null;
     notifyListeners();
   }
 
   @override
   void nextDrill() {
     nextDrillCallCount++;
-    if (_currentDrillIndex < totalDrills - 1) {
+    if (_currentDrillIndex < totalDrills) {
       _currentDrillIndex++;
-    } else {
-      _blueprint = null; // End of workout
     }
     notifyListeners();
   }
@@ -86,9 +95,37 @@ class FakeWorkoutState extends ChangeNotifier implements WorkoutState {
   }
 
   @override
-  void logDrillResult(DrillResult result) {
+  void _logDrillResult(DrillResult result) {
     _sessionResults.add(result);
-    notifyListeners();
+    lastLoggedResult = result;
+  }
+
+  @override
+  void logTimedDrill() {
+    if (currentDrill == null) return;
+    _logDrillResult(DrillResult(
+      drillId: currentDrill!.drillId,
+      elapsedSeconds: currentDrill!.config['duration'],
+    ));
+  }
+
+  @override
+  void logRepBasedDrill({required int makes}) {
+    if (currentDrill == null) return;
+    _logDrillResult(DrillResult(
+      drillId: currentDrill!.drillId,
+      makes: makes,
+    ));
+  }
+
+  @override
+  void logMakeTargetTimedDrill({required int elapsedSeconds}) {
+    if (currentDrill == null) return;
+    _logDrillResult(DrillResult(
+      drillId: currentDrill!.drillId,
+      elapsedSeconds: elapsedSeconds,
+      makes: currentDrill!.config['targetMakes'],
+    ));
   }
 
   @override

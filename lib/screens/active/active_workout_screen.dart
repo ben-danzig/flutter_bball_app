@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bball_app/models/drill.dart';
+import 'package:flutter_bball_app/screens/active/injury_log_screen.dart';
 import 'package:flutter_bball_app/screens/active/widgets/active_drill_layout.dart';
 import 'package:flutter_bball_app/screens/active/widgets/make_target_timed_drill_widget.dart';
 import 'package:flutter_bball_app/screens/active/widgets/rep_based_drill_widget.dart';
@@ -23,17 +24,19 @@ class ActiveWorkoutScreen extends StatelessWidget {
           );
         }
 
-        final drill = workoutState.currentDrill;
-        if (drill == null) {
-          // This can happen when the workout is finished
-          // We'll navigate to a summary screen later.
+        if (workoutState.isWorkoutComplete) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(builder: (context) => const InjuryLogScreen()),
+            );
+          });
           return const Scaffold(
             backgroundColor: Color(0xFF111827),
-            body: Center(
-                child: Text('Workout Complete!',
-                    style: TextStyle(color: Colors.white, fontSize: 24))),
+            body: Center(child: CircularProgressIndicator()),
           );
         }
+
+        final drill = workoutState.currentDrill!;
 
         return ActiveDrillLayout(
           drillName: drill.name,

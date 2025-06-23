@@ -152,10 +152,9 @@ class RepBasedDrillWidget extends StatelessWidget {
               ),
               onPressed: () {
                 final makes = int.tryParse(makesController.text) ?? 0;
-                // TODO: workoutState.logRepBasedSet(makes: makes);
-                print('Logged $makes makes for ${drill.name}');
+                workoutState.logRepBasedDrill(makes: makes);
+                workoutState.nextDrill();
                 Navigator.of(ctx).pop();
-                workoutState.nextDrill(); // For now, just advance
               },
               child: const Text('SAVE & CONTINUE',
                   style: TextStyle(fontWeight: FontWeight.bold)),

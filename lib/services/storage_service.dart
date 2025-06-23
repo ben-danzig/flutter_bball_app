@@ -4,6 +4,16 @@ import 'package:path_provider/path_provider.dart';
 import '../models/workout_session.dart';
 
 class StorageService {
+  static StorageService _instance = StorageService._();
+  static StorageService get instance => _instance;
+
+  // Allow replacement for testing
+  static void setInstance(StorageService instance) {
+    _instance = instance;
+  }
+
+  StorageService._();
+
   Future<String> get _localPath async {
     final directory = await getApplicationDocumentsDirectory();
     return directory.path;

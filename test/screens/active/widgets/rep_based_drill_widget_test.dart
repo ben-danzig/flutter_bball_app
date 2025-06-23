@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bball_app/models/drill.dart';
+import 'package:flutter_bball_app/models/workout_blueprint.dart';
 import 'package:flutter_bball_app/screens/active/widgets/rep_based_drill_widget.dart';
 import 'package:flutter_bball_app/services/workout_state.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -11,23 +12,25 @@ void main() {
 
   setUp(() {
     fakeWorkoutState = FakeWorkoutState();
+    final blueprint = WorkoutBlueprint(
+      id: 'test_id',
+      name: 'Test Workout',
+      objective: 'Test objective',
+      estimatedDuration: 10,
+      drills: [
+        Drill(drillId: 'rep_drill', name: 'Test Rep Drill', description: '', type: 'REP_BASED', config: {'targetMakes': 10}),
+      ],
+    );
+    fakeWorkoutState.startWorkout(blueprint);
   });
 
   testWidgets('RepBasedDrillWidget shows modal and logs set', (WidgetTester tester) async {
-    final drill = Drill(
-      drillId: 'rep_drill',
-      name: 'Test Rep Drill',
-      description: '',
-      type: 'REP_BASED',
-      config: {'targetMakes': 10},
-    );
-
     await tester.pumpWidget(
       ChangeNotifierProvider<WorkoutState>.value(
         value: fakeWorkoutState,
         child: MaterialApp(
           home: Scaffold(
-            body: RepBasedDrillWidget(drill: drill),
+            body: RepBasedDrillWidget(drill: fakeWorkoutState.currentDrill!),
           ),
         ),
       ),
@@ -63,7 +66,8 @@ void main() {
     expect(find.text('Log Your Set'), findsNothing);
 
     // Verify that the correct method was called on the state
-    // For now, we just check nextDrill. Later we'll check a specific log method.
     expect(fakeWorkoutState.nextDrillCallCount, 1);
+    expect(fakeWorkoutState.lastLoggedResult?.drillId, 'rep_drill');
+    expect(fakeWorkoutState.lastLoggedResult?.makes, 8);
   });
 }

@@ -37,6 +37,7 @@ class _TimedDrillWidgetState extends State<TimedDrillWidget> {
         });
       } else {
         _timer.cancel();
+        workoutState.logTimedDrill();
         workoutState.nextDrill();
       }
     });

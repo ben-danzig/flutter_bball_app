@@ -178,7 +178,11 @@ class _MakeTargetTimedDrillWidgetState extends State<MakeTargetTimedDrillWidget>
               ),
             ),
             onPressed: () {
-              Provider.of<WorkoutState>(context, listen: false).nextDrill();
+              final workoutState =
+                  Provider.of<WorkoutState>(context, listen: false);
+              workoutState.logMakeTargetTimedDrill(
+                  elapsedSeconds: _elapsedSeconds);
+              workoutState.nextDrill();
             },
             child: const Text('FINISH DRILL',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),

@@ -98,7 +98,7 @@
   - **Outputs:** A `lib/services/storage_service.dart` file.
   - **Validation:** A unit test that mocks the file system, calls `saveSession()`, and verifies that a `writeAsString()` method is called with the correct data.
 
-- [ ] **T4.2: Build Injury Log Screen**
+- [x] **T4.2: Build Injury Log Screen**
   - **Description:** Build the screen (Mockup #6) that appears after the last drill, allowing the user to log their physical feeling.
   - **Inputs:** The active `WorkoutState`.
   - **Outputs:** A `lib/screens/active/injury_log_screen.dart` widget. The "FINISH & SAVE" button calls the `StorageService`.

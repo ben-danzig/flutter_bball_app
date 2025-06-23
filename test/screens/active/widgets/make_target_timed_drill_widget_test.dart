@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bball_app/models/drill.dart';
+import 'package:flutter_bball_app/models/workout_blueprint.dart';
 import 'package:flutter_bball_app/screens/active/widgets/make_target_timed_drill_widget.dart';
 import 'package:flutter_bball_app/services/workout_state.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -11,23 +12,26 @@ void main() {
 
   setUp(() {
     fakeWorkoutState = FakeWorkoutState();
+    final blueprint = WorkoutBlueprint(
+      id: 'test_id',
+      name: 'Test Workout',
+      objective: 'Test objective',
+      estimatedDuration: 10,
+      drills: [
+        Drill(drillId: 'make_target_drill', name: 'Test Make Target Drill', description: '', type: 'MAKE_TARGET_TIMED', config: {'targetMakes': 2}),
+        Drill(drillId: 'make_target_drill_2', name: 'Test Make Target Drill 2', description: '', type: 'MAKE_TARGET_TIMED', config: {'targetMakes': 5}),
+      ],
+    );
+    fakeWorkoutState.startWorkout(blueprint);
   });
 
   testWidgets('MakeTargetTimedDrillWidget works correctly', (WidgetTester tester) async {
-    final drill = Drill(
-      drillId: 'make_target_drill',
-      name: 'Test Make Target Drill',
-      description: '',
-      type: 'MAKE_TARGET_TIMED',
-      config: {'targetMakes': 2},
-    );
-
     await tester.pumpWidget(
       ChangeNotifierProvider<WorkoutState>.value(
         value: fakeWorkoutState,
         child: MaterialApp(
           home: Scaffold(
-            body: MakeTargetTimedDrillWidget(drill: drill),
+            body: MakeTargetTimedDrillWidget(drill: fakeWorkoutState.currentDrill!),
           ),
         ),
       ),
@@ -86,23 +90,19 @@ void main() {
     await tester.tap(find.widgetWithText(ElevatedButton, 'FINISH DRILL'));
     await tester.pump();
     expect(fakeWorkoutState.nextDrillCallCount, 1);
+    expect(fakeWorkoutState.lastLoggedResult?.drillId, 'make_target_drill');
+    expect(fakeWorkoutState.lastLoggedResult?.makes, 2);
+    expect(fakeWorkoutState.lastLoggedResult?.elapsedSeconds, 2);
   });
 
   testWidgets('log all button works correctly', (WidgetTester tester) async {
-    final drill = Drill(
-      drillId: 'make_target_drill',
-      name: 'Test Make Target Drill',
-      description: '',
-      type: 'MAKE_TARGET_TIMED',
-      config: {'targetMakes': 5},
-    );
-
+    fakeWorkoutState.nextDrill(); // Move to the second drill
     await tester.pumpWidget(
       ChangeNotifierProvider<WorkoutState>.value(
         value: fakeWorkoutState,
         child: MaterialApp(
           home: Scaffold(
-            body: MakeTargetTimedDrillWidget(drill: drill),
+            body: MakeTargetTimedDrillWidget(drill: fakeWorkoutState.currentDrill!),
           ),
         ),
       ),
