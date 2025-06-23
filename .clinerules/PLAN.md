@@ -56,7 +56,7 @@
 
 **Goal:** Create the active workout experience, managing state and displaying the correct UI for each drill type.
 
-- [ ] **T3.1: Create Workout State Service**
+- [x] **T3.1: Create Workout State Service**
   - **Description:** Create a state management service using `Provider` (`ChangeNotifier`) to manage the state of an active workout session (e.g., current drill index, results).
   - **Inputs:** A `WorkoutBlueprint` object to start a session.
   - **Outputs:** A `lib/services/workout_state.dart` file.

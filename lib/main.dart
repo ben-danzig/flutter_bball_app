@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bball_app/screens/library/workout_library_screen.dart'; // Add this import
+import 'package:flutter_bball_app/screens/library/workout_library_screen.dart';
+import 'package:flutter_bball_app/services/workout_state.dart';
+import 'package:provider/provider.dart';
 
 void main() {
-  runApp(const BballTrainerApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => WorkoutState(),
+      child: const BballTrainerApp(),
+    ),
+  );
 }
 
 class BballTrainerApp extends StatelessWidget {
