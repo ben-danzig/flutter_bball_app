@@ -74,7 +74,7 @@
   - **Outputs:** A widget that displays a countdown timer. When the timer finishes, it calls a method on `WorkoutState` to advance to the next drill.
   - **Validation:** A widget test that uses `tester.pump()` to advance time and verifies the timer text updates correctly and that `nextDrill()` is called on a mock `WorkoutState` upon completion.
 
-- [ ] **T3.4: Implement Rep-Based Drill Logic**
+- [x] **T3.4: Implement Rep-Based Drill Logic**
   - **Description:** Implement the UI for `REP_BASED` drills, including the "Log Set" Modal for data entry.
   - **Inputs:** A `Drill` object of type `REP_BASED`.
   - **Outputs:** A widget with a make/target counter and a "LOG SET" button that opens a modal. Saving the modal updates the `WorkoutState`.
