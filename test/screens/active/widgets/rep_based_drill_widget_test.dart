@@ -3,16 +3,14 @@ import 'package:flutter_bball_app/models/drill.dart';
 import 'package:flutter_bball_app/screens/active/widgets/rep_based_drill_widget.dart';
 import 'package:flutter_bball_app/services/workout_state.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
 import 'package:provider/provider.dart';
-
-class MockWorkoutState extends Mock implements WorkoutState {}
+import '../../../mocks/mock_workout_state.dart';
 
 void main() {
-  late MockWorkoutState mockWorkoutState;
+  late FakeWorkoutState fakeWorkoutState;
 
   setUp(() {
-    mockWorkoutState = MockWorkoutState();
+    fakeWorkoutState = FakeWorkoutState();
   });
 
   testWidgets('RepBasedDrillWidget shows modal and logs set', (WidgetTester tester) async {
@@ -26,7 +24,7 @@ void main() {
 
     await tester.pumpWidget(
       ChangeNotifierProvider<WorkoutState>.value(
-        value: mockWorkoutState,
+        value: fakeWorkoutState,
         child: MaterialApp(
           home: Scaffold(
             body: RepBasedDrillWidget(drill: drill),
@@ -66,6 +64,6 @@ void main() {
 
     // Verify that the correct method was called on the state
     // For now, we just check nextDrill. Later we'll check a specific log method.
-    verify(mockWorkoutState.nextDrill()).called(1);
+    expect(fakeWorkoutState.nextDrillCallCount, 1);
   });
 }

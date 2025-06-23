@@ -97,4 +97,55 @@ void main() {
         ),
         findsOneWidget);
   });
+
+  testWidgets('tapping skip button calls nextDrill', (WidgetTester tester) async {
+    // ARRANGE
+    final workoutState = WorkoutState();
+    // Use a blueprint with more than one drill
+    final blueprint = WorkoutBlueprint(
+        id: 'multi_drill',
+        name: 'Multi Drill',
+        objective: '',
+        estimatedDuration: 1,
+        drills: [
+          Drill(drillId: 'd1', name: 'Drill 1', description: '', type: 'TIMED', config: {'duration': 10}),
+          Drill(drillId: 'd2', name: 'Drill 2', description: '', type: 'TIMED', config: {'duration': 10}),
+        ]);
+    workoutState.startWorkout(blueprint);
+
+    await tester.pumpWidget(createTestableScreen(workoutState));
+
+    // ACT
+    await tester.tap(find.widgetWithText(TextButton, 'SKIP >'));
+    await tester.pump();
+
+    // ASSERT
+    expect(workoutState.currentDrillIndex, 1);
+  });
+
+  testWidgets('tapping pause button calls togglePause', (WidgetTester tester) async {
+    // ARRANGE
+    final workoutState = WorkoutState();
+    final blueprint = createMockBlueprint('TIMED');
+    workoutState.startWorkout(blueprint);
+
+    await tester.pumpWidget(createTestableScreen(workoutState));
+    expect(workoutState.isPaused, isFalse);
+
+    // ACT
+    await tester.tap(find.widgetWithText(TextButton, '|| PAUSE'));
+    await tester.pump();
+
+    // ASSERT
+    expect(workoutState.isPaused, isTrue);
+    expect(find.text('RESUME'), findsOneWidget);
+
+    // ACT again
+    await tester.tap(find.widgetWithText(TextButton, 'RESUME'));
+    await tester.pump();
+
+    // ASSERT
+    expect(workoutState.isPaused, isFalse);
+    expect(find.text('|| PAUSE'), findsOneWidget);
+  });
 }

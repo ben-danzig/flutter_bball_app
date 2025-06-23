@@ -58,4 +58,25 @@ void main() {
     expect(workoutState.currentDrillIndex, 0);
     expect(workoutState.currentDrill, isNull);
   });
+
+  test('togglePause should flip the isPaused state', () {
+    // ARRANGE
+    final workoutState = WorkoutState();
+    workoutState.startWorkout(mockBlueprint);
+
+    // ASSERT initial state
+    expect(workoutState.isPaused, isFalse);
+
+    // ACT
+    workoutState.togglePause();
+
+    // ASSERT after first toggle
+    expect(workoutState.isPaused, isTrue);
+
+    // ACT again
+    workoutState.togglePause();
+
+    // ASSERT after second toggle
+    expect(workoutState.isPaused, isFalse);
+  });
 }

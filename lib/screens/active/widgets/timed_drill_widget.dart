@@ -25,14 +25,19 @@ class _TimedDrillWidgetState extends State<TimedDrillWidget> {
   }
 
   void _startTimer() {
+    final workoutState = Provider.of<WorkoutState>(context, listen: false);
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (workoutState.isPaused) {
+        return;
+      }
+
       if (_remainingSeconds > 0) {
         setState(() {
           _remainingSeconds--;
         });
       } else {
         _timer.cancel();
-        Provider.of<WorkoutState>(context, listen: false).nextDrill();
+        workoutState.nextDrill();
       }
     });
   }

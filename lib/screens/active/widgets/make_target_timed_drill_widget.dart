@@ -26,7 +26,11 @@ class _MakeTargetTimedDrillWidgetState extends State<MakeTargetTimedDrillWidget>
   }
 
   void _startTimer() {
+    final workoutState = Provider.of<WorkoutState>(context, listen: false);
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (workoutState.isPaused) {
+        return;
+      }
       if (!_isComplete) {
         setState(() {
           _elapsedSeconds++;

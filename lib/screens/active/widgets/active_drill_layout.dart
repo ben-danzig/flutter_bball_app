@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bball_app/services/workout_state.dart';
+import 'package:provider/provider.dart';
 
 class ActiveDrillLayout extends StatelessWidget {
   final String drillName;
@@ -47,22 +49,33 @@ class ActiveDrillLayout extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  TextButton(
-                    onPressed: () {
-                      // TODO: Implement Pause functionality
+                  Consumer<WorkoutState>(
+                    builder: (context, workoutState, child) {
+                      return TextButton(
+                        onPressed: () {
+                          workoutState.togglePause();
+                        },
+                        child: Text(
+                          workoutState.isPaused ? 'RESUME' : '|| PAUSE',
+                          style: const TextStyle(
+                              color: Color(0xFF9ca3af),
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold),
+                        ),
+                      );
                     },
-                    child: const Text(
-                      '|| PAUSE',
-                      style: TextStyle(color: Color(0xFF9ca3af), fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
                   ),
                   TextButton(
                     onPressed: () {
-                      // TODO: Implement Skip functionality
+                      Provider.of<WorkoutState>(context, listen: false)
+                          .nextDrill();
                     },
                     child: const Text(
                       'SKIP >',
-                      style: TextStyle(color: Color(0xFF9ca3af), fontSize: 16, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                          color: Color(0xFF9ca3af),
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold),
                     ),
                   ),
                 ],

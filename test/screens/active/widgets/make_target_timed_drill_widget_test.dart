@@ -3,16 +3,14 @@ import 'package:flutter_bball_app/models/drill.dart';
 import 'package:flutter_bball_app/screens/active/widgets/make_target_timed_drill_widget.dart';
 import 'package:flutter_bball_app/services/workout_state.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
 import 'package:provider/provider.dart';
-
-class MockWorkoutState extends Mock implements WorkoutState {}
+import '../../../mocks/mock_workout_state.dart';
 
 void main() {
-  late MockWorkoutState mockWorkoutState;
+  late FakeWorkoutState fakeWorkoutState;
 
   setUp(() {
-    mockWorkoutState = MockWorkoutState();
+    fakeWorkoutState = FakeWorkoutState();
   });
 
   testWidgets('MakeTargetTimedDrillWidget works correctly', (WidgetTester tester) async {
@@ -26,7 +24,7 @@ void main() {
 
     await tester.pumpWidget(
       ChangeNotifierProvider<WorkoutState>.value(
-        value: mockWorkoutState,
+        value: fakeWorkoutState,
         child: MaterialApp(
           home: Scaffold(
             body: MakeTargetTimedDrillWidget(drill: drill),
@@ -87,6 +85,6 @@ void main() {
     // Tap finish and verify state is advanced
     await tester.tap(find.widgetWithText(ElevatedButton, 'FINISH DRILL'));
     await tester.pump();
-    verify(mockWorkoutState.nextDrill()).called(1);
+    expect(fakeWorkoutState.nextDrillCallCount, 1);
   });
 }

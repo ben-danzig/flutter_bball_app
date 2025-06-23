@@ -4,15 +4,13 @@ import 'package:flutter_bball_app/screens/active/widgets/timed_drill_widget.dart
 import 'package:flutter_bball_app/services/workout_state.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
-import 'package:mockito/mockito.dart';
-
-class MockWorkoutState extends Mock implements WorkoutState {}
+import '../../../mocks/mock_workout_state.dart';
 
 void main() {
-  late MockWorkoutState mockWorkoutState;
+  late FakeWorkoutState fakeWorkoutState;
 
   setUp(() {
-    mockWorkoutState = MockWorkoutState();
+    fakeWorkoutState = FakeWorkoutState();
   });
 
   testWidgets('TimedDrillWidget shows initial time and counts down',
@@ -27,7 +25,7 @@ void main() {
 
     await tester.pumpWidget(
       ChangeNotifierProvider<WorkoutState>.value(
-        value: mockWorkoutState,
+        value: fakeWorkoutState,
         child: MaterialApp(
           home: Scaffold(
             body: TimedDrillWidget(drill: drill),
@@ -60,7 +58,7 @@ void main() {
 
     await tester.pumpWidget(
       ChangeNotifierProvider<WorkoutState>.value(
-        value: mockWorkoutState,
+        value: fakeWorkoutState,
         child: MaterialApp(
           home: Scaffold(
             body: TimedDrillWidget(drill: drill),
@@ -85,7 +83,7 @@ void main() {
     await tester.pump();
 
     // Verify that nextDrill was called
-    verify(mockWorkoutState.nextDrill()).called(1);
+    expect(fakeWorkoutState.nextDrillCallCount, 1);
   });
 
   testWidgets('Timer resets when drill changes', (WidgetTester tester) async {
@@ -107,7 +105,7 @@ void main() {
     // A helper widget to simulate the parent rebuilding with a new drill
     Widget buildWidget(Drill drill) {
       return ChangeNotifierProvider<WorkoutState>.value(
-        value: mockWorkoutState,
+        value: fakeWorkoutState,
         child: MaterialApp(
           home: Scaffold(
             body: TimedDrillWidget(
