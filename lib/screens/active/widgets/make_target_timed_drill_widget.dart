@@ -119,19 +119,54 @@ class _MakeTargetTimedDrillWidgetState extends State<MakeTargetTimedDrillWidget>
             ],
           ),
         ),
+        const SizedBox(height: 20),
+        Text(
+          widget.drill.description,
+          style: const TextStyle(
+            fontSize: 18,
+            color: Color(0xFF9ca3af),
+          ),
+          textAlign: TextAlign.center,
+        ),
         const Spacer(),
         if (!_isComplete)
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF1f2937),
-              minimumSize: const Size(150, 60),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12.0),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF1f2937),
+                  minimumSize: const Size(120, 60),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.0),
+                  ),
+                ),
+                onPressed: _incrementMakes,
+                child: const Text('+1 MAKE',
+                    style:
+                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               ),
-            ),
-            onPressed: _incrementMakes,
-            child: const Text('+1 MAKE',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const SizedBox(width: 20),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF3B82F6),
+                  minimumSize: const Size(120, 60),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.0),
+                  ),
+                ),
+                onPressed: () {
+                  setState(() {
+                    _currentMakes = widget.drill.config['targetMakes']!;
+                    _isComplete = true;
+                    _timer.cancel();
+                  });
+                },
+                child: const Text('LOG ALL',
+                    style:
+                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              ),
+            ],
           )
         else
           ElevatedButton(

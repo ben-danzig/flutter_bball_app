@@ -87,4 +87,39 @@ void main() {
     await tester.pump();
     expect(fakeWorkoutState.nextDrillCallCount, 1);
   });
+
+  testWidgets('log all button works correctly', (WidgetTester tester) async {
+    final drill = Drill(
+      drillId: 'make_target_drill',
+      name: 'Test Make Target Drill',
+      description: '',
+      type: 'MAKE_TARGET_TIMED',
+      config: {'targetMakes': 5},
+    );
+
+    await tester.pumpWidget(
+      ChangeNotifierProvider<WorkoutState>.value(
+        value: fakeWorkoutState,
+        child: MaterialApp(
+          home: Scaffold(
+            body: MakeTargetTimedDrillWidget(drill: drill),
+          ),
+        ),
+      ),
+    );
+
+    // Tap the "LOG ALL" button
+    await tester.tap(find.widgetWithText(ElevatedButton, 'LOG ALL'));
+    await tester.pump();
+
+    // Verify the makes are updated and the drill is complete
+    expect(
+        find.byWidgetPredicate(
+          (Widget widget) =>
+              widget is RichText &&
+              widget.text.toPlainText() == '5 / 5',
+        ),
+        findsOneWidget);
+    expect(find.widgetWithText(ElevatedButton, 'FINISH DRILL'), findsOneWidget);
+  });
 }
