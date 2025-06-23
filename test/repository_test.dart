@@ -17,15 +17,15 @@ void main() {
     final blueprints = await workoutRepository.getAllWorkoutBlueprints();
 
     // 3. ASSERT: Verify the result is what we expect.
-    // We should have 4 workouts now: 3 from production and 1 from test.
+    // We should have 3 workouts now: 2 from production and 1 from test.
     expect(blueprints, isA<List<WorkoutBlueprint>>());
-    expect(blueprints.length, 4);
+    expect(blueprints.length, 3);
 
     // Check the production workout
     final prodWorkout =
         blueprints.firstWhere((b) => b.id == 'foundational_ball_control_and_finishing');
     expect(prodWorkout.name, 'Foundational Ball Control & Finishing');
-    expect(prodWorkout.drills.length, 5);
+    expect(prodWorkout.drills.length, 3);
 
     // Check the test workout
     final testWorkout =

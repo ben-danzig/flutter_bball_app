@@ -30,101 +30,183 @@
         "name": "Net Tap Finishes",
         "description": "Start under the rim. Jump up and tap the net with the ball before finishing a layup. Helps with body control and finishing high. Alternate sides.",
         "type": "REP_BASED",
-        "config": {
-          "sets": 1,
-          "targetMakes": 10
-        }
+        "config": { "sets": 1, "targetMakes": 10 }
       },
       {
         "drillId": "body_touch_finishing",
         "name": "Body-Touch Finishing",
         "description": "Drive from the wing. As you gather for the layup, touch the ball to your hip or shoulder to protect it from defenders before finishing.",
         "type": "REP_BASED",
-        "config": {
-          "sets": 1,
-          "targetMakes": 10
-        }
+        "config": { "sets": 1, "targetMakes": 10 }
       },
       {
         "drillId": "finishers_gauntlet",
         "name": "The Finisher's Gauntlet",
         "description": "Make 20 layups from various angles around the hoop as quickly as you can. The clock stops when you hit 20 makes.",
         "type": "MAKE_TARGET_TIMED",
-        "config": {
-          "targetMakes": 20
-        }
+        "config": { "targetMakes": 20 }
       }
     ]
   },
   {
-    "id": "game_speed_attack_and_counters",
-    "name": "Game-Speed Attack & Counters",
-    "objective": "Train your ability to read situations and make split-second decisions with the ball.",
-    "estimatedDuration": 35,
+    "id": "advanced_ball_handling_and_finishing",
+    "name": "TJL Advanced Ball Handling & Finishing",
+    "objective": "A 40-minute workout to improve ball control, finishing, and shooting off the dribble.",
+    "estimatedDuration": 40,
     "drills": [
       {
-        "drillId": "read_and_react_stimulus",
-        "name": "Read & React Stimulus",
-        "description": "The app will give a random audio/visual cue. React instantly and perform the move at game speed.",
-        "type": "COGNITIVE_REP_BASED",
-        "config": { "sets": 1, "reps": 20 }
-      },
-      {
-        "drillId": "hesitation_pullup",
-        "name": "Hesitation Pull-up",
-        "description": "Attack the elbow, use a hard hesitation dribble to freeze the imaginary defender, then rise up for a jump shot. Make 10.",
-        "type": "REP_BASED",
-        "config": { "sets": 1, "targetMakes": 10 }
-      },
-      {
-        "drillId": "shot_fake_and_drive",
-        "name": "Shot Fake & Drive",
-        "description": "Catch the ball on the wing, give a hard shot fake, and then attack the rim for a layup. Perform 10 drives.",
-        "type": "REP_BASED",
-        "config": { "sets": 1, "targetMakes": 10 }
-      },
-      {
-        "drillId": "in_out_dribble_attack",
-        "name": "In-and-Out Dribble Attack",
-        "description": "Focus on using the in-and-out dribble as your primary move to attack the basket for a layup. Make 10 layups.",
-        "type": "REP_BASED",
-        "config": { "sets": 1, "targetMakes": 10 }
-      }
-    ]
-  },
-  {
-    "id": "explosive_athleticism",
-    "name": "Explosive Athleticism",
-    "objective": "Build foundational basketball athleticism, focusing on vertical jump, quickness, and defensive posture.",
-    "estimatedDuration": 20,
-    "drills": [
-      {
-        "drillId": "line_jumps",
-        "name": "Line Jumps",
-        "description": "Find a line on the court. Perform quick, two-footed jumps back and forth over the line.",
+        "drillId": "freestyle_warmup",
+        "name": "Freestyle Warmup",
+        "description": "5 minutes of free-form dribbling to warm up.",
         "type": "TIMED",
-        "config": { "sets": 3, "duration": 30 }
+        "config": { "duration": 300 }
       },
       {
-        "drillId": "broad_jumps",
-        "name": "Broad Jumps",
-        "description": "From a standstill, jump as far forward as you can, landing softly and under control. Reset after each jump.",
-        "type": "REP_BASED",
-        "config": { "sets": 3, "targetMakes": 5 }
+        "drillId": "cross_pullback_series",
+        "name": "Cross Pullback Series",
+        "description": "Cross pullback (down and back), then between the legs, then behind the back.",
+        "type": "MAKE_TARGET_TIMED",
+        "config": { "targetMakes": 1 }
       },
       {
-        "drillId": "defensive_slides",
-        "name": "Defensive Slides",
-        "description": "Get in a low defensive stance and slide back and forth along the baseline. Stay low and do not cross your feet.",
+        "drillId": "outside_feet_dribbling",
+        "name": "Outside the Feet Dribbling",
+        "description": "Dribble outside the feet without carrying. Right hand down and back, then left hand down and back.",
+        "type": "MAKE_TARGET_TIMED",
+        "config": { "targetMakes": 1 }
+      },
+      {
+        "drillId": "freestyle_pullback_protect",
+        "name": "Freestyle Pullback & Protect",
+        "description": "Freestyle dribbling, then a quick pullback and protect the ball.",
         "type": "TIMED",
-        "config": { "sets": 4, "duration": 45 }
+        "config": { "duration": 60 }
       },
       {
-        "drillId": "approach_jumps",
-        "name": "Approach Jumps",
-        "description": "Take two powerful steps and explode upwards, reaching as high as you can with both hands, as if grabbing a rebound.",
-        "type":"REP_BASED",
-        "config": { "sets": 2, "targetMakes": 8 }
+        "drillId": "side_to_side_cross_right",
+        "name": "Side to Side Finishes (Cross, Right)",
+        "description": "Start on the right side, cross over, get to the left lane line, cross back, and finish.",
+        "type": "MAKE_TARGET_TIMED",
+        "config": { "targetMakes": 3 }
+      },
+      {
+        "drillId": "side_to_side_btl_right",
+        "name": "Side to Side Finishes (BTL, Right)",
+        "description": "Start on the right side, go between the legs, get to the left lane line, go between the legs again, and finish.",
+        "type": "MAKE_TARGET_TIMED",
+        "config": { "targetMakes": 3 }
+      },
+      {
+        "drillId": "side_to_side_btb_right",
+        "name": "Side to Side Finishes (BTB, Right)",
+        "description": "Start on the right side, go behind the back, get to the left lane line, go behind the back again, and finish.",
+        "type": "MAKE_TARGET_TIMED",
+        "config": { "targetMakes": 3 }
+      },
+      {
+        "drillId": "side_to_side_cross_left",
+        "name": "Side to Side Finishes (Cross, Left)",
+        "description": "Start on the left side, cross over, get to the right lane line, cross back, and finish.",
+        "type": "MAKE_TARGET_TIMED",
+        "config": { "targetMakes": 3 }
+      },
+      {
+        "drillId": "side_to_side_btl_left",
+        "name": "Side to Side Finishes (BTL, Left)",
+        "description": "Start on the left side, go between the legs, get to the right lane line, go between the legs again, and finish.",
+        "type": "MAKE_TARGET_TIMED",
+        "config": { "targetMakes": 3 }
+      },
+      {
+        "drillId": "side_to_side_btb_left",
+        "name": "Side to Side Finishes (BTB, Left)",
+        "description": "Start on the left side, go behind the back, get to the right lane line, go behind the back again, and finish.",
+        "type": "MAKE_TARGET_TIMED",
+        "config": { "targetMakes": 3 }
+      },
+      {
+        "drillId": "elbow_pullups_cross_right",
+        "name": "Elbow Pull-ups (Cross, Right)",
+        "description": "Start on the right elbow, cross over to the left elbow in one dribble, and pull up for a shot.",
+        "type": "MAKE_TARGET_TIMED",
+        "config": { "targetMakes": 3 }
+      },
+      {
+        "drillId": "elbow_pullups_btl_right",
+        "name": "Elbow Pull-ups (BTL, Right)",
+        "description": "Start on the right elbow, go between the legs to the left elbow in one dribble, and pull up for a shot.",
+        "type": "MAKE_TARGET_TIMED",
+        "config": { "targetMakes": 3 }
+      },
+      {
+        "drillId": "elbow_pullups_btb_right",
+        "name": "Elbow Pull-ups (BTB, Right)",
+        "description": "Start on the right elbow, go behind the back to the left elbow in one dribble, and pull up for a shot.",
+        "type": "MAKE_TARGET_TIMED",
+        "config": { "targetMakes": 3 }
+      },
+      {
+        "drillId": "elbow_pullups_cross_left",
+        "name": "Elbow Pull-ups (Cross, Left)",
+        "description": "Start on the left elbow, cross over to the right elbow in one dribble, and pull up for a shot.",
+        "type": "MAKE_TARGET_TIMED",
+        "config": { "targetMakes": 3 }
+      },
+      {
+        "drillId": "elbow_pullups_btl_left",
+        "name": "Elbow Pull-ups (BTL, Left)",
+        "description": "Start on the left elbow, go between the legs to the right elbow in one dribble, and pull up for a shot.",
+        "type": "MAKE_TARGET_TIMED",
+        "config": { "targetMakes": 3 }
+      },
+      {
+        "drillId": "elbow_pullups_btb_left",
+        "name": "Elbow Pull-ups (BTB, Left)",
+        "description": "Start on the left elbow, go behind the back to the right elbow in one dribble, and pull up for a shot.",
+        "type": "MAKE_TARGET_TIMED",
+        "config": { "targetMakes": 3 }
+      },
+      {
+        "drillId": "3_combo_move_finishes_left",
+        "name": "3-Combo Move Finishes Left",
+        "description": "3 combo move on the 3pt wing (ex. cross, BTL, cross), then get downhill and finish. Different finish and tempo each time, same combo move each time.",
+        "type": "MAKE_TARGET_TIMED",
+        "config": { "targetMakes": 10 }
+      },
+      {
+        "drillId": "3_combo_move_finishes_right",
+        "name": "3-Combo Move Finishes Right",
+        "description": "3 combo move on the 3pt wing (ex. cross, BTL, cross), then get downhill and finish. Different finish and tempo each time, same combo move each time.",
+        "type": "MAKE_TARGET_TIMED",
+        "config": { "targetMakes": 10 }
+      },
+      {
+        "drillId": "crossover_pullups_right",
+        "name": "Crossover Pull-ups left to right",
+        "description": "Left to right pull up. Sell the drive, then create space.",
+        "type": "MAKE_TARGET_TIMED",
+        "config": { "targetMakes": 10 }
+      },
+      {
+        "drillId": "crossover_pullups_left",
+        "name": "Crossover Pull-ups right to left",
+        "description": "Right to left pull up. Sell the drive, then create space.",
+        "type": "MAKE_TARGET_TIMED",
+        "config": { "targetMakes": 10 }
+      },
+      {
+        "drillId": "3_combo_move_3pt_start_left",
+        "name": "3-Combo Move to pull up 3. Left-hand start",
+        "description": "3 combo move on the 3pt wing (ex. cross, BTL, cross), then pull up from 3. Start with left hand.",
+        "type": "MAKE_TARGET_TIMED",
+        "config": { "targetMakes": 10 }
+      },
+      {
+        "drillId": "3_combo_move_3pt_start_right",
+        "name": "3-Combo Move to pull up 3. Right-hand start",
+        "description": "3 combo move on the 3pt wing (ex. cross, BTL, cross), then pull up from 3. Start with right hand.",
+        "type": "MAKE_TARGET_TIMED",
+        "config": { "targetMakes": 10 }
       }
     ]
   }
