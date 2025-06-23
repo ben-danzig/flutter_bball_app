@@ -110,7 +110,7 @@
   - **Outputs:** A `lib/screens/summary/workout_summary_screen.dart` widget.
   - **Validation:** A widget test that pumps the screen with a mock `WorkoutSession` object and verifies all key data points are displayed correctly.
 
-- [ ] **T4.4: Build Workout History Screen**
+- [x] **T4.4: Build Workout History Screen**
   - **Description:** Build a screen that loads all saved sessions from the `StorageService` and displays them in a list.
   * **Inputs:** `StorageService` class.
   * **Outputs:** A `lib/screens/history/workout_history_screen.dart` widget.

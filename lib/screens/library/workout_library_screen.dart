@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bball_app/models/workout_blueprint.dart';
 import 'package:flutter_bball_app/repositories/workout_repository.dart';
 import 'package:flutter_bball_app/screens/detail/workout_detail_screen.dart';
+import 'package:flutter_bball_app/screens/history/workout_history_screen.dart';
 
 class WorkoutLibraryScreen extends StatefulWidget {
   const WorkoutLibraryScreen({super.key});
@@ -33,12 +34,28 @@ class _WorkoutLibraryScreenState extends State<WorkoutLibraryScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const SizedBox(height: 20),
-              Text(
-                'Workouts',
-                style: textTheme.headlineLarge?.copyWith(
-                  color: const Color(0xFFf9fafb),
-                  fontWeight: FontWeight.bold,
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Workouts',
+                    style: textTheme.headlineLarge?.copyWith(
+                      color: const Color(0xFFf9fafb),
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.history, color: Colors.white, size: 30),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const WorkoutHistoryScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                ],
               ),
               const SizedBox(height: 8),
               Text(
