@@ -92,7 +92,7 @@
 
 **Goal:** Save the completed workout session to a local file and display the results on a summary screen.
 
-- [ ] **T4.1: Implement Storage Service**
+- [x] **T4.1: Implement Storage Service**
   - **Description:** Create a `StorageService` to save and load workout session data to/from a local JSON file using `path_provider`.
   - **Inputs:** A completed `WorkoutSession` object.
   - **Outputs:** A `lib/services/storage_service.dart` file.
