@@ -16,10 +16,31 @@ class WorkoutState extends ChangeNotifier {
 
   // Public getters to safely access the state
   bool get isWorkoutStarted => _blueprint != null;
-  Drill? get currentDrill => _blueprint?.drills[_currentDrillIndex];
+  Drill? get currentDrill {
+    if (_blueprint == null || _currentDrillIndex >= _blueprint!.drills.length) {
+      return null;
+    }
+    return _blueprint!.drills[_currentDrillIndex];
+  }
+
   int get totalDrills => _blueprint?.drills.length ?? 0;
   List<DrillResult> get results => _sessionResults;
-  int get currentDrillIndex => _currentDrillIndex; 
+  int get currentDrillIndex => _currentDrillIndex;
+
+  double get workoutProgress {
+    if (!isWorkoutStarted || totalDrills == 0) {
+      return 0.0;
+    }
+    // Add 1 because index is 0-based but we want to show progress for the drill number
+    return (_currentDrillIndex + 1) / totalDrills;
+  }
+
+  String? get nextDrillName {
+    if (_blueprint == null || _currentDrillIndex >= totalDrills - 1) {
+      return null; // No next drill
+    }
+    return _blueprint!.drills[_currentDrillIndex + 1].name;
+  }
 
   // Method to start a new workout
   void startWorkout(WorkoutBlueprint blueprint) {

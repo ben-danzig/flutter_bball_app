@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bball_app/models/drill.dart';
 import 'package:flutter_bball_app/models/workout_blueprint.dart';
 import 'package:flutter_bball_app/screens/active/active_workout_screen.dart';
+import 'package:flutter_bball_app/screens/active/widgets/active_drill_layout.dart';
+import 'package:flutter_bball_app/screens/active/widgets/rep_based_drill_widget.dart';
+import 'package:flutter_bball_app/screens/active/widgets/timed_drill_widget.dart';
 import 'package:flutter_bball_app/services/workout_state.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
@@ -48,7 +51,8 @@ void main() {
     );
   }
 
-  testWidgets('displays TimedDrillView for TIMED drill type', (WidgetTester tester) async {
+  testWidgets('displays correct layout and drill widget for TIMED drill',
+      (WidgetTester tester) async {
     // ARRANGE
     final workoutState = WorkoutState();
     final blueprint = createMockBlueprint('TIMED');
@@ -58,14 +62,18 @@ void main() {
     await tester.pumpWidget(createTestableScreen(workoutState));
 
     // ASSERT
-    // We no longer have a placeholder, we have the real widget.
-    // Let's check for the drill name and the initial time.
-    expect(find.text('Mock Drill'), findsOneWidget);
-    expect(find.text('10'), findsOneWidget);
-    expect(find.textContaining('REP_BASED'), findsNothing);
+    // Check for layout elements
+    expect(find.byType(ActiveDrillLayout), findsOneWidget);
+    expect(find.text('UP NEXT: Workout Complete'), findsOneWidget); // Only one drill in mock
+    expect(find.byType(LinearProgressIndicator), findsOneWidget);
+
+    // Check for the specific drill widget content
+    expect(find.byType(TimedDrillWidget), findsOneWidget);
+    expect(find.text('00:10'), findsOneWidget);
   });
 
-  testWidgets('displays RepBasedDrillView for REP_BASED drill type', (WidgetTester tester) async {
+  testWidgets('displays correct layout and drill widget for REP_BASED drill',
+      (WidgetTester tester) async {
     // ARRANGE
     final workoutState = WorkoutState();
     final blueprint = createMockBlueprint('REP_BASED');
@@ -75,7 +83,18 @@ void main() {
     await tester.pumpWidget(createTestableScreen(workoutState));
 
     // ASSERT
-    expect(find.textContaining('Placeholder for REP_BASED drill'), findsOneWidget);
-    expect(find.textContaining('TIMED'), findsNothing);
+    // Check for layout elements
+    expect(find.byType(ActiveDrillLayout), findsOneWidget);
+
+    // Check for the specific drill widget content
+    expect(find.byType(RepBasedDrillWidget), findsOneWidget);
+    // Check for the RichText widget that contains the makes
+    expect(
+        find.byWidgetPredicate(
+          (Widget widget) =>
+              widget is RichText &&
+              widget.text.toPlainText() == '0 / 5',
+        ),
+        findsOneWidget);
   });
 }

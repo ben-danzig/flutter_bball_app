@@ -69,45 +69,82 @@ class _MakeTargetTimedDrillWidgetState extends State<MakeTargetTimedDrillWidget>
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Text(
-          widget.drill.name,
-          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
+          widget.drill.name.toUpperCase(),
+          style: const TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFFf9fafb),
+            letterSpacing: 1.2,
+          ),
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 20),
         Text(
           _formatDuration(_elapsedSeconds),
           style: TextStyle(
-            fontSize: 72,
-            fontWeight: FontWeight.bold,
-            color: _isComplete ? Colors.green : const Color(0xFF3B82F6),
+            fontSize: 60,
+            fontWeight: FontWeight.w900,
+            color: _isComplete ? Colors.greenAccent : Colors.white,
           ),
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 12),
         Text(
-          '$_currentMakes / $targetMakes MAKES',
-          style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white),
+          'MAKES',
+          style: TextStyle(
+            fontSize: 18,
+            color: Colors.grey[400],
+          ),
         ),
-        const SizedBox(height: 40),
+        RichText(
+          text: TextSpan(
+            style: const TextStyle(fontFamily: 'Inter', color: Colors.white),
+            children: [
+              TextSpan(
+                text: '$_currentMakes',
+                style:
+                    const TextStyle(fontSize: 72, fontWeight: FontWeight.w900),
+              ),
+              TextSpan(
+                text: ' / $targetMakes',
+                style: TextStyle(
+                  fontSize: 50,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey[700],
+                ),
+              ),
+            ],
+          ),
+        ),
+        const Spacer(),
         if (!_isComplete)
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF3B82F6),
-              padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
+              backgroundColor: const Color(0xFF1f2937),
+              minimumSize: const Size(150, 60),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12.0),
+              ),
             ),
             onPressed: _incrementMakes,
-            child: const Text('+1 MAKE', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            child: const Text('+1 MAKE',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           )
         else
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.green,
-              padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
+              minimumSize: const Size(150, 60),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12.0),
+              ),
             ),
             onPressed: () {
               Provider.of<WorkoutState>(context, listen: false).nextDrill();
             },
-            child: const Text('FINISH DRILL', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            child: const Text('FINISH DRILL',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           ),
+        const SizedBox(height: 20),
       ],
     );
   }

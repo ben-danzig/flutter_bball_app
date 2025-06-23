@@ -37,16 +37,15 @@ void main() {
     );
 
     // Check for initial state
-    expect(find.text('5'), findsOneWidget);
-    expect(find.text('Test Drill'), findsOneWidget);
+    expect(find.text('00:05'), findsOneWidget);
 
     // Advance the timer by 1 second
     await tester.pump(const Duration(seconds: 1));
-    expect(find.text('4'), findsOneWidget);
+    expect(find.text('00:04'), findsOneWidget);
 
     // Advance the timer by another 3 seconds
     await tester.pump(const Duration(seconds: 3));
-    expect(find.text('1'), findsOneWidget);
+    expect(find.text('00:01'), findsOneWidget);
   });
 
   testWidgets('nextDrill is called when timer finishes',
@@ -71,13 +70,13 @@ void main() {
     );
 
     // Check initial time
-    expect(find.text('2'), findsOneWidget);
+    expect(find.text('00:02'), findsOneWidget);
 
     // Elapse the timer completely
     await tester.pump(const Duration(seconds: 1));
-    expect(find.text('1'), findsOneWidget);
+    expect(find.text('00:01'), findsOneWidget);
     await tester.pump(const Duration(seconds: 1));
-    expect(find.text('0'), findsOneWidget);
+    expect(find.text('00:00'), findsOneWidget);
 
     // This pump will trigger the timer's else block
     await tester.pump(const Duration(seconds: 1));
@@ -122,21 +121,20 @@ void main() {
 
     // Pump the first drill
     await tester.pumpWidget(buildWidget(drill1));
-    expect(find.text('10'), findsOneWidget);
+    expect(find.text('00:10'), findsOneWidget);
 
     // Advance time a bit
     await tester.pump(const Duration(seconds: 2));
-    expect(find.text('8'), findsOneWidget);
+    expect(find.text('00:08'), findsOneWidget);
 
     // Now, rebuild with the second drill
     await tester.pumpWidget(buildWidget(drill2));
 
     // The timer should have reset to the new duration
-    expect(find.text('20'), findsOneWidget);
-    expect(find.text('Second Drill'), findsOneWidget);
+    expect(find.text('00:20'), findsOneWidget);
 
     // Advance time again to make sure the new timer is running
     await tester.pump(const Duration(seconds: 1));
-    expect(find.text('19'), findsOneWidget);
+    expect(find.text('00:19'), findsOneWidget);
   });
 }

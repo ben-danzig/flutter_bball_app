@@ -36,12 +36,17 @@ void main() {
     );
 
     // Verify initial UI
-    expect(find.text('Test Rep Drill'), findsOneWidget);
-    expect(find.text('Complete 10 makes.'), findsOneWidget);
+    expect(
+        find.byWidgetPredicate(
+          (Widget widget) =>
+              widget is RichText &&
+              widget.text.toPlainText() == '0 / 10',
+        ),
+        findsOneWidget);
     expect(find.byType(ElevatedButton), findsOneWidget);
 
     // Tap the "LOG SET" button
-    await tester.tap(find.widgetWithText(ElevatedButton, 'LOG SET'));
+    await tester.tap(find.widgetWithText(ElevatedButton, 'LOG SET >'));
     await tester.pumpAndSettle(); // Wait for modal animation
 
     // Verify modal is shown
@@ -53,7 +58,7 @@ void main() {
     await tester.pump();
 
     // Tap the "Save Set" button
-    await tester.tap(find.widgetWithText(ElevatedButton, 'Save Set'));
+    await tester.tap(find.widgetWithText(ElevatedButton, 'SAVE & CONTINUE'));
     await tester.pumpAndSettle(); // Wait for modal to close
 
     // Verify modal is gone

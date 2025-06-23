@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bball_app/models/drill.dart';
+import 'package:flutter_bball_app/screens/active/widgets/active_drill_layout.dart';
 import 'package:flutter_bball_app/screens/active/widgets/make_target_timed_drill_widget.dart';
 import 'package:flutter_bball_app/screens/active/widgets/rep_based_drill_widget.dart';
 import 'package:flutter_bball_app/screens/active/widgets/timed_drill_widget.dart';
@@ -13,39 +14,32 @@ class ActiveWorkoutScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<WorkoutState>(
       builder: (context, workoutState, child) {
-        // If no workout is active, show an empty state (or navigate back).
-        // This is a safeguard.
         if (!workoutState.isWorkoutStarted) {
           return const Scaffold(
-            body: Center(child: Text('No active workout.')),
+            backgroundColor: Color(0xFF111827),
+            body: Center(
+                child: Text('No active workout.',
+                    style: TextStyle(color: Colors.white))),
           );
         }
 
-        final drill = workoutState.currentDrill!;
+        final drill = workoutState.currentDrill;
+        if (drill == null) {
+          // This can happen when the workout is finished
+          // We'll navigate to a summary screen later.
+          return const Scaffold(
+            backgroundColor: Color(0xFF111827),
+            body: Center(
+                child: Text('Workout Complete!',
+                    style: TextStyle(color: Colors.white, fontSize: 24))),
+          );
+        }
 
-        return Scaffold(
-          body: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              children: [
-                // This is the top "context" bar from our mockups
-                const SizedBox(height: 40),
-                const Text(
-                  'UP NEXT: Drill Name Here', // We will make this dynamic later
-                  style: TextStyle(color: Colors.grey),
-                ),
-
-                // The main display area, which will change dynamically
-                Expanded(
-                  child: _buildDrillView(drill),
-                ),
-
-                // This is the bottom progress bar from our mockups
-                const LinearProgressIndicator(value: 0.5), // Placeholder value
-                const SizedBox(height: 16),
-              ],
-            ),
-          ),
+        return ActiveDrillLayout(
+          drillName: drill.name,
+          nextDrillName: workoutState.nextDrillName,
+          progress: workoutState.workoutProgress,
+          child: _buildDrillView(drill),
         );
       },
     );

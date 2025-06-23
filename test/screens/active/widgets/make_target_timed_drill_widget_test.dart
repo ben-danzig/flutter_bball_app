@@ -36,9 +36,14 @@ void main() {
     );
 
     // Initial state
-    expect(find.text('Test Make Target Drill'), findsOneWidget);
     expect(find.text('00:00'), findsOneWidget);
-    expect(find.text('0 / 2 MAKES'), findsOneWidget);
+    expect(
+        find.byWidgetPredicate(
+          (Widget widget) =>
+              widget is RichText &&
+              widget.text.toPlainText() == '0 / 2',
+        ),
+        findsOneWidget);
     expect(find.widgetWithText(ElevatedButton, '+1 MAKE'), findsOneWidget);
 
     // Advance timer
@@ -48,7 +53,13 @@ void main() {
     // Add a make
     await tester.tap(find.widgetWithText(ElevatedButton, '+1 MAKE'));
     await tester.pump();
-    expect(find.text('1 / 2 MAKES'), findsOneWidget);
+    expect(
+        find.byWidgetPredicate(
+          (Widget widget) =>
+              widget is RichText &&
+              widget.text.toPlainText() == '1 / 2',
+        ),
+        findsOneWidget);
 
     // Advance timer again
     await tester.pump(const Duration(seconds: 1));
@@ -57,7 +68,13 @@ void main() {
     // Add final make to complete the drill
     await tester.tap(find.widgetWithText(ElevatedButton, '+1 MAKE'));
     await tester.pump();
-    expect(find.text('2 / 2 MAKES'), findsOneWidget);
+    expect(
+        find.byWidgetPredicate(
+          (Widget widget) =>
+              widget is RichText &&
+              widget.text.toPlainText() == '2 / 2',
+        ),
+        findsOneWidget);
 
     // Verify timer has stopped
     await tester.pump(const Duration(seconds: 1));

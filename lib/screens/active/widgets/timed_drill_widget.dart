@@ -43,6 +43,13 @@ class _TimedDrillWidgetState extends State<TimedDrillWidget> {
     super.dispose();
   }
 
+  String _formatDuration(int totalSeconds) {
+    final duration = Duration(seconds: totalSeconds);
+    final minutes = duration.inMinutes.remainder(60).toString().padLeft(2, '0');
+    final seconds = duration.inSeconds.remainder(60).toString().padLeft(2, '0');
+    return '$minutes:$seconds';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -50,28 +57,46 @@ class _TimedDrillWidgetState extends State<TimedDrillWidget> {
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Text(
-          widget.drill.name,
-          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
+          widget.drill.name.toUpperCase(),
+          style: const TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFFf9fafb),
+            letterSpacing: 1.2,
+          ),
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: 20),
-        Text(
-          '$_remainingSeconds',
-          style: const TextStyle(
-            fontSize: 96,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF3B82F6), // Bright Blue
+        const SizedBox(height: 30),
+        Container(
+          width: 240,
+          height: 240,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: const Color(0xFF1f2937), // Medium Gray
+              width: 15,
+            ),
+          ),
+          child: Center(
+            child: Text(
+              _formatDuration(_remainingSeconds),
+              style: const TextStyle(
+                fontSize: 60,
+                fontWeight: FontWeight.w900,
+                color: Colors.white,
+              ),
+            ),
           ),
         ),
-        const SizedBox(height: 20),
-        // Placeholder for future controls like pause/skip
-        const Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Example Button:
-            // ElevatedButton(onPressed: () {}, child: Text("Pause")),
-          ],
-        )
+        const SizedBox(height: 30),
+        Text(
+          widget.drill.description,
+          style: const TextStyle(
+            fontSize: 18,
+            color: Color(0xFF9ca3af),
+          ),
+          textAlign: TextAlign.center,
+        ),
       ],
     );
   }
