@@ -12,6 +12,7 @@ class WorkoutSession {
   final DateTime completedAt;
   final String? feeling;
   final String? notes;
+  final bool isPartial;
 
   WorkoutSession({
     required this.id,
@@ -20,6 +21,7 @@ class WorkoutSession {
     required this.completedAt,
     this.feeling,
     this.notes,
+    this.isPartial = false,
   });
 
   factory WorkoutSession.fromJson(Map<String, dynamic> json) => _$WorkoutSessionFromJson(json);

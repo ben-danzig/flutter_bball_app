@@ -18,6 +18,7 @@ WorkoutSession _$WorkoutSessionFromJson(Map<String, dynamic> json) =>
       completedAt: DateTime.parse(json['completedAt'] as String),
       feeling: json['feeling'] as String?,
       notes: json['notes'] as String?,
+      isPartial: json['isPartial'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$WorkoutSessionToJson(WorkoutSession instance) =>
@@ -28,4 +29,5 @@ Map<String, dynamic> _$WorkoutSessionToJson(WorkoutSession instance) =>
       'completedAt': instance.completedAt.toIso8601String(),
       'feeling': instance.feeling,
       'notes': instance.notes,
+      'isPartial': instance.isPartial,
     };

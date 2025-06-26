@@ -135,4 +135,14 @@ class FakeWorkoutState extends ChangeNotifier implements WorkoutState {
     _sessionResults.clear();
     notifyListeners();
   }
+
+  @override
+  Future<void> savePartialWorkout() async {
+    endWorkout();
+  }
+
+  @override
+  void discardWorkout() {
+    endWorkout();
+  }
 }
