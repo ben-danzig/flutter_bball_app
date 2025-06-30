@@ -15,6 +15,7 @@ import 'package:rhino_flutter/rhino_manager.dart';
 import 'package:rhino_flutter/rhino.dart';
 import 'package:rhino_flutter/rhino_error.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 
 class ActiveWorkoutScreen extends StatefulWidget {
   const ActiveWorkoutScreen({super.key});
@@ -30,12 +31,14 @@ class _ActiveWorkoutScreenState extends State<ActiveWorkoutScreen> {
   RhinoManager? _rhinoManager;
   bool _isListeningForCommand = false;
   Timer? _timer;
+  FlutterTts _flutterTts = FlutterTts();
 
   @override
   void initState() {
     super.initState();
     _checkAndRequestMicrophonePermission();
     _startTimer();
+    _initTts();
   }
 
   @override
@@ -71,6 +74,17 @@ class _ActiveWorkoutScreenState extends State<ActiveWorkoutScreen> {
     }
   }
 
+  Future<void> _initTts() async {
+    await _flutterTts.setLanguage("en-US");
+    await _flutterTts.setSpeechRate(0.5);
+    await _flutterTts.setVolume(1.0);
+    await _flutterTts.setPitch(1.0);
+  }
+
+  Future<void> _speak(String text) async {
+    await _flutterTts.speak(text);
+  }
+
   void _inferenceCallback(RhinoInference inference) {
     debugPrint("Rhino inference: $inference, understood? ${inference.isUnderstood}, intent: ${inference.intent}");
     if (inference.isUnderstood!) {
@@ -79,8 +93,10 @@ class _ActiveWorkoutScreenState extends State<ActiveWorkoutScreen> {
       debugPrint("");
       if (intent == 'madeShot') {
         workoutState.logMake();
+        _speak("Make");
       } else if (intent == 'missedShot') {
         debugPrint("No Missed Shot action yet");
+        _speak("Miss");
       } else if (intent == 'nextDrill') {
         final drill = workoutState.currentDrill;
         if (drill != null) {
@@ -92,11 +108,14 @@ class _ActiveWorkoutScreenState extends State<ActiveWorkoutScreen> {
           }
         }
         workoutState.nextDrill();
+        _speak("Next Drill");
       } else if (intent == 'pause' && !workoutState.isPaused) {
         workoutState.togglePause();
+        _speak("Paused");
       }
       else if (intent == 'resume' && workoutState.isPaused) {
         workoutState.togglePause();
+        _speak("Resuming");
       }
     }
 
