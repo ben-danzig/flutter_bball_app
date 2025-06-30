@@ -72,6 +72,9 @@ class _ActiveWorkoutScreenState extends State<ActiveWorkoutScreen> {
       await _porcupineManager?.start();
     } on PorcupineException catch (err) {
       debugPrint("Failed to initialize Porcupine: ${err.message}");
+      // Clean up manager if it was created but failed to start
+      _porcupineManager?.delete();
+      _porcupineManager = null;
     }
   }
 
