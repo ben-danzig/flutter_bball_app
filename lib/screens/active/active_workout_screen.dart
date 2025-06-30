@@ -10,6 +10,9 @@ import 'package:provider/provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:porcupine_flutter/porcupine_manager.dart';
 import 'package:porcupine_flutter/porcupine_error.dart';
+import 'package:rhino_flutter/rhino_manager.dart';
+import 'package:rhino_flutter/rhino.dart';
+import 'package:rhino_flutter/rhino_error.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ActiveWorkoutScreen extends StatefulWidget {
@@ -23,6 +26,8 @@ class _ActiveWorkoutScreenState extends State<ActiveWorkoutScreen> {
   PermissionStatus _permissionStatus = PermissionStatus.denied;
   bool _isCheckingPermission = true;
   PorcupineManager? _porcupineManager;
+  RhinoManager? _rhinoManager;
+  bool _isListeningForCommand = false;
 
   @override
   void initState() {
@@ -32,9 +37,9 @@ class _ActiveWorkoutScreenState extends State<ActiveWorkoutScreen> {
 
   @override
   void dispose() {
-    debugPrint("stopping porcupine manager");   
     _porcupineManager?.stop();
     _porcupineManager?.delete();
+    _rhinoManager?.delete();
     super.dispose();
   }
 
@@ -54,12 +59,43 @@ class _ActiveWorkoutScreenState extends State<ActiveWorkoutScreen> {
   void _wakeWordCallback(int keywordIndex) {
     debugPrint("Wake word detected: $keywordIndex");
     if (keywordIndex == 0) {
-      Provider.of<WorkoutState>(context, listen: false).logMake();
+      setState(() {
+        _isListeningForCommand = true;
+      });
+      _porcupineManager?.stop();
+      _createRhinoManager();
     }
   }
 
+  void _inferenceCallback(RhinoInference inference) {
+    debugPrint("Rhino inference: $inference, understood? ${inference.isUnderstood}, intent: ${inference.intent}");
+    if (inference.isUnderstood!) {
+      final intent = inference.intent;
+      final workoutState = Provider.of<WorkoutState>(context, listen: false);
+      debugPrint("");
+      if (intent == 'madeShot') {
+        workoutState.logMake();
+      } else if (intent == 'missedShot') {
+        debugPrint("No Missed Shot action yet");
+      } else if (intent == 'nextDrill') {
+        //TODO: log all makes then go to the next drill
+        workoutState.nextDrill();//TODO: need to actually log the drill stats
+      } else if (intent == 'pause' && !workoutState.isPaused) {
+        workoutState.togglePause();
+      }
+      else if (intent == 'resume' && workoutState.isPaused) {
+        workoutState.togglePause();
+      }
+    }
+
+    setState(() {
+      _isListeningForCommand = false;
+    });
+    _rhinoManager?.delete();
+    _porcupineManager?.start();
+  }
+
   void _createPorcupineManager() async {
-    debugPrint("_createPorcupineManager");
     final accessKey = dotenv.env['PICOVOICE_ACCESS_KEY'];
     if (accessKey == null) {
       debugPrint("PICOVOICE_ACCESS_KEY not found in .env file");
@@ -74,6 +110,23 @@ class _ActiveWorkoutScreenState extends State<ActiveWorkoutScreen> {
       await _porcupineManager?.start();
     } on PorcupineException catch (err) {
       debugPrint("Failed to initialize Porcupine: ${err.message}");
+    }
+  }
+
+  void _createRhinoManager() async {
+    final accessKey = dotenv.env['PICOVOICE_ACCESS_KEY'];
+    if (accessKey == null) {
+      debugPrint("PICOVOICE_ACCESS_KEY not found in .env file");
+      return;
+    }
+
+    try {
+      _rhinoManager = await RhinoManager.create(accessKey,
+          'assets/models/basketball-app-actions_en_android_v3_0_0.rhn',
+          _inferenceCallback);
+      await _rhinoManager?.process();
+    } on RhinoException catch (err) {
+      debugPrint("Failed to initialize Rhino: ${err.message}");
     }
   }
 

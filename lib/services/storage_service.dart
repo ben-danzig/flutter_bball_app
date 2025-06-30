@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import '../models/workout_session.dart';
 
@@ -16,6 +17,7 @@ class StorageService {
 
   Future<String> get _localPath async {
     final directory = await getApplicationDocumentsDirectory();
+    debugPrint('Local documents path: ${directory.path}');
     return directory.path;
   }
 
