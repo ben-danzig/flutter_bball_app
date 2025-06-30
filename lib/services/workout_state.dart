@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bball_app/models/drill.dart';
 import 'package:flutter_bball_app/models/drill_result.dart';
 import 'package:flutter_bball_app/models/workout_blueprint.dart';
+import 'package:flutter_bball_app/models/workout_session.dart';
+import 'package:flutter_bball_app/services/storage_service.dart';
 
 class WorkoutState extends ChangeNotifier {
   WorkoutBlueprint? _blueprint;
@@ -103,5 +105,29 @@ class WorkoutState extends ChangeNotifier {
     _currentDrillIndex = 0;
     // Results are cleared when a new workout starts
     notifyListeners();
+  }
+
+  // Method to save partial workout progress
+  Future<void> savePartialWorkout() async {
+    if (_blueprint == null || _sessionResults.isEmpty) {
+      endWorkout();
+      return;
+    }
+
+    final session = WorkoutSession(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      workoutBlueprint: _blueprint!,
+      results: List.from(_sessionResults),
+      completedAt: DateTime.now(),
+      isPartial: true,
+    );
+
+    await StorageService.instance.saveSession(session);
+    endWorkout();
+  }
+
+  // Method to discard workout without saving
+  void discardWorkout() {
+    endWorkout();
   }
 }

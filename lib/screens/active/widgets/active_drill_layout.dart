@@ -66,6 +66,16 @@ class ActiveDrillLayout extends StatelessWidget {
                     },
                   ),
                   TextButton(
+                    onPressed: () => _showEndWorkoutDialog(context),
+                    child: const Text(
+                      'END',
+                      style: TextStyle(
+                          color: Color(0xFFef4444),
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  TextButton(
                     onPressed: () {
                       Provider.of<WorkoutState>(context, listen: false)
                           .nextDrill();
@@ -84,6 +94,60 @@ class ActiveDrillLayout extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  void _showEndWorkoutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: const Color(0xFF1f2937),
+          title: const Text(
+            'End Workout?',
+            style: TextStyle(color: Colors.white),
+          ),
+          content: const Text(
+            'You can save your progress so far or discard this workout session.',
+            style: TextStyle(color: Color(0xFF9ca3af)),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text(
+                'Cancel',
+                style: TextStyle(color: Color(0xFF9ca3af)),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                final workoutState = Provider.of<WorkoutState>(context, listen: false);
+                workoutState.discardWorkout();
+                Navigator.of(context).pop();
+                Navigator.of(context).popUntil((route) => route.isFirst);
+              },
+              child: const Text(
+                'Discard',
+                style: TextStyle(color: Color(0xFFef4444)),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                final workoutState = Provider.of<WorkoutState>(context, listen: false);
+                workoutState.savePartialWorkout();
+                Navigator.of(context).pop();
+                Navigator.of(context).popUntil((route) => route.isFirst);
+              },
+              child: const Text(
+                'Save Progress',
+                style: TextStyle(color: Color(0xFF3b82f6)),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }
