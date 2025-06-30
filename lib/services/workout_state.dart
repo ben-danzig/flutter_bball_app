@@ -8,6 +8,7 @@ import 'package:flutter_bball_app/services/storage_service.dart';
 class WorkoutState extends ChangeNotifier {
   WorkoutBlueprint? _blueprint;
   int _currentDrillIndex = 0;
+  int _currentDrillElapsedSeconds = 0;
   bool _isPaused = false;
   final List<DrillResult> _sessionResults = [];
 
@@ -26,6 +27,7 @@ class WorkoutState extends ChangeNotifier {
   int get totalDrills => _blueprint?.drills.length ?? 0;
   List<DrillResult> get results => _sessionResults;
   int get currentDrillIndex => _currentDrillIndex;
+  int get currentDrillElapsedSeconds => _currentDrillElapsedSeconds;
 
   double get workoutProgress {
     if (!isWorkoutStarted || totalDrills == 0) {
@@ -62,6 +64,14 @@ class WorkoutState extends ChangeNotifier {
   void nextDrill() {
     if (_currentDrillIndex < totalDrills) {
       _currentDrillIndex++;
+      _currentDrillElapsedSeconds = 0;
+      notifyListeners();
+    }
+  }
+
+  void tick() {
+    if (!_isPaused) {
+      _currentDrillElapsedSeconds++;
       notifyListeners();
     }
   }
@@ -91,11 +101,22 @@ class WorkoutState extends ChangeNotifier {
 
   void logMakeTargetTimedDrill({required int elapsedSeconds}) {
     if (currentDrill == null) return;
-    _logDrillResult(DrillResult(
-      drillId: currentDrill!.drillId,
+
+    final drillId = currentDrill!.drillId;
+    final existingResultIndex =
+        _sessionResults.indexWhere((r) => r.drillId == drillId);
+
+    final newResult = DrillResult(
+      drillId: drillId,
       elapsedSeconds: elapsedSeconds,
       makes: currentDrill!.config['targetMakes'],
-    ));
+    );
+
+    if (existingResultIndex != -1) {
+      _sessionResults[existingResultIndex] = newResult;
+    } else {
+      _logDrillResult(newResult);
+    }
     notifyListeners();
   }
 

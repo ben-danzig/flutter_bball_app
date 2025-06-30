@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bball_app/models/drill.dart';
 import 'package:flutter_bball_app/screens/active/injury_log_screen.dart';
@@ -28,11 +29,13 @@ class _ActiveWorkoutScreenState extends State<ActiveWorkoutScreen> {
   PorcupineManager? _porcupineManager;
   RhinoManager? _rhinoManager;
   bool _isListeningForCommand = false;
+  Timer? _timer;
 
   @override
   void initState() {
     super.initState();
     _checkAndRequestMicrophonePermission();
+    _startTimer();
   }
 
   @override
@@ -40,6 +43,7 @@ class _ActiveWorkoutScreenState extends State<ActiveWorkoutScreen> {
     _porcupineManager?.stop();
     _porcupineManager?.delete();
     _rhinoManager?.delete();
+    _timer?.cancel();
     super.dispose();
   }
 
@@ -78,8 +82,16 @@ class _ActiveWorkoutScreenState extends State<ActiveWorkoutScreen> {
       } else if (intent == 'missedShot') {
         debugPrint("No Missed Shot action yet");
       } else if (intent == 'nextDrill') {
-        //TODO: log all makes then go to the next drill
-        workoutState.nextDrill();//TODO: need to actually log the drill stats
+        final drill = workoutState.currentDrill;
+        if (drill != null) {
+          if (drill.type == 'TIMED') {
+            workoutState.logTimedDrill();
+          } else if (drill.type == 'MAKE_TARGET_TIMED') {
+            workoutState.logMakeTargetTimedDrill(
+                elapsedSeconds: workoutState.currentDrillElapsedSeconds);
+          }
+        }
+        workoutState.nextDrill();
       } else if (intent == 'pause' && !workoutState.isPaused) {
         workoutState.togglePause();
       }
@@ -128,6 +140,15 @@ class _ActiveWorkoutScreenState extends State<ActiveWorkoutScreen> {
     } on RhinoException catch (err) {
       debugPrint("Failed to initialize Rhino: ${err.message}");
     }
+  }
+
+  void _startTimer() {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      final workoutState = Provider.of<WorkoutState>(context, listen: false);
+      if (workoutState.isWorkoutStarted && !workoutState.isWorkoutComplete) {
+        workoutState.tick();
+      }
+    });
   }
 
   Widget _buildDrillView(Drill drill, WorkoutState workoutState) {

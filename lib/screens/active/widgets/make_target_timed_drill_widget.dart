@@ -5,49 +5,13 @@ import 'package:provider/provider.dart';
 import '../../../models/drill.dart';
 import '../../../services/workout_state.dart';
 
-class MakeTargetTimedDrillWidget extends StatefulWidget {
+class MakeTargetTimedDrillWidget extends StatelessWidget {
   final Drill drill;
   final VoidCallback? onMake;
 
   const MakeTargetTimedDrillWidget(
       {Key? key, required this.drill, this.onMake})
       : super(key: key);
-
-  @override
-  _MakeTargetTimedDrillWidgetState createState() =>
-      _MakeTargetTimedDrillWidgetState();
-}
-
-class _MakeTargetTimedDrillWidgetState
-    extends State<MakeTargetTimedDrillWidget> {
-  late Timer _timer;
-  int _elapsedSeconds = 0;
-  bool _isComplete = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _startTimer();
-  }
-
-  void _startTimer() {
-    final workoutState = Provider.of<WorkoutState>(context, listen: false);
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (workoutState.isPaused) {
-        return;
-      }
-      if (!_isComplete) {
-        setState(() {
-          _elapsedSeconds++;
-        });
-      }
-    });
-  }
-
-  void _incrementMakes() {
-    if (_isComplete) return;
-    widget.onMake?.call();
-  }
 
   String _formatDuration(int totalSeconds) {
     final duration = Duration(seconds: totalSeconds);
@@ -57,30 +21,21 @@ class _MakeTargetTimedDrillWidgetState
   }
 
   @override
-  void dispose() {
-    _timer.cancel();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final workoutState = Provider.of<WorkoutState>(context);
     final makes = workoutState.results
-        .firstWhere((r) => r.drillId == widget.drill.drillId,
-            orElse: () => DrillResult(drillId: widget.drill.drillId, makes: 0))
+        .firstWhere((r) => r.drillId == drill.drillId,
+            orElse: () => DrillResult(drillId: drill.drillId, makes: 0))
         .makes;
-    final targetMakes = widget.drill.config['targetMakes']!;
-    _isComplete = (makes ?? 0) >= targetMakes;
-    if (_isComplete) {
-      _timer.cancel();
-    }
+    final targetMakes = drill.config['targetMakes']!;
+    final isComplete = (makes ?? 0) >= targetMakes;
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Text(
-          widget.drill.name.toUpperCase(),
+          drill.name.toUpperCase(),
           style: const TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.bold,
@@ -91,11 +46,11 @@ class _MakeTargetTimedDrillWidgetState
         ),
         const SizedBox(height: 20),
         Text(
-          _formatDuration(_elapsedSeconds),
+          _formatDuration(workoutState.currentDrillElapsedSeconds),
           style: TextStyle(
             fontSize: 60,
             fontWeight: FontWeight.w900,
-            color: _isComplete ? Colors.greenAccent : Colors.white,
+            color: isComplete ? Colors.greenAccent : Colors.white,
           ),
         ),
         const SizedBox(height: 12),
@@ -128,7 +83,7 @@ class _MakeTargetTimedDrillWidgetState
         ),
         const SizedBox(height: 20),
         Text(
-          widget.drill.description,
+          drill.description,
           style: const TextStyle(
             fontSize: 18,
             color: Color(0xFF9ca3af),
@@ -136,7 +91,7 @@ class _MakeTargetTimedDrillWidgetState
           textAlign: TextAlign.center,
         ),
         const Spacer(),
-        if (!_isComplete)
+        if (!isComplete)
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -148,7 +103,7 @@ class _MakeTargetTimedDrillWidgetState
                     borderRadius: BorderRadius.circular(12.0),
                   ),
                 ),
-                onPressed: _incrementMakes,
+                onPressed: onMake,
                 child: const Text('+1 MAKE',
                     style:
                         TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
@@ -163,18 +118,9 @@ class _MakeTargetTimedDrillWidgetState
                   ),
                 ),
                 onPressed: () {
-                  final workoutState =
-                      Provider.of<WorkoutState>(context, listen: false);
-                  while ((workoutState.results
-                              .firstWhere(
-                                  (r) => r.drillId == widget.drill.drillId,
-                                  orElse: () => DrillResult(
-                                      drillId: widget.drill.drillId, makes: 0))
-                              .makes ??
-                          0) <
-                      targetMakes) {
-                    workoutState.logMake();
-                  }
+                  workoutState.logMakeTargetTimedDrill(
+                      elapsedSeconds: workoutState.currentDrillElapsedSeconds);
+                  workoutState.nextDrill();
                 },
                 child: const Text('LOG ALL',
                     style:
@@ -192,10 +138,8 @@ class _MakeTargetTimedDrillWidgetState
               ),
             ),
             onPressed: () {
-              final workoutState =
-                  Provider.of<WorkoutState>(context, listen: false);
               workoutState.logMakeTargetTimedDrill(
-                  elapsedSeconds: _elapsedSeconds);
+                  elapsedSeconds: workoutState.currentDrillElapsedSeconds);
               workoutState.nextDrill();
             },
             child: const Text('FINISH DRILL',

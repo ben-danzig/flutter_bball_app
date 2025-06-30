@@ -12,6 +12,9 @@ class FakeWorkoutState extends ChangeNotifier implements WorkoutState {
   int _currentDrillIndex = 0;
 
   @override
+  int _currentDrillElapsedSeconds = 0;
+
+  @override
   bool _isPaused = false;
 
   @override
@@ -51,6 +54,9 @@ class FakeWorkoutState extends ChangeNotifier implements WorkoutState {
   int get currentDrillIndex => _currentDrillIndex;
 
   @override
+  int get currentDrillElapsedSeconds => _currentDrillElapsedSeconds;
+
+  @override
   double get workoutProgress {
     if (!isWorkoutStarted || totalDrills == 0) {
       return 0.0;
@@ -83,6 +89,15 @@ class FakeWorkoutState extends ChangeNotifier implements WorkoutState {
     nextDrillCallCount++;
     if (_currentDrillIndex < totalDrills) {
       _currentDrillIndex++;
+      _currentDrillElapsedSeconds = 0;
+    }
+    notifyListeners();
+  }
+
+  @override
+  void tick() {
+    if (!_isPaused) {
+      _currentDrillElapsedSeconds++;
     }
     notifyListeners();
   }
