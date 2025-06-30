@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bball_app/screens/library/workout_library_screen.dart';
 import 'package:flutter_bball_app/services/workout_state.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-void main() {
+Future main() async {
+  await dotenv.load(fileName: ".env");
   runApp(
     ChangeNotifierProvider(
       create: (context) => WorkoutState(),
