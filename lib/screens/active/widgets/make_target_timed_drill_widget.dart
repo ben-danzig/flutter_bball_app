@@ -1,22 +1,27 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_bball_app/models/drill_result.dart';
 import 'package:provider/provider.dart';
 import '../../../models/drill.dart';
 import '../../../services/workout_state.dart';
 
 class MakeTargetTimedDrillWidget extends StatefulWidget {
   final Drill drill;
+  final VoidCallback? onMake;
 
-  const MakeTargetTimedDrillWidget({Key? key, required this.drill}) : super(key: key);
+  const MakeTargetTimedDrillWidget(
+      {Key? key, required this.drill, this.onMake})
+      : super(key: key);
 
   @override
-  _MakeTargetTimedDrillWidgetState createState() => _MakeTargetTimedDrillWidgetState();
+  _MakeTargetTimedDrillWidgetState createState() =>
+      _MakeTargetTimedDrillWidgetState();
 }
 
-class _MakeTargetTimedDrillWidgetState extends State<MakeTargetTimedDrillWidget> {
+class _MakeTargetTimedDrillWidgetState
+    extends State<MakeTargetTimedDrillWidget> {
   late Timer _timer;
   int _elapsedSeconds = 0;
-  int _currentMakes = 0;
   bool _isComplete = false;
 
   @override
@@ -41,14 +46,7 @@ class _MakeTargetTimedDrillWidgetState extends State<MakeTargetTimedDrillWidget>
 
   void _incrementMakes() {
     if (_isComplete) return;
-
-    setState(() {
-      _currentMakes++;
-      if (_currentMakes >= widget.drill.config['targetMakes']!) {
-        _isComplete = true;
-        _timer.cancel();
-      }
-    });
+    widget.onMake?.call();
   }
 
   String _formatDuration(int totalSeconds) {
@@ -66,7 +64,16 @@ class _MakeTargetTimedDrillWidgetState extends State<MakeTargetTimedDrillWidget>
 
   @override
   Widget build(BuildContext context) {
+    final workoutState = Provider.of<WorkoutState>(context);
+    final makes = workoutState.results
+        .firstWhere((r) => r.drillId == widget.drill.drillId,
+            orElse: () => DrillResult(drillId: widget.drill.drillId, makes: 0))
+        .makes;
     final targetMakes = widget.drill.config['targetMakes']!;
+    _isComplete = (makes ?? 0) >= targetMakes;
+    if (_isComplete) {
+      _timer.cancel();
+    }
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -104,7 +111,7 @@ class _MakeTargetTimedDrillWidgetState extends State<MakeTargetTimedDrillWidget>
             style: const TextStyle(fontFamily: 'Inter', color: Colors.white),
             children: [
               TextSpan(
-                text: '$_currentMakes',
+                text: '${makes ?? 0}',
                 style:
                     const TextStyle(fontSize: 72, fontWeight: FontWeight.w900),
               ),
@@ -156,11 +163,18 @@ class _MakeTargetTimedDrillWidgetState extends State<MakeTargetTimedDrillWidget>
                   ),
                 ),
                 onPressed: () {
-                  setState(() {
-                    _currentMakes = widget.drill.config['targetMakes']!;
-                    _isComplete = true;
-                    _timer.cancel();
-                  });
+                  final workoutState =
+                      Provider.of<WorkoutState>(context, listen: false);
+                  while ((workoutState.results
+                              .firstWhere(
+                                  (r) => r.drillId == widget.drill.drillId,
+                                  orElse: () => DrillResult(
+                                      drillId: widget.drill.drillId, makes: 0))
+                              .makes ??
+                          0) <
+                      targetMakes) {
+                    workoutState.logMake();
+                  }
                 },
                 child: const Text('LOG ALL',
                     style:

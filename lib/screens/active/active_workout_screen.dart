@@ -32,7 +32,7 @@ class _ActiveWorkoutScreenState extends State<ActiveWorkoutScreen> {
 
   @override
   void dispose() {
-    debugPrint("stopping porcupine manager");
+    debugPrint("stopping porcupine manager");   
     _porcupineManager?.stop();
     _porcupineManager?.delete();
     super.dispose();
@@ -52,8 +52,10 @@ class _ActiveWorkoutScreenState extends State<ActiveWorkoutScreen> {
   }
 
   void _wakeWordCallback(int keywordIndex) {
-    // placeholder
     debugPrint("Wake word detected: $keywordIndex");
+    if (keywordIndex == 0) {
+      Provider.of<WorkoutState>(context, listen: false).logMake();
+    }
   }
 
   void _createPorcupineManager() async {
@@ -75,6 +77,26 @@ class _ActiveWorkoutScreenState extends State<ActiveWorkoutScreen> {
     }
   }
 
+  Widget _buildDrillView(Drill drill, WorkoutState workoutState) {
+    switch (drill.type) {
+      case 'TIMED':
+        return TimedDrillWidget(
+          key: ValueKey(drill.drillId),
+          drill: drill,
+        );
+      case 'REP_BASED':
+        return RepBasedDrillWidget(key: ValueKey(drill.drillId), drill: drill);
+      case 'MAKE_TARGET_TIMED':
+        return MakeTargetTimedDrillWidget(
+          key: ValueKey(drill.drillId),
+          drill: drill,
+          onMake: workoutState.logMake,
+        );
+      default:
+        return Center(child: Text('Unknown drill type: ${drill.type}'));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_isCheckingPermission) {
@@ -85,67 +107,45 @@ class _ActiveWorkoutScreenState extends State<ActiveWorkoutScreen> {
     }
 
     if (_permissionStatus.isGranted) {
-      return const WorkoutUI();
+      return Consumer<WorkoutState>(
+        builder: (context, workoutState, child) {
+          if (!workoutState.isWorkoutStarted) {
+            return const Scaffold(
+              backgroundColor: Color(0xFF111827),
+              body: Center(
+                  child: Text('No active workout.',
+                      style: TextStyle(color: Colors.white))),
+            );
+          }
+
+          if (workoutState.isWorkoutComplete) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(
+                    builder: (context) => const InjuryLogScreen()),
+              );
+            });
+            return const Scaffold(
+              backgroundColor: Color(0xFF111827),
+              body: Center(child: CircularProgressIndicator()),
+            );
+          }
+
+          final drill = workoutState.currentDrill!;
+
+          return ActiveDrillLayout(
+            drillName: drill.name,
+            nextDrillName: workoutState.nextDrillName,
+            progress: workoutState.workoutProgress,
+            child: _buildDrillView(drill, workoutState),
+          );
+        },
+      );
     }
 
     return PermissionDeniedScreen(
       onRequestPermission: _checkAndRequestMicrophonePermission,
     );
-  }
-}
-
-class WorkoutUI extends StatelessWidget {
-  const WorkoutUI({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Consumer<WorkoutState>(
-      builder: (context, workoutState, child) {
-        if (!workoutState.isWorkoutStarted) {
-          return const Scaffold(
-            backgroundColor: Color(0xFF111827),
-            body: Center(
-                child: Text('No active workout.',
-                    style: TextStyle(color: Colors.white))),
-          );
-        }
-
-        if (workoutState.isWorkoutComplete) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(builder: (context) => const InjuryLogScreen()),
-            );
-          });
-          return const Scaffold(
-            backgroundColor: Color(0xFF111827),
-            body: Center(child: CircularProgressIndicator()),
-          );
-        }
-
-        final drill = workoutState.currentDrill!;
-
-        return ActiveDrillLayout(
-          drillName: drill.name,
-          nextDrillName: workoutState.nextDrillName,
-          progress: workoutState.workoutProgress,
-          child: _buildDrillView(drill),
-        );
-      },
-    );
-  }
-
-  Widget _buildDrillView(Drill drill) {
-    switch (drill.type) {
-      case 'TIMED':
-        return TimedDrillWidget(key: ValueKey(drill.drillId), drill: drill);
-      case 'REP_BASED':
-        return RepBasedDrillWidget(key: ValueKey(drill.drillId), drill: drill);
-      case 'MAKE_TARGET_TIMED':
-        return MakeTargetTimedDrillWidget(
-            key: ValueKey(drill.drillId), drill: drill);
-      default:
-        return Center(child: Text('Unknown drill type: ${drill.type}'));
-    }
   }
 }
 

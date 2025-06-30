@@ -99,6 +99,30 @@ class WorkoutState extends ChangeNotifier {
     notifyListeners();
   }
 
+  void logMake() {
+    if (currentDrill == null) return;
+
+    final drillId = currentDrill!.drillId;
+    final existingResultIndex =
+        _sessionResults.indexWhere((r) => r.drillId == drillId);
+
+    if (existingResultIndex != -1) {
+      final existingResult = _sessionResults[existingResultIndex];
+      final updatedResult = DrillResult(
+        drillId: drillId,
+        makes: (existingResult.makes ?? 0) + 1,
+        elapsedSeconds: existingResult.elapsedSeconds,
+      );
+      _sessionResults[existingResultIndex] = updatedResult;
+    } else {
+      _logDrillResult(DrillResult(
+        drillId: drillId,
+        makes: 1,
+      ));
+    }
+    notifyListeners();
+  }
+
   // Method to end the workout and reset the state
   void endWorkout() {
     _blueprint = null;
