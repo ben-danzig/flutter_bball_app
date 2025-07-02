@@ -14,6 +14,8 @@ import 'package:picovoice_flutter/picovoice_error.dart';
 import 'package:rhino_flutter/rhino.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:mic_info/mic_info.dart';
+import 'package:mic_info/model/mic_info_model.dart';
 
 class ActiveWorkoutScreen extends StatefulWidget {
   const ActiveWorkoutScreen({super.key});
@@ -46,6 +48,24 @@ class _ActiveWorkoutScreenState extends State<ActiveWorkoutScreen> {
     super.dispose();
   }
 
+  void _logMicrophoneInfo() async {
+    // Retrieve Active Microphones
+    List<MicInfoDevice> activeMicrophones = await MicInfo.getActiveMicrophones();
+    debugPrint("Active Microphones: $activeMicrophones");
+
+    // Retrieve Bluetooth Microphones
+    List<MicInfoDevice> bluetoothMicrophones = await MicInfo.getBluetoothMicrophones();
+    debugPrint("Bluetooth Microphones: $bluetoothMicrophones");
+
+    // Retrieve Default Microphones
+    List<MicInfoDevice> defaultMicrophones = await MicInfo.getDefaultMicrophones();
+    debugPrint("Default Microphones: $defaultMicrophones");
+
+    // Retrieve Wired Microphones
+    List<MicInfoDevice> wiredMicrophones = await MicInfo.getWiredMicrophones();
+    debugPrint("Wired Microphones: $wiredMicrophones");
+  }
+
   Future<void> _checkAndRequestMicrophonePermission() async {
     final status = await Permission.microphone.request();
     if (mounted) {
@@ -53,12 +73,15 @@ class _ActiveWorkoutScreenState extends State<ActiveWorkoutScreen> {
         _permissionStatus = status;
         _isCheckingPermission = false;
       });
-      if (status.isGranted) {        _createPicovoiceManager();
+      if (status.isGranted) {
+        _createPicovoiceManager();
+        _logMicrophoneInfo();
       }
     }
   }
 
   void _wakeWordCallback() {
+    //_speak("awoken");
     debugPrint("Wake word detected");
   }
 
@@ -74,6 +97,7 @@ class _ActiveWorkoutScreenState extends State<ActiveWorkoutScreen> {
   }
 
   void _inferenceCallback(RhinoInference inference) {
+    //_speak("command");
     debugPrint(
         "Picovoice inference: $inference, understood? ${inference.isUnderstood}, intent: ${inference.intent}");
     if (inference.isUnderstood!) {
@@ -193,11 +217,20 @@ class _ActiveWorkoutScreenState extends State<ActiveWorkoutScreen> {
 
           final drill = workoutState.currentDrill!;
 
-          return ActiveDrillLayout(
-            drillName: drill.name,
-            nextDrillName: workoutState.nextDrillName,
-            progress: workoutState.workoutProgress,
-            child: _buildDrillView(drill, workoutState),
+          return Scaffold(
+            backgroundColor: const Color(0xFF111827),
+            body: ActiveDrillLayout(
+              drillName: drill.name,
+              nextDrillName: workoutState.nextDrillName,
+              progress: workoutState.workoutProgress,
+              child: _buildDrillView(drill, workoutState),
+            ),
+            floatingActionButton: FloatingActionButton(
+              onPressed: _logMicrophoneInfo,
+              backgroundColor: const Color(0xFF3B82F6),
+              child: const Icon(Icons.mic),
+              tooltip: 'Log Microphone Info',
+            ),
           );
         },
       );
