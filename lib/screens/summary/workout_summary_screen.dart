@@ -5,7 +5,7 @@ import '../../models/workout_session.dart';
 class WorkoutSummaryScreen extends StatelessWidget {
   final WorkoutSession session;
 
-  const WorkoutSummaryScreen({Key? key, required this.session}) : super(key: key);
+  const WorkoutSummaryScreen({super.key, required this.session});
 
   @override
   Widget build(BuildContext context) {
@@ -91,7 +91,7 @@ class WorkoutSummaryScreen extends StatelessWidget {
             final drill = session.workoutBlueprint.drills
                 .firstWhere((d) => d.drillId == result.drillId);
             return _buildInfoRow(drill.name, _formatResult(result, drill));
-          }).toList(),
+          }),
         ],
       ),
     );
