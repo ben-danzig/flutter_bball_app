@@ -101,6 +101,15 @@ class WorkoutState extends ChangeNotifier {
     notifyListeners();
   }
 
+  void logReadAndReactDrill({required int totalReps}) {
+    if (currentDrill == null) return;
+    _logDrillResult(DrillResult(
+      drillId: currentDrill!.drillId,
+      reps: totalReps,
+    ));
+    notifyListeners();
+  }
+
   // Method to end the workout and reset the state
   void endWorkout() {
     _blueprint = null;

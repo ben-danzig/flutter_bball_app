@@ -260,5 +260,27 @@
         "config": { "targetMakes": 5 }
       }
     ]
+  },
+  {
+    "id": "3pt_wing_read_and_react",
+    "name": "3pt Wing Read and React",
+    "objective": "Improve decision-making and reaction time by randomly choosing to shoot, drive left, or drive right from the 3-point wing positions.",
+    "estimatedDuration": 10,
+    "drills": [
+      {
+        "drillId": "left_wing_read_react",
+        "name": "Left Wing Read & React",
+        "description": "Start at the left 3pt wing with the ball. When the timer expires, quickly react to the random direction given: shoot, drive left, or drive right.",
+        "type": "READ_AND_REACT",
+        "config": { "reps": 10, "intervalSeconds": 20 }
+      },
+      {
+        "drillId": "right_wing_read_react",
+        "name": "Right Wing Read & React",
+        "description": "Start at the right 3pt wing with the ball. When the timer expires, quickly react to the random direction given: shoot, drive left, or drive right.",
+        "type": "READ_AND_REACT",
+        "config": { "reps": 10, "intervalSeconds": 20 }
+      }
+    ]
   }
 ]
