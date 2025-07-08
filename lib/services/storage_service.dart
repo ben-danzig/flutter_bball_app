@@ -45,4 +45,17 @@ class StorageService {
     }
     return sessions;
   }
+
+  Future<void> deleteSession(String sessionId) async {
+    final file = await _getLocalFile('session_$sessionId.json');
+    if (await file.exists()) {
+      await file.delete();
+    }
+  }
+
+  Future<void> updateSession(WorkoutSession session) async {
+    final file = await _getLocalFile('session_${session.id}.json');
+    final jsonString = jsonEncode(session.toJson());
+    await file.writeAsString(jsonString);
+  }
 }
