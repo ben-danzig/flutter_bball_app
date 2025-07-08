@@ -49,6 +49,28 @@ class ActiveDrillLayout extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
+                  // Prev button with tap and long-press
+                  Tooltip(
+                    message: 'Long press to reset drill',
+                    child: GestureDetector(
+                      onTap: () {
+                        Provider.of<WorkoutState>(context, listen: false)
+                            .previousDrill();
+                      },
+                      onLongPress: () {
+                        Provider.of<WorkoutState>(context, listen: false)
+                            .resetCurrentDrill();
+                      },
+                      child: const Text(
+                        '< PREV',
+                        style: TextStyle(
+                          color: Color(0xFF9ca3af),
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
                   Consumer<WorkoutState>(
                     builder: (context, workoutState, child) {
                       return TextButton(
