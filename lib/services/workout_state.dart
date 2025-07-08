@@ -10,6 +10,7 @@ class WorkoutState extends ChangeNotifier {
   int _currentDrillIndex = 0;
   bool _isPaused = false;
   final List<DrillResult> _sessionResults = [];
+  int _resetDrillCounter = 0;
 
   // Public getters to safely access the state
   bool get isWorkoutStarted => _blueprint != null;
@@ -26,6 +27,7 @@ class WorkoutState extends ChangeNotifier {
   int get totalDrills => _blueprint?.drills.length ?? 0;
   List<DrillResult> get results => _sessionResults;
   int get currentDrillIndex => _currentDrillIndex;
+  int get resetDrillCounter => _resetDrillCounter;
 
   double get workoutProgress {
     if (!isWorkoutStarted || totalDrills == 0) {
@@ -129,5 +131,20 @@ class WorkoutState extends ChangeNotifier {
   // Method to discard workout without saving
   void discardWorkout() {
     endWorkout();
+  }
+
+  // Go to the previous drill (if not at the first drill)
+  void previousDrill() {
+    if (_currentDrillIndex > 0) {
+      _currentDrillIndex--;
+      notifyListeners();
+    }
+  }
+
+  // Reset the current drill (widgets should listen and reset their local state)
+  void resetCurrentDrill() {
+    _resetDrillCounter++;
+    // This method notifies listeners so drill widgets can reset their local state (timer, makes, etc.)
+    notifyListeners();
   }
 }

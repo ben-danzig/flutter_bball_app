@@ -19,11 +19,38 @@ class _MakeTargetTimedDrillWidgetState extends State<MakeTargetTimedDrillWidget>
   int _elapsedSeconds = 0;
   int _currentMakes = 0;
   bool _isComplete = false;
+  int? _lastDrillIndex;
+  int? _lastResetCounter;
 
   @override
   void initState() {
     super.initState();
     _startTimer();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final workoutState = Provider.of<WorkoutState>(context);
+    final currentDrillIndex = workoutState.currentDrillIndex;
+    final resetCounter = workoutState.resetDrillCounter;
+    if (_lastDrillIndex == null) {
+      _lastDrillIndex = currentDrillIndex;
+      _lastResetCounter = resetCounter;
+    } else if (_lastDrillIndex == currentDrillIndex && _lastResetCounter != resetCounter) {
+      // Only reset if resetDrillCounter changed
+      _timer.cancel();
+      setState(() {
+        _elapsedSeconds = 0;
+        _currentMakes = 0;
+        _isComplete = false;
+      });
+      _startTimer();
+      _lastResetCounter = resetCounter;
+    } else {
+      _lastDrillIndex = currentDrillIndex;
+      _lastResetCounter = resetCounter;
+    }
   }
 
   void _startTimer() {
