@@ -154,7 +154,7 @@ class WorkoutSummaryScreen extends StatelessWidget {
     } else if (drill.type == 'REP_BASED') {
       return '${result.makes} / ${drill.config['targetMakes']}';
     } else if (drill.type == 'MAKE_TARGET_TIMED') {
-      return '${result.makes} makes in ${formatDuration(result.elapsedSeconds)}';
+      return '${result.makes} makes in ${formatDurationVerbose(result.elapsedSeconds)}';
     }
     return '';
   }

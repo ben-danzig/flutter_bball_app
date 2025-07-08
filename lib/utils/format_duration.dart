@@ -9,4 +9,11 @@ String formatDuration(int totalSeconds) {
   } else {
     return totalSeconds.toString();
   }
+}
+
+// Utility function to format a duration in seconds for summary display as 'Xm Ys'.
+String formatDurationVerbose(int totalSeconds) {
+  final minutes = totalSeconds ~/ 60;
+  final seconds = totalSeconds % 60;
+  return '${minutes}m ${seconds}s';
 } 
