@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../models/drill.dart';
 import '../../../services/workout_state.dart';
+import 'package:flutter_bball_app/utils/format_duration.dart';
 
 class MakeTargetTimedDrillWidget extends StatefulWidget {
   final Drill drill;
@@ -51,13 +52,6 @@ class _MakeTargetTimedDrillWidgetState extends State<MakeTargetTimedDrillWidget>
     });
   }
 
-  String _formatDuration(int totalSeconds) {
-    final duration = Duration(seconds: totalSeconds);
-    final minutes = duration.inMinutes.remainder(60).toString().padLeft(2, '0');
-    final seconds = duration.inSeconds.remainder(60).toString().padLeft(2, '0');
-    return '$minutes:$seconds';
-  }
-
   @override
   void dispose() {
     _timer.cancel();
@@ -84,9 +78,9 @@ class _MakeTargetTimedDrillWidgetState extends State<MakeTargetTimedDrillWidget>
         ),
         const SizedBox(height: 20),
         Text(
-          _formatDuration(_elapsedSeconds),
+          formatDuration(_elapsedSeconds),
           style: TextStyle(
-            fontSize: 60,
+            fontSize: 150,
             fontWeight: FontWeight.w900,
             color: _isComplete ? Colors.greenAccent : Colors.white,
           ),

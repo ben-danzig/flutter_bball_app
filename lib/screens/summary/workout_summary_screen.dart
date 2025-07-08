@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../models/workout_session.dart';
+import 'package:flutter_bball_app/utils/format_duration.dart';
 
 class WorkoutSummaryScreen extends StatelessWidget {
   final WorkoutSession session;
@@ -153,15 +154,8 @@ class WorkoutSummaryScreen extends StatelessWidget {
     } else if (drill.type == 'REP_BASED') {
       return '${result.makes} / ${drill.config['targetMakes']}';
     } else if (drill.type == 'MAKE_TARGET_TIMED') {
-      return '${result.makes} makes in ${_formatDuration(result.elapsedSeconds)}';
+      return '${result.makes} makes in ${formatDurationVerbose(result.elapsedSeconds)}';
     }
     return '';
-  }
-
-  String _formatDuration(int totalSeconds) {
-    final duration = Duration(seconds: totalSeconds);
-    final minutes = duration.inMinutes;
-    final seconds = duration.inSeconds.remainder(60);
-    return '${minutes}m ${seconds}s';
   }
 }

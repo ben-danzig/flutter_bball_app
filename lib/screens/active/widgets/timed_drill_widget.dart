@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../models/drill.dart';
 import '../../../services/workout_state.dart';
+import 'package:flutter_bball_app/utils/format_duration.dart';
 
 class TimedDrillWidget extends StatefulWidget {
   final Drill drill;
@@ -49,13 +50,6 @@ class _TimedDrillWidgetState extends State<TimedDrillWidget> {
     super.dispose();
   }
 
-  String _formatDuration(int totalSeconds) {
-    final duration = Duration(seconds: totalSeconds);
-    final minutes = duration.inMinutes.remainder(60).toString().padLeft(2, '0');
-    final seconds = duration.inSeconds.remainder(60).toString().padLeft(2, '0');
-    return '$minutes:$seconds';
-  }
-
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -73,23 +67,17 @@ class _TimedDrillWidgetState extends State<TimedDrillWidget> {
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 30),
-        Container(
-          width: 240,
-          height: 240,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(
-              color: const Color(0xFF1f2937), // Medium Gray
-              width: 15,
-            ),
-          ),
+        Expanded(
           child: Center(
-            child: Text(
-              _formatDuration(_remainingSeconds),
-              style: const TextStyle(
-                fontSize: 60,
-                fontWeight: FontWeight.w900,
-                color: Colors.white,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                formatDuration(_remainingSeconds),
+                style: const TextStyle(
+                  fontSize: 300,
+                  fontWeight: FontWeight.w900,
+                  color: Colors.white,
+                ),
               ),
             ),
           ),
