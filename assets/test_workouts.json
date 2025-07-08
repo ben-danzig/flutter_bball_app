@@ -13,6 +13,27 @@
         "config": { "sets": 1, "duration": 3 }
       },
       {
+        "drillId": "med_timed_drill",
+        "name": "Test: Timed Drill",
+        "description": "A 20-second timed drill.",
+        "type": "TIMED",
+        "config": { "sets": 1, "duration": 20 }
+      },
+      {
+        "drillId": "med_long_timed_drill",
+        "name": "Test: Timed Drill",
+        "description": "A timed drill.",
+        "type": "TIMED",
+        "config": { "sets": 1, "duration": 65 }
+      },
+      {
+        "drillId": "long_timed_drill",
+        "name": "Test: Timed Drill",
+        "description": "A 25-minute timed drill.",
+        "type": "TIMED",
+        "config": { "sets": 1, "duration": 1500 }
+      },
+      {
         "drillId": "short_rep_drill",
         "name": "Test: Rep-Based Drill",
         "description": "Log 1 set of 2 reps.",
