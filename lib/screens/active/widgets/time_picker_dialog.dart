@@ -17,7 +17,7 @@ class _TimePickerDialogState extends State<TimePickerDialog> {
   void initState() {
     super.initState();
     minutes = widget.initialSeconds ~/ 60;
-    seconds = (widget.initialSeconds % 60) - (widget.initialSeconds % 5);
+    seconds = (widget.initialSeconds % 60) ~/ 5 * 5;
   }
 
   @override
