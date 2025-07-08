@@ -20,6 +20,140 @@ class _WorkoutHistoryScreenState extends State<WorkoutHistoryScreen> {
     _sessionsFuture = StorageService.instance.getAllSessions();
   }
 
+  void _refreshSessions() {
+    setState(() {
+      _sessionsFuture = StorageService.instance.getAllSessions();
+    });
+  }
+
+  Future<void> _deleteSession(WorkoutSession session) async {
+    final shouldDelete = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: const Color(0xFF1f2937),
+          title: const Text('Delete Workout', style: TextStyle(color: Colors.white)),
+          content: Text(
+            'Are you sure you want to delete "${session.workoutBlueprint.name}" from ${DateFormat.yMMMMd().format(session.completedAt)}?',
+            style: const TextStyle(color: Colors.white70),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (shouldDelete == true) {
+      await StorageService.instance.deleteSession(session.id);
+      _refreshSessions();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Workout deleted')),
+        );
+      }
+    }
+  }
+
+  Future<void> _editSession(WorkoutSession session) async {
+    final feelingController = TextEditingController(text: session.feeling ?? '');
+    final notesController = TextEditingController(text: session.notes ?? '');
+
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: const Color(0xFF1f2937),
+          title: const Text('Edit Workout', style: TextStyle(color: Colors.white)),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  session.workoutBlueprint.name,
+                  style: const TextStyle(color: Colors.white70, fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+                Text(
+                  DateFormat.yMMMMd().format(session.completedAt),
+                  style: const TextStyle(color: Colors.white54, fontSize: 14),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: feelingController,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: const InputDecoration(
+                    labelText: 'How did you feel?',
+                    labelStyle: TextStyle(color: Colors.white70),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.white30),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.blue),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: notesController,
+                  style: const TextStyle(color: Colors.white),
+                  maxLines: 3,
+                  decoration: const InputDecoration(
+                    labelText: 'Notes',
+                    labelStyle: TextStyle(color: Colors.white70),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.white30),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: Colors.blue),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Save', style: TextStyle(color: Colors.blue)),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (result == true) {
+      final updatedSession = WorkoutSession(
+        id: session.id,
+        workoutBlueprint: session.workoutBlueprint,
+        results: session.results,
+        completedAt: session.completedAt,
+        feeling: feelingController.text.isEmpty ? null : feelingController.text,
+        notes: notesController.text.isEmpty ? null : notesController.text,
+        isPartial: session.isPartial,
+      );
+      
+      await StorageService.instance.updateSession(updatedSession);
+      _refreshSessions();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Workout updated')),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -96,6 +230,39 @@ class _WorkoutHistoryScreenState extends State<WorkoutHistoryScreen> {
             ),
           );
         },
+        trailing: PopupMenuButton<String>(
+          icon: const Icon(Icons.more_vert, color: Colors.white),
+          color: const Color(0xFF374151),
+          itemBuilder: (context) => [
+            const PopupMenuItem<String>(
+              value: 'edit',
+              child: Row(
+                children: [
+                  Icon(Icons.edit, color: Colors.white, size: 20),
+                  SizedBox(width: 8),
+                  Text('Edit', style: TextStyle(color: Colors.white)),
+                ],
+              ),
+            ),
+            const PopupMenuItem<String>(
+              value: 'delete',
+              child: Row(
+                children: [
+                  Icon(Icons.delete, color: Colors.red, size: 20),
+                  SizedBox(width: 8),
+                  Text('Delete', style: TextStyle(color: Colors.red)),
+                ],
+              ),
+            ),
+          ],
+          onSelected: (value) {
+            if (value == 'edit') {
+              _editSession(session);
+            } else if (value == 'delete') {
+              _deleteSession(session);
+            }
+          },
+        ),
       ),
     );
   }
