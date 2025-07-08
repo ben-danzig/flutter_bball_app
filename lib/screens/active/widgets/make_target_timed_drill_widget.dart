@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../../models/drill.dart';
 import '../../../services/workout_state.dart';
 import 'package:flutter_bball_app/utils/format_duration.dart';
+import 'package:flutter_bball_app/screens/active/widgets/time_picker_dialog.dart' as custom_picker;
 
 class MakeTargetTimedDrillWidget extends StatefulWidget {
   final Drill drill;
@@ -104,13 +105,43 @@ class _MakeTargetTimedDrillWidgetState extends State<MakeTargetTimedDrillWidget>
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 20),
-        Text(
-          formatDuration(_elapsedSeconds),
-          style: TextStyle(
-            fontSize: 150,
-            fontWeight: FontWeight.w900,
-            color: _isComplete ? Colors.greenAccent : Colors.white,
-          ),
+        LayoutBuilder(
+          builder: (context, constraints) {
+            double fontSize = 150;
+            return Center(
+              child: GestureDetector(
+                onTap: !_isComplete
+                    ? () async {
+                        final workoutState = Provider.of<WorkoutState>(context, listen: false);
+                        final wasPaused = workoutState.isPaused;
+                        if (!wasPaused) {
+                          workoutState.togglePause();
+                        }
+                        final result = await showDialog<int>(
+                          context: context,
+                          builder: (context) => custom_picker.TimePickerDialog(initialSeconds: _elapsedSeconds),
+                        );
+                        if (result != null) {
+                          setState(() {
+                            _elapsedSeconds = result;
+                          });
+                        }
+                        if (!wasPaused) {
+                          workoutState.togglePause();
+                        }
+                      }
+                    : null,
+                child: Text(
+                  formatDuration(_elapsedSeconds),
+                  style: TextStyle(
+                    fontSize: fontSize,
+                    fontWeight: FontWeight.w900,
+                    color: _isComplete ? Colors.greenAccent : Colors.white,
+                  ),
+                ),
+              ),
+            );
+          },
         ),
         const SizedBox(height: 12),
         Text(
