@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../../../models/drill.dart';
 import '../../../services/workout_state.dart';
 import 'package:flutter_bball_app/utils/format_duration.dart';
+import 'package:flutter_bball_app/screens/active/widgets/time_picker_dialog.dart' as custom_picker;
 
 class TimedDrillWidget extends StatefulWidget {
   final Drill drill;
@@ -94,14 +95,35 @@ class _TimedDrillWidgetState extends State<TimedDrillWidget> {
         const SizedBox(height: 30),
         Expanded(
           child: Center(
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Text(
-                formatDuration(_remainingSeconds),
-                style: const TextStyle(
-                  fontSize: 300,
-                  fontWeight: FontWeight.w900,
-                  color: Colors.white,
+            child: GestureDetector(
+              onTap: () async {
+                final workoutState = Provider.of<WorkoutState>(context, listen: false);
+                final wasPaused = workoutState.isPaused;
+                if (!wasPaused) {
+                  workoutState.togglePause();
+                }
+                final result = await showDialog<int>(
+                  context: context,
+                  builder: (context) => custom_picker.TimePickerDialog(initialSeconds: _remainingSeconds),
+                );
+                if (result != null) {
+                  setState(() {
+                    _remainingSeconds = result;
+                  });
+                }
+                if (!wasPaused) {
+                  workoutState.togglePause();
+                }
+              },
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  formatDuration(_remainingSeconds),
+                  style: const TextStyle(
+                    fontSize: 300,
+                    fontWeight: FontWeight.w900,
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ),
