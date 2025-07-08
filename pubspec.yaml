@@ -40,6 +40,7 @@ dependencies:
   uuid: ^4.5.1
   intl: ^0.20.2
   numberpicker: ^2.1.2
+  fl_chart: ^0.64.0
 
 dev_dependencies:
   flutter_test:
