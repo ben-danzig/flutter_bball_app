@@ -80,7 +80,7 @@ class _MakeTargetTimedDrillWidgetState extends State<MakeTargetTimedDrillWidget>
         Text(
           formatDuration(_elapsedSeconds),
           style: TextStyle(
-            fontSize: 60,
+            fontSize: 150,
             fontWeight: FontWeight.w900,
             color: _isComplete ? Colors.greenAccent : Colors.white,
           ),
