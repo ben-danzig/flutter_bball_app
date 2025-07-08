@@ -6,7 +6,7 @@ import '../../../services/workout_state.dart';
 class RepBasedDrillWidget extends StatelessWidget {
   final Drill drill;
 
-  const RepBasedDrillWidget({Key? key, required this.drill}) : super(key: key);
+  const RepBasedDrillWidget({super.key, required this.drill});
 
   @override
   Widget build(BuildContext context) {

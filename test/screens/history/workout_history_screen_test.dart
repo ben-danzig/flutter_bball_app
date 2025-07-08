@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bball_app/models/drill.dart';
 import 'package:flutter_bball_app/models/workout_blueprint.dart';
 import 'package:flutter_bball_app/models/workout_session.dart';
 import 'package:flutter_bball_app/screens/history/workout_history_screen.dart';

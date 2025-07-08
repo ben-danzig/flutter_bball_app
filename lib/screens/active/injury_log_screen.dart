@@ -7,7 +7,7 @@ import 'package:uuid/uuid.dart';
 import '../../models/workout_session.dart';
 
 class InjuryLogScreen extends StatefulWidget {
-  const InjuryLogScreen({Key? key}) : super(key: key);
+  const InjuryLogScreen({super.key});
 
   @override
   _InjuryLogScreenState createState() => _InjuryLogScreenState();

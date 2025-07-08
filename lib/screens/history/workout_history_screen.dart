@@ -5,7 +5,7 @@ import '../../services/storage_service.dart';
 import '../summary/workout_summary_screen.dart';
 
 class WorkoutHistoryScreen extends StatefulWidget {
-  const WorkoutHistoryScreen({Key? key}) : super(key: key);
+  const WorkoutHistoryScreen({super.key});
 
   @override
   _WorkoutHistoryScreenState createState() => _WorkoutHistoryScreenState();

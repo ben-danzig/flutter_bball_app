@@ -10,8 +10,7 @@ class MakeTargetTimedDrillWidget extends StatelessWidget {
   final VoidCallback? onMake;
 
   const MakeTargetTimedDrillWidget(
-      {Key? key, required this.drill, this.onMake})
-      : super(key: key);
+      {super.key, required this.drill, this.onMake});
 
   String _formatDuration(int totalSeconds) {
     final duration = Duration(seconds: totalSeconds);

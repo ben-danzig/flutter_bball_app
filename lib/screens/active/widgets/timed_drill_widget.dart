@@ -7,7 +7,7 @@ import '../../../services/workout_state.dart';
 class TimedDrillWidget extends StatefulWidget {
   final Drill drill;
 
-  const TimedDrillWidget({Key? key, required this.drill}) : super(key: key);
+  const TimedDrillWidget({super.key, required this.drill});
 
   @override
   _TimedDrillWidgetState createState() => _TimedDrillWidgetState();

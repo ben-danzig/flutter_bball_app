@@ -9,12 +9,12 @@ class ActiveDrillLayout extends StatelessWidget {
   final double progress;
 
   const ActiveDrillLayout({
-    Key? key,
+    super.key,
     required this.drillName,
     required this.nextDrillName,
     required this.child,
     required this.progress,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

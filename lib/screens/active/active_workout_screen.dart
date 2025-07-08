@@ -9,12 +9,11 @@ import 'package:flutter_bball_app/screens/active/widgets/timed_drill_widget.dart
 import 'package:flutter_bball_app/services/workout_state.dart';
 import 'package:provider/provider.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:porcupine_flutter/porcupine_manager.dart';
-import 'package:porcupine_flutter/porcupine_error.dart';
-import 'package:rhino_flutter/rhino_manager.dart';
+import 'package:picovoice_flutter/picovoice_manager.dart';
+import 'package:picovoice_flutter/picovoice_error.dart';
 import 'package:rhino_flutter/rhino.dart';
-import 'package:rhino_flutter/rhino_error.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 
 class ActiveWorkoutScreen extends StatefulWidget {
   const ActiveWorkoutScreen({super.key});
@@ -26,23 +25,23 @@ class ActiveWorkoutScreen extends StatefulWidget {
 class _ActiveWorkoutScreenState extends State<ActiveWorkoutScreen> {
   PermissionStatus _permissionStatus = PermissionStatus.denied;
   bool _isCheckingPermission = true;
-  PorcupineManager? _porcupineManager;
-  RhinoManager? _rhinoManager;
-  bool _isListeningForCommand = false;
+
+  PicovoiceManager? _picovoiceManager;
   Timer? _timer;
+  FlutterTts _flutterTts = FlutterTts();
 
   @override
   void initState() {
     super.initState();
     _checkAndRequestMicrophonePermission();
     _startTimer();
+    _initTts();
   }
 
   @override
   void dispose() {
-    _porcupineManager?.stop();
-    _porcupineManager?.delete();
-    _rhinoManager?.delete();
+    _picovoiceManager?.stop();
+    _picovoiceManager?.delete();
     _timer?.cancel();
     super.dispose();
   }
@@ -54,33 +53,39 @@ class _ActiveWorkoutScreenState extends State<ActiveWorkoutScreen> {
         _permissionStatus = status;
         _isCheckingPermission = false;
       });
-      if (status.isGranted) {
-        _createPorcupineManager();
+      if (status.isGranted) {        _createPicovoiceManager();
       }
     }
   }
 
-  void _wakeWordCallback(int keywordIndex) {
-    debugPrint("Wake word detected: $keywordIndex");
-    if (keywordIndex == 0) {
-      setState(() {
-        _isListeningForCommand = true;
-      });
-      _porcupineManager?.stop();
-      _createRhinoManager();
-    }
+  void _wakeWordCallback() {
+    debugPrint("Wake word detected");
+  }
+
+  Future<void> _initTts() async {
+    await _flutterTts.setLanguage("en-US");
+    await _flutterTts.setSpeechRate(0.5);
+    await _flutterTts.setVolume(1.0);
+    await _flutterTts.setPitch(1.0);
+  }
+
+  Future<void> _speak(String text) async {
+    await _flutterTts.speak(text);
   }
 
   void _inferenceCallback(RhinoInference inference) {
-    debugPrint("Rhino inference: $inference, understood? ${inference.isUnderstood}, intent: ${inference.intent}");
+    debugPrint(
+        "Picovoice inference: $inference, understood? ${inference.isUnderstood}, intent: ${inference.intent}");
     if (inference.isUnderstood!) {
       final intent = inference.intent;
       final workoutState = Provider.of<WorkoutState>(context, listen: false);
       debugPrint("");
       if (intent == 'madeShot') {
         workoutState.logMake();
+        _speak("Make");
       } else if (intent == 'missedShot') {
         debugPrint("No Missed Shot action yet");
+        _speak("Miss");
       } else if (intent == 'nextDrill') {
         final drill = workoutState.currentDrill;
         if (drill != null) {
@@ -92,22 +97,18 @@ class _ActiveWorkoutScreenState extends State<ActiveWorkoutScreen> {
           }
         }
         workoutState.nextDrill();
+        _speak("Next Drill");
       } else if (intent == 'pause' && !workoutState.isPaused) {
         workoutState.togglePause();
-      }
-      else if (intent == 'resume' && workoutState.isPaused) {
+        _speak("Paused");
+      } else if (intent == 'resume' && workoutState.isPaused) {
         workoutState.togglePause();
+        _speak("Resuming");
       }
     }
-
-    setState(() {
-      _isListeningForCommand = false;
-    });
-    _rhinoManager?.delete();
-    _porcupineManager?.start();
   }
 
-  void _createPorcupineManager() async {
+  void _createPicovoiceManager() async {
     final accessKey = dotenv.env['PICOVOICE_ACCESS_KEY'];
     if (accessKey == null) {
       debugPrint("PICOVOICE_ACCESS_KEY not found in .env file");
@@ -115,30 +116,15 @@ class _ActiveWorkoutScreenState extends State<ActiveWorkoutScreen> {
     }
 
     try {
-      _porcupineManager = await PorcupineManager.fromKeywordPaths(
+      _picovoiceManager = await PicovoiceManager.create(
           accessKey,
-          ['assets/models/register_en_android_v3_0_0.ppn'],
-          _wakeWordCallback);
-      await _porcupineManager?.start();
-    } on PorcupineException catch (err) {
-      debugPrint("Failed to initialize Porcupine: ${err.message}");
-    }
-  }
-
-  void _createRhinoManager() async {
-    final accessKey = dotenv.env['PICOVOICE_ACCESS_KEY'];
-    if (accessKey == null) {
-      debugPrint("PICOVOICE_ACCESS_KEY not found in .env file");
-      return;
-    }
-
-    try {
-      _rhinoManager = await RhinoManager.create(accessKey,
+          'assets/models/register_en_android_v3_0_0.ppn',
+          _wakeWordCallback,
           'assets/models/basketball-app-actions_en_android_v3_0_0.rhn',
           _inferenceCallback);
-      await _rhinoManager?.process();
-    } on RhinoException catch (err) {
-      debugPrint("Failed to initialize Rhino: ${err.message}");
+      await _picovoiceManager?.start();
+    } on PicovoiceException catch (err) {
+      debugPrint("Failed to initialize Picovoice: ${err.message}");
     }
   }
 
