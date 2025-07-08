@@ -17,12 +17,37 @@ class TimedDrillWidget extends StatefulWidget {
 class _TimedDrillWidgetState extends State<TimedDrillWidget> {
   late Timer _timer;
   late int _remainingSeconds;
+  int? _lastDrillIndex;
+  int? _lastResetCounter;
 
   @override
   void initState() {
     super.initState();
     _remainingSeconds = widget.drill.config['duration']!;
     _startTimer();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final workoutState = Provider.of<WorkoutState>(context);
+    final currentDrillIndex = workoutState.currentDrillIndex;
+    final resetCounter = workoutState.resetDrillCounter;
+    if (_lastDrillIndex == null) {
+      _lastDrillIndex = currentDrillIndex;
+      _lastResetCounter = resetCounter;
+    } else if (_lastDrillIndex == currentDrillIndex && _lastResetCounter != resetCounter) {
+      // Only reset if resetDrillCounter changed
+      _timer.cancel();
+      setState(() {
+        _remainingSeconds = widget.drill.config['duration']!;
+      });
+      _startTimer();
+      _lastResetCounter = resetCounter;
+    } else {
+      _lastDrillIndex = currentDrillIndex;
+      _lastResetCounter = resetCounter;
+    }
   }
 
   void _startTimer() {
