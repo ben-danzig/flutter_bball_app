@@ -1,13 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bball_app/models/workout_blueprint.dart';
+import 'package:flutter_bball_app/models/drill.dart';
 import 'package:flutter_bball_app/screens/active/active_workout_screen.dart';
 import 'package:flutter_bball_app/services/workout_state.dart';
 import 'package:provider/provider.dart';
 
-class WorkoutDetailScreen extends StatelessWidget {
+class WorkoutDetailScreen extends StatefulWidget {
   final WorkoutBlueprint workout;
 
   const WorkoutDetailScreen({super.key, required this.workout});
+
+  @override
+  State<WorkoutDetailScreen> createState() => _WorkoutDetailScreenState();
+}
+
+class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
+  late List<Map<String, int>> drillConfigs;
+
+  @override
+  void initState() {
+    super.initState();
+    // Make a copy of each drill's config so we can edit in memory
+    drillConfigs = widget.workout.drills.map((d) => Map<String, int>.from(d.config)).toList();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +31,7 @@ class WorkoutDetailScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFF111827),
       appBar: AppBar(
-        title: Text(workout.name),
+        title: Text(widget.workout.name),
         backgroundColor: const Color(0xFF1f2937),
       ),
       body: CustomScrollView(
@@ -28,7 +43,7 @@ class WorkoutDetailScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    workout.name.toUpperCase(),
+                    widget.workout.name.toUpperCase(),
                     style: textTheme.headlineSmall?.copyWith(
                       color: const Color(0xFFf9fafb),
                       fontWeight: FontWeight.bold,
@@ -36,7 +51,7 @@ class WorkoutDetailScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    workout.objective,
+                    widget.workout.objective,
                     style: textTheme.titleMedium?.copyWith(
                       color: const Color(0xFF9ca3af),
                     ),
@@ -48,10 +63,10 @@ class WorkoutDetailScreen extends StatelessWidget {
           SliverList(
             delegate: SliverChildBuilderDelegate(
               (context, index) {
-                final drill = workout.drills[index];
+                final drill = widget.workout.drills[index];
+                final config = drillConfigs[index];
                 return Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                   child: Container(
                     padding: const EdgeInsets.all(16.0),
                     decoration: BoxDecoration(
@@ -76,12 +91,72 @@ class WorkoutDetailScreen extends StatelessWidget {
                             color: const Color(0xFF9ca3af),
                           ),
                         ),
+                        if (drill.type == 'READ_AND_REACT') ...[
+                          const SizedBox(height: 16),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text('Number of Intervals', style: TextStyle(color: Colors.white)),
+                                    const SizedBox(height: 4),
+                                    TextFormField(
+                                      initialValue: config['reps']?.toString() ?? '10',
+                                      keyboardType: TextInputType.number,
+                                      style: const TextStyle(color: Colors.white),
+                                      decoration: InputDecoration(
+                                        filled: true,
+                                        fillColor: const Color(0xFF222b3a),
+                                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                      ),
+                                      onChanged: (val) {
+                                        final v = int.tryParse(val) ?? 1;
+                                        setState(() {
+                                          config['reps'] = v;
+                                        });
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Text('Interval Time (seconds)', style: TextStyle(color: Colors.white)),
+                                    const SizedBox(height: 4),
+                                    TextFormField(
+                                      initialValue: config['intervalSeconds']?.toString() ?? '20',
+                                      keyboardType: TextInputType.number,
+                                      style: const TextStyle(color: Colors.white),
+                                      decoration: InputDecoration(
+                                        filled: true,
+                                        fillColor: const Color(0xFF222b3a),
+                                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                      ),
+                                      onChanged: (val) {
+                                        final v = int.tryParse(val) ?? 1;
+                                        setState(() {
+                                          config['intervalSeconds'] = v;
+                                        });
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ],
                     ),
                   ),
                 );
               },
-              childCount: workout.drills.length,
+              childCount: widget.workout.drills.length,
             ),
           ),
           SliverToBoxAdapter(
@@ -96,8 +171,26 @@ class WorkoutDetailScreen extends StatelessWidget {
                   ),
                 ),
                 onPressed: () {
+                  // Create a new WorkoutBlueprint with updated configs
+                  final updatedDrills = [
+                    for (int i = 0; i < widget.workout.drills.length; i++)
+                      Drill(
+                        drillId: widget.workout.drills[i].drillId,
+                        name: widget.workout.drills[i].name,
+                        description: widget.workout.drills[i].description,
+                        type: widget.workout.drills[i].type,
+                        config: Map<String, int>.from(drillConfigs[i]),
+                      )
+                  ];
+                  final updatedWorkout = WorkoutBlueprint(
+                    id: widget.workout.id,
+                    name: widget.workout.name,
+                    objective: widget.workout.objective,
+                    estimatedDuration: widget.workout.estimatedDuration,
+                    drills: updatedDrills,
+                  );
                   Provider.of<WorkoutState>(context, listen: false)
-                      .startWorkout(workout);
+                      .startWorkout(updatedWorkout);
                   Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (context) => const ActiveWorkoutScreen(),

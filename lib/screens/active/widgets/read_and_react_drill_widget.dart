@@ -103,12 +103,12 @@ class _ReadAndReactDrillWidgetState extends State<ReadAndReactDrillWidget> {
         }
       } else {
         // Counting down interval
-        if (_remainingSeconds > 0) {
+        if (_remainingSeconds > 1) {
           setState(() {
             _remainingSeconds--;
           });
-        } else {
-          // Show direction
+        } else if (_remainingSeconds == 1) {
+          // Show direction immediately instead of showing 0
           _showRandomDirection();
         }
       }
@@ -148,7 +148,7 @@ class _ReadAndReactDrillWidgetState extends State<ReadAndReactDrillWidget> {
     super.dispose();
   }
 
-  Widget _buildDirectionDisplay() {
+  Widget _buildDirectionDisplay(BuildContext context) {
     if (_currentDirection == null) return const SizedBox.shrink();
 
     Color backgroundColor;
@@ -157,13 +157,16 @@ class _ReadAndReactDrillWidgetState extends State<ReadAndReactDrillWidget> {
     switch (_currentDirection) {
       case 'SHOOT':
         backgroundColor = const Color(0xFF10B981); // Green
-        content = const Text(
-          'SHOOT',
-          style: TextStyle(
-            fontSize: 120,
-            fontWeight: FontWeight.w900,
-            color: Colors.white,
-            letterSpacing: 2,
+        content = const FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Text(
+            'SHOOT',
+            style: TextStyle(
+              fontSize: 80,
+              fontWeight: FontWeight.w900,
+              color: Colors.white,
+              letterSpacing: 2,
+            ),
           ),
         );
         break;
@@ -221,74 +224,82 @@ class _ReadAndReactDrillWidgetState extends State<ReadAndReactDrillWidget> {
         return const SizedBox.shrink();
     }
 
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 300),
-      width: double.infinity,
-      height: double.infinity,
+    // Make the cue take up the entire screen
+    final size = MediaQuery.of(context).size;
+    return Container(
+      width: size.width,
+      height: size.height,
       color: backgroundColor,
-      child: Center(child: content),
+      alignment: Alignment.center,
+      child: content,
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_showingDirection) {
-      return _buildDirectionDisplay();
-    }
-
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
+    return Stack(
       children: [
-        Text(
-          widget.drill.name.toUpperCase(),
-          style: const TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFFf9fafb),
-            letterSpacing: 1.2,
-          ),
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 30),
-        Expanded(
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text(
-                    formatDuration(_remainingSeconds),
-                    style: const TextStyle(
-                      fontSize: 200,
-                      fontWeight: FontWeight.w900,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 40),
-                Text(
-                  'REP $_currentRep / $_totalReps',
-                  style: const TextStyle(
-                    fontSize: 36,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF9ca3af),
-                  ),
-                ),
-              ],
+        // Base: normal timer UI
+        Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(
+              widget.drill.name.toUpperCase(),
+              style: const TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFFf9fafb),
+                letterSpacing: 1.2,
+              ),
+              textAlign: TextAlign.center,
             ),
-          ),
+            const SizedBox(height: 30),
+            Expanded(
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        formatDuration(_remainingSeconds > 0 ? _remainingSeconds : 1),
+                        style: const TextStyle(
+                          fontSize: 200,
+                          fontWeight: FontWeight.w900,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 40),
+                    Text(
+                      'REP $_currentRep / $_totalReps',
+                      style: const TextStyle(
+                        fontSize: 36,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF9ca3af),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 30),
+            Text(
+              widget.drill.description,
+              style: const TextStyle(
+                fontSize: 18,
+                color: Color(0xFF9ca3af),
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
         ),
-        const SizedBox(height: 30),
-        Text(
-          widget.drill.description,
-          style: const TextStyle(
-            fontSize: 18,
-            color: Color(0xFF9ca3af),
+        // Overlay: full-screen cue
+        if (_showingDirection)
+          Positioned.fill(
+            child: _buildDirectionDisplay(context),
           ),
-          textAlign: TextAlign.center,
-        ),
       ],
     );
   }
