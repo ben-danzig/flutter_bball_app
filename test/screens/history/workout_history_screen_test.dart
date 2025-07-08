@@ -6,6 +6,7 @@ import 'package:flutter_bball_app/screens/history/workout_history_screen.dart';
 import 'package:flutter_bball_app/screens/summary/workout_summary_screen.dart';
 import 'package:flutter_bball_app/services/storage_service.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/intl.dart';
 import '../../mocks/mock_storage_service.dart';
 
 void main() {
@@ -157,11 +158,12 @@ void main() {
       estimatedDuration: 10,
       drills: [],
     );
+    final completedAt = DateTime.now();
     final session = WorkoutSession(
       id: 's1',
       workoutBlueprint: blueprint,
       results: [],
-      completedAt: DateTime.now(),
+      completedAt: completedAt,
     );
     fakeStorageService.sessionsToReturn = [session];
 
@@ -181,7 +183,8 @@ void main() {
 
     // Verify delete confirmation dialog
     expect(find.text('Delete Workout'), findsOneWidget);
-    expect(find.text('Are you sure you want to delete "Test Workout"'), findsOneWidget);
+    final expectedText = 'Are you sure you want to delete "Test Workout" from ${DateFormat.yMMMMd().format(completedAt)}?';
+    expect(find.text(expectedText), findsOneWidget);
 
     // Confirm deletion
     await tester.tap(find.text('Delete').last);
