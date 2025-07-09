@@ -4,12 +4,10 @@ import 'package:flutter_tts/flutter_tts.dart';
 class AudioService {
   static final AudioService _instance = AudioService._internal();
   factory AudioService() => _instance;
-  AudioService._internal() {
-    _initTts();
-  }
+  AudioService._internal();
 
   final FlutterTts _flutterTts = FlutterTts();
-  bool _isInitialized = false;
+  Future<void>? _initializationFuture;
 
   Future<void> _initTts() async {
     try {
@@ -17,16 +15,18 @@ class AudioService {
       await _flutterTts.setSpeechRate(0.5);
       await _flutterTts.setVolume(1.0);
       await _flutterTts.setPitch(1.0);
-      _isInitialized = true;
     } catch (e) {
       debugPrint('Error initializing TTS: $e');
     }
   }
 
+  Future<void> _ensureInitialized() async {
+    _initializationFuture ??= _initTts();
+    await _initializationFuture!;
+  }
+
   Future<void> speak(String text) async {
-    if (!_isInitialized) {
-      await _initTts();
-    }
+    await _ensureInitialized();
     
     try {
       await _flutterTts.speak(text);
