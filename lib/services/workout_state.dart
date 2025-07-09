@@ -3,6 +3,8 @@ import 'package:flutter_bball_app/models/drill.dart';
 import 'package:flutter_bball_app/models/drill_result.dart';
 import 'package:flutter_bball_app/models/workout_blueprint.dart';
 import 'package:flutter_bball_app/models/workout_session.dart';
+import 'package:flutter_bball_app/services/audio_service.dart';
+import 'package:flutter_bball_app/services/settings_service.dart';
 import 'package:flutter_bball_app/services/storage_service.dart';
 
 class WorkoutState extends ChangeNotifier {
@@ -11,6 +13,8 @@ class WorkoutState extends ChangeNotifier {
   bool _isPaused = false;
   final List<DrillResult> _sessionResults = [];
   int _resetDrillCounter = 0;
+  final AudioService _audioService = AudioService();
+  SettingsService? _settingsService;
 
   // Public getters to safely access the state
   bool get isWorkoutStarted => _blueprint != null;
@@ -44,6 +48,10 @@ class WorkoutState extends ChangeNotifier {
     return _blueprint!.drills[_currentDrillIndex + 1].name;
   }
 
+  void setSettingsService(SettingsService settingsService) {
+    _settingsService = settingsService;
+  }
+
   void togglePause() {
     _isPaused = !_isPaused;
     notifyListeners();
@@ -55,6 +63,9 @@ class WorkoutState extends ChangeNotifier {
     _currentDrillIndex = 0;
     _sessionResults.clear();
 
+    // Announce the first drill
+    _announceDrill();
+
     // This is the key method from ChangeNotifier. It tells all listening
     // widgets that the state has changed and they need to rebuild.
     notifyListeners();
@@ -64,7 +75,44 @@ class WorkoutState extends ChangeNotifier {
   void nextDrill() {
     if (_currentDrillIndex < totalDrills) {
       _currentDrillIndex++;
+      
+      // Announce the new drill if not complete
+      if (!isWorkoutComplete) {
+        _announceDrill();
+      }
+      
       notifyListeners();
+    }
+  }
+
+  // Helper method to announce drill details
+  void _announceDrill() {
+    if (_settingsService == null || currentDrill == null) return;
+
+    List<String> announcements = [];
+
+    // Announce drill name
+    if (_settingsService!.announceDrillName) {
+      announcements.add('Next drill: ${currentDrill!.name}');
+    }
+
+    // Announce drill description
+    if (_settingsService!.announceDrillDescription && currentDrill!.description.isNotEmpty) {
+      announcements.add(currentDrill!.description);
+    }
+
+    // Announce target makes for applicable drill types
+    if (_settingsService!.announceDrillTargetMakes) {
+      if (currentDrill!.type == 'REP_BASED' && currentDrill!.config['reps'] != null) {
+        announcements.add('Complete ${currentDrill!.config['reps']} repetitions');
+      } else if (currentDrill!.type == 'MAKE_TARGET_TIMED' && currentDrill!.config['targetMakes'] != null) {
+        announcements.add('Make ${currentDrill!.config['targetMakes']} shots');
+      }
+    }
+
+    // Speak all announcements as one string
+    if (announcements.isNotEmpty) {
+      _audioService.speak(announcements.join('. '));
     }
   }
 
@@ -137,6 +185,7 @@ class WorkoutState extends ChangeNotifier {
   void previousDrill() {
     if (_currentDrillIndex > 0) {
       _currentDrillIndex--;
+      _announceDrill();
       notifyListeners();
     }
   }
@@ -144,6 +193,8 @@ class WorkoutState extends ChangeNotifier {
   // Reset the current drill (widgets should listen and reset their local state)
   void resetCurrentDrill() {
     _resetDrillCounter++;
+    // Announce the drill again when resetting
+    _announceDrill();
     // This method notifies listeners so drill widgets can reset their local state (timer, makes, etc.)
     notifyListeners();
   }

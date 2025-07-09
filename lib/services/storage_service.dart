@@ -38,9 +38,30 @@ class StorageService {
     final List<WorkoutSession> sessions = [];
     for (var file in files) {
       if (file is File) {
-        final jsonString = await file.readAsString();
-        final jsonMap = jsonDecode(jsonString);
-        sessions.add(WorkoutSession.fromJson(jsonMap));
+        // Skip settings file
+        if (file.path.contains('settings.json')) {
+          continue;
+        }
+        try {
+          final jsonString = await file.readAsString();
+          final jsonMap = jsonDecode(jsonString);
+          // Defensive: check for required keys
+          if (jsonMap is Map<String, dynamic> &&
+              jsonMap.containsKey('id') &&
+              jsonMap.containsKey('workoutBlueprint') &&
+              jsonMap.containsKey('results') &&
+              jsonMap.containsKey('completedAt')) {
+            sessions.add(WorkoutSession.fromJson(jsonMap));
+          } else {
+            // Log and skip malformed session
+            print('Skipped malformed session file: ${file.path}');
+          }
+        } catch (e) {
+          // Log and skip on error
+          print('Error reading session file ${file.path}: $e');
+          final fileContents = await file.readAsString();
+          print('File had contents: ${fileContents}');
+        }
       }
     }
     return sessions;
