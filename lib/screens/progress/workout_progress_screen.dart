@@ -460,8 +460,8 @@ class _WorkoutProgressScreenState extends State<WorkoutProgressScreen> {
     if (drill.type == 'TIMED' || drill.type == 'MAKE_TARGET_TIMED') {
       final oldTime = oldResult.elapsedSeconds ?? 0;
       final newTime = newResult.elapsedSeconds ?? 0;
-      if (oldTime == 0 || newTime == 0) return 0;
-      return oldTime - newTime;
+      if (oldTime == 0 || newTime == 0) return 0.0;
+      return (oldTime - newTime).toDouble();
     } else if (drill.type == 'REP_BASED') {
       final oldMakes = oldResult.makes ?? 0;
       final newMakes = newResult.makes ?? 0;
