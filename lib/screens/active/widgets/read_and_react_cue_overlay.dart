@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:async';
+import '../../../models/cue_action.dart';
 
 class ReadAndReactCueOverlay extends StatefulWidget {
-  final String direction;
+  final CueAction cue;
 
-  const ReadAndReactCueOverlay({Key? key, required this.direction}) : super(key: key);
+  const ReadAndReactCueOverlay({Key? key, required this.cue}) : super(key: key);
 
   @override
   State<ReadAndReactCueOverlay> createState() => _ReadAndReactCueOverlayState();
@@ -33,80 +34,47 @@ class _ReadAndReactCueOverlayState extends State<ReadAndReactCueOverlay> {
 
   @override
   Widget build(BuildContext context) {
-    Color backgroundColor;
+    final cue = widget.cue;
+    final backgroundColor = cue.color ?? Colors.black;
     Widget content;
 
-    switch (widget.direction) {
-      case 'SHOOT':
-        backgroundColor = const Color(0xFF10B981); // Green
-        content = const FittedBox(
-          fit: BoxFit.scaleDown,
-          child: Text(
-            'SHOOT',
-            style: TextStyle(
-              fontSize: 80,
-              fontWeight: FontWeight.w900,
-              color: Colors.white,
-              letterSpacing: 2,
+    if (cue.icon != null) {
+      content = Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              cue.label,
+              style: TextStyle(
+                fontSize: 70,
+                fontWeight: FontWeight.w900,
+                color: backgroundColor.computeLuminance() > 0.5 ? Colors.black : Colors.white,
+                letterSpacing: 2,
+              ),
             ),
           ),
-        );
-        break;
-      case 'DRIVE_LEFT':
-        backgroundColor = const Color(0xFFEAB308); // Yellow/Orange
-        content = Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Text(
-                'DRIVE',
-                style: TextStyle(
-                  fontSize: 70,
-                  fontWeight: FontWeight.w900,
-                  color: Colors.black,
-                  letterSpacing: 2,
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            const Icon(
-              Icons.arrow_back,
-              size: 100,
-              color: Colors.black,
-            ),
-          ],
-        );
-        break;
-      case 'DRIVE_RIGHT':
-        backgroundColor = const Color(0xFFEAB308); // Yellow/Orange
-        content = Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Text(
-                'DRIVE',
-                style: TextStyle(
-                  fontSize: 70,
-                  fontWeight: FontWeight.w900,
-                  color: Colors.black,
-                  letterSpacing: 2,
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            const Icon(
-              Icons.arrow_forward,
-              size: 100,
-              color: Colors.black,
-            ),
-          ],
-        );
-        break;
-      default:
-        backgroundColor = Colors.black;
-        content = const SizedBox.shrink();
+          const SizedBox(height: 16),
+          Icon(
+            cue.icon,
+            size: 100,
+            color: backgroundColor.computeLuminance() > 0.5 ? Colors.black : Colors.white,
+          ),
+        ],
+      );
+    } else {
+      content = FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Text(
+          cue.label,
+          style: TextStyle(
+            fontSize: 80,
+            fontWeight: FontWeight.w900,
+            color: backgroundColor.computeLuminance() > 0.5 ? Colors.black : Colors.white,
+            letterSpacing: 2,
+          ),
+        ),
+      );
     }
 
     return WillPopScope(

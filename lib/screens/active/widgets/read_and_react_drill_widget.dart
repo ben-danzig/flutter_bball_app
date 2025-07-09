@@ -7,6 +7,7 @@ import '../../../models/drill.dart';
 import '../../../services/workout_state.dart';
 import 'package:flutter_bball_app/utils/format_duration.dart';
 import 'read_and_react_cue_overlay.dart';
+import '../../../models/cue_action.dart';
 
 class ReadAndReactDrillWidget extends StatefulWidget {
   final Drill drill;
@@ -28,6 +29,7 @@ class _ReadAndReactDrillWidgetState extends State<ReadAndReactDrillWidget> {
   int? _lastDrillIndex;
   int? _lastResetCounter;
   bool _isCueShowing = false;
+  late List<CueAction> _actions;
 
   @override
   void initState() {
@@ -36,6 +38,16 @@ class _ReadAndReactDrillWidgetState extends State<ReadAndReactDrillWidget> {
     _totalReps = widget.drill.config['reps'] ?? 10;
     _remainingSeconds = _intervalSeconds;
     _initializeTts();
+    // Parse actions from config, or use default
+    final rawActions = widget.drill.config['actions'];
+    if (rawActions is List && (rawActions).isNotEmpty) {
+      _actions = (rawActions)
+          .where((a) => a is Map)
+          .map((a) => CueAction.fromJson(Map<String, dynamic>.from(a)))
+          .toList();
+    } else {
+      _actions = _defaultActions();
+    }
     _startTimer();
   }
 
@@ -45,6 +57,12 @@ class _ReadAndReactDrillWidgetState extends State<ReadAndReactDrillWidget> {
     await _flutterTts.setVolume(1.0);
     await _flutterTts.setPitch(1.0);
   }
+
+  List<CueAction> _defaultActions() => [
+        CueAction(label: 'SHOOT', color: const Color(0xFF10B981), ttsPhrase: 'Shoot'),
+        CueAction(label: 'DRIVE LEFT', icon: Icons.arrow_back, color: const Color(0xFFEAB308), ttsPhrase: 'Drive left'),
+        CueAction(label: 'DRIVE RIGHT', icon: Icons.arrow_forward, color: const Color(0xFFEAB308), ttsPhrase: 'Drive right'),
+      ];
 
   @override
   void didChangeDependencies() {
@@ -91,30 +109,13 @@ class _ReadAndReactDrillWidgetState extends State<ReadAndReactDrillWidget> {
   Future<void> _showRandomDirectionCue() async {
     if (_isCueShowing) return;
     _isCueShowing = true;
-    final directions = ['SHOOT', 'DRIVE_LEFT', 'DRIVE_RIGHT'];
-    final direction = directions[_random.nextInt(directions.length)];
-
-    // Speak the direction
-    String speechText = '';
-    switch (direction) {
-      case 'SHOOT':
-        speechText = 'Shoot';
-        break;
-      case 'DRIVE_LEFT':
-        speechText = 'Drive left';
-        break;
-      case 'DRIVE_RIGHT':
-        speechText = 'Drive right';
-        break;
-    }
-    await _flutterTts.speak(speechText);
-
-    // Show the overlay route
+    final cue = _actions[_random.nextInt(_actions.length)];
+    await _flutterTts.speak(cue.ttsPhrase ?? cue.label);
     await Navigator.of(context).push(
       PageRouteBuilder(
         opaque: true,
         barrierDismissible: false,
-        pageBuilder: (_, __, ___) => ReadAndReactCueOverlay(direction: direction),
+        pageBuilder: (_, __, ___) => ReadAndReactCueOverlay(cue: cue),
         transitionDuration: Duration.zero,
         reverseTransitionDuration: Duration.zero,
       ),
