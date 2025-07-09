@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bball_app/models/workout_blueprint.dart';
 import 'package:flutter_bball_app/models/drill.dart';
 import 'package:flutter_bball_app/screens/active/active_workout_screen.dart';
+import 'package:flutter_bball_app/services/settings_service.dart';
 import 'package:flutter_bball_app/services/workout_state.dart';
 import 'package:provider/provider.dart';
 
@@ -189,8 +190,10 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
                     estimatedDuration: widget.workout.estimatedDuration,
                     drills: updatedDrills,
                   );
-                  Provider.of<WorkoutState>(context, listen: false)
-                      .startWorkout(updatedWorkout);
+                  final workoutState = Provider.of<WorkoutState>(context, listen: false);
+                  final settingsService = Provider.of<SettingsService>(context, listen: false);
+                  workoutState.setSettingsService(settingsService);
+                  workoutState.startWorkout(updatedWorkout);
                   Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (context) => const ActiveWorkoutScreen(),
