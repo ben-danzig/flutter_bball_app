@@ -282,5 +282,52 @@
         "config": { "reps": 10, "intervalSeconds": 20 }
       }
     ]
+  },
+  {
+    "id": "custom_react_demo",
+    "name": "Custom Read & React Demo",
+    "objective": "Test custom cue actions in a Read & React drill.",
+    "estimatedDuration": 5,
+    "drills": [
+      {
+        "drillId": "custom_react_drill",
+        "name": "Custom React Drill",
+        "description": "React to a variety of custom cues, including visual and audio prompts.",
+        "type": "READ_AND_REACT",
+        "config": {
+          "reps": 6,
+          "intervalSeconds": 10,
+          "actions": [
+            {
+              "label": "PASS",
+              "color": "#FF0000",
+              "ttsPhrase": "Pass"
+            },
+            {
+              "label": "STEP BACK",
+              "color": "#0000FF",
+              "ttsPhrase": "Step back"
+            },
+            {
+              "label": "SPIN MOVE",
+              "color": "#00FF00",
+              "icon": "directions_run",
+              "ttsPhrase": "Spin move"
+            },
+            {
+              "label": "CROSSOVER",
+              "color": "#FFFF00",
+              "icon": "arrow_back",
+              "ttsPhrase": "Crossover left"
+            },
+            {
+              "label": "HESITATION",
+              "color": "#FF00FF",
+              "ttsPhrase": "Hesitation"
+            }
+          ]
+        }
+      }
+    ]
   }
 ]

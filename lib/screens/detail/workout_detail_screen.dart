@@ -15,13 +15,13 @@ class WorkoutDetailScreen extends StatefulWidget {
 }
 
 class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
-  late List<Map<String, int>> drillConfigs;
+  late List<Map<String, dynamic>> drillConfigs;
 
   @override
   void initState() {
     super.initState();
     // Make a copy of each drill's config so we can edit in memory
-    drillConfigs = widget.workout.drills.map((d) => Map<String, int>.from(d.config)).toList();
+    drillConfigs = widget.workout.drills.map((d) => Map<String, dynamic>.from(d.config)).toList();
   }
 
   @override
@@ -179,7 +179,7 @@ class _WorkoutDetailScreenState extends State<WorkoutDetailScreen> {
                         name: widget.workout.drills[i].name,
                         description: widget.workout.drills[i].description,
                         type: widget.workout.drills[i].type,
-                        config: Map<String, int>.from(drillConfigs[i]),
+                        config: Map<String, dynamic>.from(drillConfigs[i]),
                       )
                   ];
                   final updatedWorkout = WorkoutBlueprint(

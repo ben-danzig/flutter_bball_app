@@ -11,7 +11,7 @@ Drill _$DrillFromJson(Map<String, dynamic> json) => Drill(
   name: json['name'] as String,
   description: json['description'] as String,
   type: json['type'] as String,
-  config: Map<String, int>.from(json['config'] as Map),
+  config: Map<String, dynamic>.from(json['config'] as Map),
 );
 
 Map<String, dynamic> _$DrillToJson(Drill instance) => <String, dynamic>{
