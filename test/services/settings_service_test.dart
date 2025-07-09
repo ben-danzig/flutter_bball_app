@@ -3,8 +3,8 @@ import 'package:flutter_bball_app/services/settings_service.dart';
 
 void main() {
   group('SettingsService', () {
-    test('should have default values as true', () {
-      final settings = SettingsService();
+    test('should have default values as true', () async {
+      final settings = await SettingsService.create();
       
       expect(settings.announceDrillName, true);
       expect(settings.announceDrillDescription, true);
@@ -12,7 +12,7 @@ void main() {
     });
 
     test('should update announceDrillName', () async {
-      final settings = SettingsService();
+      final settings = await SettingsService.create();
       
       await settings.setAnnounceDrillName(false);
       expect(settings.announceDrillName, false);
@@ -22,7 +22,7 @@ void main() {
     });
 
     test('should update announceDrillDescription', () async {
-      final settings = SettingsService();
+      final settings = await SettingsService.create();
       
       await settings.setAnnounceDrillDescription(false);
       expect(settings.announceDrillDescription, false);
@@ -32,7 +32,7 @@ void main() {
     });
 
     test('should update announceDrillTargetMakes', () async {
-      final settings = SettingsService();
+      final settings = await SettingsService.create();
       
       await settings.setAnnounceDrillTargetMakes(false);
       expect(settings.announceDrillTargetMakes, false);
@@ -42,7 +42,7 @@ void main() {
     });
 
     test('should notify listeners when settings change', () async {
-      final settings = SettingsService();
+      final settings = await SettingsService.create();
       int notificationCount = 0;
       
       settings.addListener(() {

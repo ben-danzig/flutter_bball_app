@@ -16,8 +16,12 @@ class SettingsService extends ChangeNotifier {
   bool get announceDrillDescription => _announceDrillDescription;
   bool get announceDrillTargetMakes => _announceDrillTargetMakes;
 
-  SettingsService() {
-    _loadSettings();
+  SettingsService._();
+
+  static Future<SettingsService> create() async {
+    final service = SettingsService._();
+    await service._loadSettings();
+    return service;
   }
 
   Future<void> _loadSettings() async {

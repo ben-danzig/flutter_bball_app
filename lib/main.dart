@@ -5,15 +5,37 @@ import 'package:flutter_bball_app/services/workout_state.dart';
 import 'package:provider/provider.dart';
 
 void main() {
-  runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (context) => WorkoutState()),
-        ChangeNotifierProvider(create: (context) => SettingsService()),
-      ],
-      child: const BballTrainerApp(),
-    ),
-  );
+  runApp(const AppInitializer());
+}
+
+class AppInitializer extends StatelessWidget {
+  const AppInitializer({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<SettingsService>(
+      future: SettingsService.create(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.done && snapshot.hasData) {
+          return MultiProvider(
+            providers: [
+              ChangeNotifierProvider(create: (context) => WorkoutState()),
+              ChangeNotifierProvider.value(value: snapshot.data!),
+            ],
+            child: const BballTrainerApp(),
+          );
+        } else {
+          return const MaterialApp(
+            home: Scaffold(
+              body: Center(
+                child: CircularProgressIndicator(),
+              ),
+            ),
+          );
+        }
+      },
+    );
+  }
 }
 
 class BballTrainerApp extends StatelessWidget {
