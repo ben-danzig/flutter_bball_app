@@ -2,9 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bball_app/screens/home_screen.dart';
 import 'package:flutter_bball_app/services/settings_service.dart';
 import 'package:flutter_bball_app/services/workout_state.dart';
+import 'package:flutter_bball_app/services/player_service.dart';
 import 'package:provider/provider.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize PlayerService and load players
+  await PlayerService.instance.loadPlayers();
+  
   runApp(
     MultiProvider(
       providers: [

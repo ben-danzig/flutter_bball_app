@@ -1,12 +1,25 @@
 import 'package:flutter/material.dart';
+import '../../models/player.dart';
+import '../../services/player_service.dart';
 
 class PlayersScreen extends StatefulWidget {
+  const PlayersScreen({Key? key}) : super(key: key);
+
   @override
-  _PlayersScreenState createState() => _PlayersScreenState();
+  State<PlayersScreen> createState() => _PlayersScreenState();
 }
 
 class _PlayersScreenState extends State<PlayersScreen> {
-  final TextEditingController _nameController = TextEditingController();
+  final _playerService = PlayerService.instance;
+  final _nameController = TextEditingController();
+  List<Player> _players = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPlayers();
+  }
 
   @override
   void dispose() {
@@ -14,71 +27,110 @@ class _PlayersScreenState extends State<PlayersScreen> {
     super.dispose();
   }
 
-  void _onNext() {
-    final name = _nameController.text.trim();
-    if (name.isNotEmpty) {
-      // For now, just show a snackbar. You can add navigation or saving logic here.
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Registered player: $name')),
-      );
+  Future<void> _loadPlayers() async {
+    setState(() => _isLoading = true);
+    final players = await _playerService.getPlayers();
+    setState(() {
+      _players = players;
+      _isLoading = false;
+    });
+  }
+
+  Future<void> _addPlayer() async {
+    final name = _nameController.text;
+    if (name.isEmpty) return;
+
+    final error = await _playerService.addPlayer(name);
+    if (error != null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(error), backgroundColor: Colors.red),
+        );
+      }
+    } else {
       _nameController.clear();
+      await _loadPlayers();
+    }
+  }
+
+  Future<void> _removePlayer(String id) async {
+    final error = await _playerService.removePlayer(id);
+    if (error != null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(error), backgroundColor: Colors.red),
+        );
+      }
+    } else {
+      await _loadPlayers();
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF111827),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const Text(
-                'Player Registration',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 32),
-              TextField(
-                controller: _nameController,
-                style: const TextStyle(color: Colors.white),
-                decoration: InputDecoration(
-                  hintText: 'Enter player name',
-                  hintStyle: const TextStyle(color: Colors.grey),
-                  filled: true,
-                  fillColor: const Color(0xFF1f2937),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
+      appBar: AppBar(
+        title: const Text('Players'),
+        backgroundColor: const Color(0xFF1F2937),
+      ),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: _nameController,
+                    decoration: const InputDecoration(
+                      hintText: 'Enter player name',
+                      border: OutlineInputBorder(),
+                    ),
+                    onSubmitted: (_) => _addPlayer(),
                   ),
                 ),
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF3B82F6),
-                  padding: const EdgeInsets.symmetric(vertical: 16.0),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30.0),
+                const SizedBox(width: 8),
+                ElevatedButton(
+                  onPressed: _addPlayer,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                   ),
+                  child: const Text('Add'),
                 ),
-                onPressed: _onNext,
-                child: const Text(
-                  'Next',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
+          Expanded(
+            child: _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : _players.isEmpty
+                    ? const Center(
+                        child: Text(
+                          'No players registered yet',
+                          style: TextStyle(fontSize: 16, color: Colors.grey),
+                        ),
+                      )
+                    : ListView.builder(
+                        itemCount: _players.length,
+                        itemBuilder: (context, index) {
+                          final player = _players[index];
+                          return ListTile(
+                            title: Text(player.name),
+                            subtitle: Text(
+                              'Registered: ${player.registeredAt.toString().split('.').first}',
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                            trailing: IconButton(
+                              icon: const Icon(Icons.delete, color: Colors.red),
+                              onPressed: () => _removePlayer(player.id),
+                            ),
+                          );
+                        },
+                      ),
+          ),
+        ],
       ),
     );
   }
-} 
+}
