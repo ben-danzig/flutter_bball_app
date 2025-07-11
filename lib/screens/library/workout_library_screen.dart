@@ -3,6 +3,7 @@ import 'package:flutter_bball_app/models/workout_blueprint.dart';
 import 'package:flutter_bball_app/repositories/workout_repository.dart';
 import 'package:flutter_bball_app/screens/detail/workout_detail_screen.dart';
 import 'package:flutter_bball_app/screens/history/workout_history_screen.dart';
+import 'package:flutter_bball_app/danzig_cup_app/danzig_cup_app.dart';
 
 class WorkoutLibraryScreen extends StatefulWidget {
   const WorkoutLibraryScreen({super.key});
@@ -62,6 +63,24 @@ class _WorkoutLibraryScreenState extends State<WorkoutLibraryScreen> {
                 'Choose a workout to start your session.',
                 style: textTheme.titleMedium?.copyWith(
                   color: const Color(0xFF9ca3af),
+                ),
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const DanzigCupApp(),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.sports_basketball),
+                label: const Text('Go to Danzig Cup 2v2 Tournament App'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF3b82f6),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                 ),
               ),
               const SizedBox(height: 24),
