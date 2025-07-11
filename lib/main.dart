@@ -32,7 +32,7 @@ class BballTrainerApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Basketball Trainer',
+      title: 'DanzigCup2v2',
       theme: ThemeData.dark().copyWith(
         scaffoldBackgroundColor: const Color(0xFF111827),
       ),
