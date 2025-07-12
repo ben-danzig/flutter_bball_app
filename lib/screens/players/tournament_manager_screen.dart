@@ -2,13 +2,15 @@ import 'package:flutter/material.dart';
 import '../../models/team_configuration.dart';
 import '../../models/player.dart';
 import '../../models/game_result.dart';
+import '../../models/tournament.dart';
 import '../../services/storage_service.dart';
 import 'game_prep_screen.dart';
 
 class TournamentManagerScreen extends StatefulWidget {
-  final TeamConfiguration config;
+  final String? tournamentId;
+  final TeamConfiguration? config;
   final Map<String, Player> playerMap;
-  const TournamentManagerScreen({Key? key, required this.config, required this.playerMap}) : super(key: key);
+  const TournamentManagerScreen({Key? key, this.tournamentId, this.config, required this.playerMap}) : super(key: key);
 
   @override
   State<TournamentManagerScreen> createState() => _TournamentManagerScreenState();
@@ -18,22 +20,54 @@ class _TournamentManagerScreenState extends State<TournamentManagerScreen> {
   bool _useTestTimes = false;
   List<GameResult> _gameResults = [];
   final StorageService _storageService = StorageService.instance;
+  TeamConfiguration? _config;
+  String? _tournamentId;
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _loadGameResults();
+    _initTournament();
+  }
+
+  Future<void> _initTournament() async {
+    if (widget.tournamentId != null) {
+      // Load tournament and config snapshot from Firestore
+      final tournaments = await _storageService.getTournaments();
+      final tJson = tournaments.firstWhere((t) => t['id'] == widget.tournamentId, orElse: () => <String, dynamic>{});
+      if (tJson.isNotEmpty) {
+        final tournament = Tournament.fromJson(tJson);
+        _tournamentId = tournament.id;
+        _config = TeamConfiguration.fromJson(tournament.teamConfigSnapshot as Map<String, dynamic>, tournament.teamConfigId);
+      }
+    } else {
+      // Use provided config and create a new tournament
+      _config = widget.config;
+      final now = DateTime.now().toLocal();
+      final name = '${now.toString().replaceAll(":", "-").replaceAll(".", "-").split(" ").join("_")}_${_config!.name}';
+      _tournamentId = await _storageService.createTournament(
+        name: name,
+        teamConfigId: _config!.id,
+        teamConfigSnapshot: _config!.toJson(),
+      );
+    }
+    await _loadGameResults();
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   Future<void> _loadGameResults() async {
-    final results = await _storageService.getGameResults(widget.config.name);
+    if (_tournamentId == null) return;
+    final results = await _storageService.getGameResults(_tournamentId!);
     setState(() {
       _gameResults = results;
     });
   }
 
   Future<void> _saveGameResult(GameResult result) async {
-    await _storageService.saveGameResult(widget.config.name, result);
+    if (_tournamentId == null) return;
+    await _storageService.saveGameResult(_tournamentId!, result);
     await _loadGameResults(); // Reload to update UI
   }
 
@@ -67,7 +101,12 @@ class _TournamentManagerScreenState extends State<TournamentManagerScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final numTeams = widget.config.teams.length;
+    if (_isLoading || _config == null) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+    final numTeams = _config!.teams.length;
     final games = _generateRoundRobin(numTeams);
     
     // Define time settings based on toggle
@@ -85,7 +124,7 @@ class _TournamentManagerScreenState extends State<TournamentManagerScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              widget.config.name.isEmpty ? 'Unnamed Tournament' : widget.config.name,
+              _config!.name.isEmpty ? 'Unnamed Tournament' : _config!.name,
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
@@ -134,8 +173,8 @@ class _TournamentManagerScreenState extends State<TournamentManagerScreen> {
                 itemBuilder: (context, idx) {
                   final t1 = games[idx][0];
                   final t2 = games[idx][1];
-                  final team1 = widget.config.teams[t1];
-                  final team2 = widget.config.teams[t2];
+                  final team1 = _config!.teams[t1];
+                  final team2 = _config!.teams[t2];
                   final gameNumber = idx + 1;
                   final gameResult = _getGameResult(gameNumber);
                   

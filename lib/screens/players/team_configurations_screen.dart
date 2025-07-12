@@ -4,6 +4,8 @@ import '../../services/team_configuration_service.dart';
 import '../../services/player_service.dart';
 import '../../models/player.dart';
 import 'edit_team_configuration_screen.dart';
+import '../../services/storage_service.dart'; // Added import for StorageService
+import 'tournament_manager_screen.dart'; // Added import for TournamentManagerScreen
 
 class TeamConfigurationsScreen extends StatefulWidget {
   const TeamConfigurationsScreen({Key? key}) : super(key: key);
@@ -105,6 +107,31 @@ class _TeamConfigurationsScreenState extends State<TeamConfigurationsScreen> {
                                     );
                                   },
                                   child: const Text('Manage'),
+                                ),
+                                const SizedBox(width: 12),
+                                ElevatedButton(
+                                  style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                                  onPressed: () async {
+                                    // Create tournament and navigate
+                                    final now = DateTime.now().toLocal();
+                                    final name = '${now.toString().replaceAll(":", "-").replaceAll(".", "-").split(" ").join("_")}_${config.name}';
+                                    final tournamentId = await StorageService.instance.createTournament(
+                                      name: name,
+                                      teamConfigId: config.id,
+                                      teamConfigSnapshot: config.toJson(),
+                                    );
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => TournamentManagerScreen(
+                                          tournamentId: tournamentId,
+                                          playerMap: _playerMap,
+                                          config: config,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  child: const Text('Begin Tournament'),
                                 ),
                               ],
                             ),

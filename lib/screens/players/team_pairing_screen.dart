@@ -5,6 +5,7 @@ import '../../services/player_service.dart';
 import '../../models/team_configuration.dart';
 import '../../services/team_configuration_service.dart';
 import 'team_configurations_screen.dart';
+import 'tournaments_list_screen.dart';
 
 class TeamPairingScreen extends StatefulWidget {
   const TeamPairingScreen({Key? key}) : super(key: key);
@@ -77,6 +78,18 @@ class _TeamPairingScreenState extends State<TeamPairingScreen> {
         title: const Text('Team Pairing'),
         backgroundColor: const Color(0xFF1F2937),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.emoji_events),
+            tooltip: 'Tournaments',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const TournamentsListScreen(),
+                ),
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: _loadPlayers,

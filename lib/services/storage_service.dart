@@ -82,41 +82,51 @@ class StorageService {
     await file.writeAsString(jsonString);
   }
 
-  // Game Results Methods using Firestore
-  Future<void> saveGameResult(String tournamentName, GameResult result) async {
-    final CollectionReference gameResultsRef = FirebaseFirestore.instance.collection('game_results');
-    
-    // Create a unique document ID for this game result
-    final String documentId = '${tournamentName}_game_${result.gameNumber}';
-    
-    await gameResultsRef.doc(documentId).set(result.toJson());
+  // Tournament Methods
+  Future<String> createTournament({
+    required String name,
+    required String teamConfigId,
+    required Map<String, dynamic> teamConfigSnapshot,
+  }) async {
+    final CollectionReference tournamentsRef = FirebaseFirestore.instance.collection('tournaments');
+    final now = DateTime.now().toUtc();
+    final id = '${now.toIso8601String()}_$name';
+    await tournamentsRef.doc(id).set({
+      'id': id,
+      'name': name,
+      'teamConfigId': teamConfigId,
+      'createdAt': now.toIso8601String(),
+      'teamConfigSnapshot': teamConfigSnapshot,
+    });
+    return id;
   }
 
-  Future<List<GameResult>> getGameResults(String tournamentName) async {
+  Future<List<Map<String, dynamic>>> getTournaments() async {
+    final CollectionReference tournamentsRef = FirebaseFirestore.instance.collection('tournaments');
+    final snapshot = await tournamentsRef.orderBy('createdAt', descending: true).get();
+    return snapshot.docs.map((doc) => doc.data() as Map<String, dynamic>).toList();
+  }
+
+  // Game Results Methods using Firestore
+  Future<void> saveGameResult(String tournamentId, GameResult result) async {
+    final CollectionReference gameResultsRef = FirebaseFirestore.instance.collection('game_results');
+    final String documentId = '${tournamentId}_game_${result.gameNumber}';
+    await gameResultsRef.doc(documentId).set({
+      ...result.toJson(),
+      'tournamentId': tournamentId,
+    });
+  }
+
+  Future<List<GameResult>> getGameResults(String tournamentId) async {
     try {
       final CollectionReference gameResultsRef = FirebaseFirestore.instance.collection('game_results');
-      
-      // Query for all game results for this tournament
       final QuerySnapshot snapshot = await gameResultsRef
-          .where('gameNumber', isGreaterThan: 0) // This will get all game results
+          .where('tournamentId', isEqualTo: tournamentId)
           .get();
-      
-      final List<GameResult> results = [];
-      
-      for (var doc in snapshot.docs) {
-        final data = doc.data() as Map<String, dynamic>;
-        // Only include results for this tournament
-        if (data.containsKey('team1') && data.containsKey('team2')) {
-          // Check if this result belongs to our tournament by looking at the document ID
-          if (doc.id.startsWith('${tournamentName}_game_')) {
-            results.add(GameResult.fromJson(data));
-          }
-        }
-      }
-      
-      // Sort by game number
+      final List<GameResult> results = snapshot.docs
+          .map((doc) => GameResult.fromJson(doc.data() as Map<String, dynamic>))
+          .toList();
       results.sort((a, b) => a.gameNumber.compareTo(b.gameNumber));
-      
       return results;
     } catch (e) {
       print('Error reading game results from Firestore: $e');
