@@ -10,7 +10,18 @@ class GamePrepScreen extends StatefulWidget {
   final List<String> team1;
   final List<String> team2;
   final Map<String, Player> playerMap;
-  const GamePrepScreen({Key? key, required this.gameNumber, required this.team1, required this.team2, required this.playerMap}) : super(key: key);
+  final int prepTimeSeconds;
+  final int gameTimeSeconds;
+  
+  const GamePrepScreen({
+    Key? key, 
+    required this.gameNumber, 
+    required this.team1, 
+    required this.team2, 
+    required this.playerMap,
+    this.prepTimeSeconds = 10,
+    this.gameTimeSeconds = 300,
+  }) : super(key: key);
 
   @override
   State<GamePrepScreen> createState() => _GamePrepScreenState();
@@ -41,13 +52,23 @@ class _GamePrepScreenState extends State<GamePrepScreen> {
   }
 
   void _onPrepComplete() async {
+    print('Prep timer completed! Transitioning to game...');
+    
+    // Update state immediately
     setState(() {
       _prepStarted = false;
       _gameStarted = true;
     });
-    // Play whistle and TTS
-    await _audioPlayer.play(AssetSource('referee-whistle.mp3'));
-    await _tts.speak("let's hoop you dirty dirty boys");
+    
+    print('State updated: _prepStarted=$_prepStarted, _gameStarted=$_gameStarted');
+    
+    // Play audio after state change
+    try {
+      await _audioPlayer.play(AssetSource('referee-whistle.mp3'));
+      await _tts.speak("let's hoop you dirty dirty boys");
+    } catch (e) {
+      print('Audio error: $e');
+    }
   }
 
   void _onGameTick(int secondsLeft) async {
@@ -67,6 +88,7 @@ class _GamePrepScreenState extends State<GamePrepScreen> {
   }
 
   void _onGameComplete() async {
+    print('Game timer completed!');
     // Play buzzer
     await _audioPlayer.play(AssetSource('buzzer.mp3'));
   }
@@ -79,6 +101,8 @@ class _GamePrepScreenState extends State<GamePrepScreen> {
 
   @override
   Widget build(BuildContext context) {
+    print('Building GamePrepScreen: _prepStarted=$_prepStarted, _gameStarted=$_gameStarted');
+    
     Widget teamColumn(List<String> team) {
       if (team.isEmpty) return const SizedBox();
       if (team.length == 1) {
@@ -98,9 +122,9 @@ class _GamePrepScreenState extends State<GamePrepScreen> {
       backgroundColor: const Color(0xFF111827),
       body: SafeArea(
         child: _prepStarted
-            ? _buildTimerScreen(10, 'Get Ready!', _onPrepComplete)
+            ? _buildTimerScreen(widget.prepTimeSeconds, 'Get Ready!', _onPrepComplete)
             : _gameStarted
-                ? _buildTimerScreen(300, 'Game Time!', _onGameComplete, onTick: _onGameTick)
+                ? _buildTimerScreen(widget.gameTimeSeconds, 'Game Time!', _onGameComplete, onTick: _onGameTick)
                 : Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -144,6 +168,8 @@ class _GamePrepScreenState extends State<GamePrepScreen> {
   }
 
   Widget _buildTimerScreen(int duration, String title, VoidCallback onComplete, {Function(int)? onTick}) {
+    print('Building timer screen: duration=$duration, title=$title, isPaused=$_isPaused');
+    
     return Column(
       children: [
         // Pause button at the top
@@ -163,6 +189,7 @@ class _GamePrepScreenState extends State<GamePrepScreen> {
         // Timer in the center
         Expanded(
           child: CountdownTimerWidget(
+            key: ValueKey('${_prepStarted ? 'prep' : 'game'}_timer'), // Force rebuild when switching timers
             durationSeconds: duration,
             onComplete: onComplete,
             onTick: onTick,

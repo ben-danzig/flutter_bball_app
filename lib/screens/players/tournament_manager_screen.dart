@@ -3,10 +3,17 @@ import '../../models/team_configuration.dart';
 import '../../models/player.dart';
 import 'game_prep_screen.dart';
 
-class TournamentManagerScreen extends StatelessWidget {
+class TournamentManagerScreen extends StatefulWidget {
   final TeamConfiguration config;
   final Map<String, Player> playerMap;
   const TournamentManagerScreen({Key? key, required this.config, required this.playerMap}) : super(key: key);
+
+  @override
+  State<TournamentManagerScreen> createState() => _TournamentManagerScreenState();
+}
+
+class _TournamentManagerScreenState extends State<TournamentManagerScreen> {
+  bool _useTestTimes = false;
 
   List<List<int>> _generateRoundRobin(int numTeams) {
     List<List<List<int>>> rounds = [];
@@ -34,8 +41,13 @@ class TournamentManagerScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final numTeams = config.teams.length;
+    final numTeams = widget.config.teams.length;
     final games = _generateRoundRobin(numTeams);
+    
+    // Define time settings based on toggle
+    final prepTimeSeconds = _useTestTimes ? 3 : 10;
+    final gameTimeSeconds = _useTestTimes ? 3 : 300; // 5 minutes = 300 seconds
+    
     return Scaffold(
       appBar: AppBar(
         title: const Text('Tournament Manager'),
@@ -47,9 +59,46 @@ class TournamentManagerScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              config.name.isEmpty ? 'Unnamed Tournament' : config.name,
+              widget.config.name.isEmpty ? 'Unnamed Tournament' : widget.config.name,
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
+            const SizedBox(height: 16),
+            
+            // Test times toggle
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Test Mode',
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          _useTestTimes 
+                            ? 'Prep: 3s, Game: 3s' 
+                            : 'Prep: 10s, Game: 5m',
+                          style: const TextStyle(fontSize: 14, color: Colors.grey),
+                        ),
+                      ],
+                    ),
+                    Switch(
+                      value: _useTestTimes,
+                      onChanged: (value) {
+                        setState(() {
+                          _useTestTimes = value;
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            
             const SizedBox(height: 16),
             const Text('Round Robin Schedule:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
@@ -59,9 +108,9 @@ class TournamentManagerScreen extends StatelessWidget {
                 itemBuilder: (context, idx) {
                   final t1 = games[idx][0];
                   final t2 = games[idx][1];
-                  final team1 = config.teams[t1];
-                  final team2 = config.teams[t2];
-                  String teamName(List<String> team) => team.map((pid) => playerMap[pid]?.name ?? 'Unknown').join(' & ');
+                  final team1 = widget.config.teams[t1];
+                  final team2 = widget.config.teams[t2];
+                  String teamName(List<String> team) => team.map((pid) => widget.playerMap[pid]?.name ?? 'Unknown').join(' & ');
                   return Card(
                     margin: const EdgeInsets.symmetric(vertical: 6),
                     child: ListTile(
@@ -75,7 +124,9 @@ class TournamentManagerScreen extends StatelessWidget {
                               gameNumber: idx + 1,
                               team1: team1,
                               team2: team2,
-                              playerMap: playerMap,
+                              playerMap: widget.playerMap,
+                              prepTimeSeconds: prepTimeSeconds,
+                              gameTimeSeconds: gameTimeSeconds,
                             ),
                           ),
                         );
