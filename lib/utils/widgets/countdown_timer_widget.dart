@@ -65,7 +65,7 @@ class _CountdownTimerWidgetState extends State<CountdownTimerWidget> {
         return;
       }
 
-      if (_remainingSeconds > 0) {
+      if (_remainingSeconds > 1) {
         setState(() {
           _remainingSeconds--;
         });
