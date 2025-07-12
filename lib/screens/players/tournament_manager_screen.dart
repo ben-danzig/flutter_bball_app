@@ -430,6 +430,36 @@ class _TournamentManagerScreenState extends State<TournamentManagerScreen> {
                       ),
                     ),
                   ),
+                  const SizedBox(height: 16),
+                  // Games left and estimated time remaining
+                  Builder(
+                    builder: (context) {
+                      final totalGames = _generateRoundRobin(_config!.teams.length).length;
+                      final gamesPlayed = _gameResults.where((g) => g.team1Score != null && g.team2Score != null).length;
+                      final gamesLeft = totalGames - gamesPlayed;
+                      final secondsPerGame = _prepTimeSeconds + _gameTimeSeconds + 60; // 1 min break
+                      final totalSeconds = gamesLeft * secondsPerGame;
+                      final hours = totalSeconds ~/ 3600;
+                      final minutes = (totalSeconds % 3600) ~/ 60;
+                      final seconds = totalSeconds % 60;
+                      String timeStr = '';
+                      if (hours > 0) timeStr += '${hours}h ';
+                      if (minutes > 0 || hours > 0) timeStr += '${minutes}m ';
+                      timeStr += '${seconds.toString().padLeft(2, '0')}s';
+                      final estFinish = DateTime.now().add(Duration(seconds: totalSeconds));
+                      final hour = estFinish.hour % 12 == 0 ? 12 : estFinish.hour % 12;
+                      final ampm = estFinish.hour >= 12 ? 'PM' : 'AM';
+                      final finishStr = '${hour}:${estFinish.minute.toString().padLeft(2, '0')}$ampm';
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Games Left: $gamesLeft', style: const TextStyle(fontWeight: FontWeight.bold)),
+                          Text('Est. Time Remaining: $timeStr', style: const TextStyle(fontWeight: FontWeight.bold)),
+                          Text('Est. Round Finish Time: ~$finishStr', style: const TextStyle(fontWeight: FontWeight.bold)),
+                        ],
+                      );
+                    },
+                  ),
                 ],
               ),
             ),
