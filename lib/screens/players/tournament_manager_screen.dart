@@ -112,6 +112,10 @@ class _TournamentManagerScreenState extends State<TournamentManagerScreen> {
     setState(() {});
   }
 
+  bool _teamsEqual(List<String> a, List<String> b) {
+    return a.length == b.length && Set<String>.from(a).containsAll(b) && Set<String>.from(b).containsAll(a);
+  }
+
   void _calculateStandings() {
     if (_config == null) return;
     final teamIds = List.generate(_config!.teams.length, (i) => i);
@@ -121,14 +125,15 @@ class _TournamentManagerScreenState extends State<TournamentManagerScreen> {
         'teamIndex': i,
         'wins': 0,
         'losses': 0,
+        'draws': 0,
         'pf': 0,
         'pa': 0,
       };
     }
     for (final result in _gameResults) {
       if (result.team1Score == null || result.team2Score == null) continue;
-      final t1 = _config!.teams.indexWhere((team) => team.toString() == result.team1.toString());
-      final t2 = _config!.teams.indexWhere((team) => team.toString() == result.team2.toString());
+      final t1 = _config!.teams.indexWhere((team) => _teamsEqual(team, result.team1));
+      final t2 = _config!.teams.indexWhere((team) => _teamsEqual(team, result.team2));
       if (t1 == -1 || t2 == -1) continue;
       standings[t1]!['pf'] += result.team1Score!;
       standings[t1]!['pa'] += result.team2Score!;
@@ -140,6 +145,9 @@ class _TournamentManagerScreenState extends State<TournamentManagerScreen> {
       } else if (result.team2Score! > result.team1Score!) {
         standings[t2]!['wins'] += 1;
         standings[t1]!['losses'] += 1;
+      } else {
+        standings[t1]!['draws'] += 1;
+        standings[t2]!['draws'] += 1;
       }
     }
     _standings = standings.values.toList();
@@ -392,26 +400,32 @@ class _TournamentManagerScreenState extends State<TournamentManagerScreen> {
                         padding: const EdgeInsets.all(12.0),
                         child: DataTable(
                           columns: const [
+                            DataColumn(label: Text('#')),
                             DataColumn(label: Text('Team')),
                             DataColumn(label: Text('W')),
                             DataColumn(label: Text('L')),
-                            DataColumn(label: Text('PF')),
-                            DataColumn(label: Text('PA')),
+                            DataColumn(label: Text('D')),
                             DataColumn(label: Text('Diff')),
+                            DataColumn(label: Text('Games\nLeft', textAlign: TextAlign.center)),
                           ],
-                          rows: _standings.map((s) {
+                          rows: List.generate(_standings.length, (i) {
+                            final s = _standings[i];
                             final teamIdx = s['teamIndex'] as int;
                             final teamNames = _config!.teams[teamIdx].map((pid) => widget.playerMap[pid]?.name ?? 'Unknown').join(' & ');
                             final diff = s['pf'] - s['pa'];
+                            final gamesPlayed = s['wins'] + s['losses'] + s['draws'];
+                            final totalGames = _config!.teams.length - 1;
+                            final gamesRemaining = totalGames - gamesPlayed;
                             return DataRow(cells: [
+                              DataCell(Text('#${i + 1}')),
                               DataCell(Text(teamNames)),
                               DataCell(Text('${s['wins']}')),
                               DataCell(Text('${s['losses']}')),
-                              DataCell(Text('${s['pf']}')),
-                              DataCell(Text('${s['pa']}')),
+                              DataCell(Text('${s['draws']}')),
                               DataCell(Text('$diff')),
+                              DataCell(Text('$gamesRemaining')),
                             ]);
-                          }).toList(),
+                          }),
                         ),
                       ),
                     ),
