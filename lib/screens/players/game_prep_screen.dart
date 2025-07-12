@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/player.dart';
+import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 
 class GamePrepScreen extends StatefulWidget {
   final int gameNumber;
@@ -18,22 +20,30 @@ class _GamePrepScreenState extends State<GamePrepScreen> {
   int _prepSeconds = 10;
   int _gameSeconds = 300;
   Ticker? _ticker;
+  final AudioPlayer _audioPlayer = AudioPlayer();
+  final FlutterTts _tts = FlutterTts();
+  bool _oneMinuteCuePlayed = false;
+  bool _lastTenCueStarted = false;
 
   @override
   void dispose() {
     _ticker?.dispose();
+    _audioPlayer.dispose();
+    _tts.stop();
     super.dispose();
   }
 
   void _startPrepTimer() {
     setState(() {
       _prepStarted = true;
+      _oneMinuteCuePlayed = false;
+      _lastTenCueStarted = false;
     });
     _ticker?.dispose();
     _ticker = Ticker(_onTick)..start();
   }
 
-  void _onTick(Duration elapsed) {
+  void _onTick(Duration elapsed) async {
     if (!_gameStarted && _prepStarted) {
       final secondsLeft = 10 - elapsed.inSeconds;
       if (secondsLeft <= 0) {
@@ -44,6 +54,9 @@ class _GamePrepScreenState extends State<GamePrepScreen> {
         _ticker?.stop();
         _ticker?.dispose();
         _ticker = Ticker(_onGameTick)..start();
+        // Play whistle and TTS
+        await _audioPlayer.play(AssetSource('referee-whistle.mp3'));
+        await _tts.speak("let's hoop you dirty dirty boys");
       } else {
         setState(() {
           _prepSeconds = secondsLeft;
@@ -52,7 +65,7 @@ class _GamePrepScreenState extends State<GamePrepScreen> {
     }
   }
 
-  void _onGameTick(Duration elapsed) {
+  void _onGameTick(Duration elapsed) async {
     final secondsLeft = 300 - elapsed.inSeconds;
     if (secondsLeft <= 0) {
       setState(() {
@@ -61,10 +74,25 @@ class _GamePrepScreenState extends State<GamePrepScreen> {
       _ticker?.stop();
       _ticker?.dispose();
       _ticker = null;
+      // Play buzzer
+      await _audioPlayer.play(AssetSource('buzzer.mp3'));
     } else {
       setState(() {
         _gameSeconds = secondsLeft;
       });
+      // 1 minute left cue
+      if (secondsLeft == 60 && !_oneMinuteCuePlayed) {
+        _oneMinuteCuePlayed = true;
+        await _audioPlayer.play(AssetSource('Peter Griffins Laugh Sound Effect.mp3'));
+        await _tts.speak('one minute! uno!');
+      }
+      // Last 10 seconds cue
+      if (secondsLeft <= 10 && !_lastTenCueStarted) {
+        _lastTenCueStarted = true;
+      }
+      if (_lastTenCueStarted && secondsLeft <= 10 && secondsLeft > 0) {
+        await _audioPlayer.play(AssetSource('timer-end.mp3'));
+      }
     }
   }
 
