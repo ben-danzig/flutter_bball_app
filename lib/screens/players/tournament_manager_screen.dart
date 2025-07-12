@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/team_configuration.dart';
 import '../../models/player.dart';
+import 'game_prep_screen.dart';
 
 class TournamentManagerScreen extends StatelessWidget {
   final TeamConfiguration config;
@@ -66,6 +67,19 @@ class TournamentManagerScreen extends StatelessWidget {
                     child: ListTile(
                       title: Text('Game ${idx + 1}'),
                       subtitle: Text('${teamName(team1)}  vs  ${teamName(team2)}'),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => GamePrepScreen(
+                              gameNumber: idx + 1,
+                              team1: team1,
+                              team2: team2,
+                              playerMap: playerMap,
+                            ),
+                          ),
+                        );
+                      },
                     ),
                   );
                 },
