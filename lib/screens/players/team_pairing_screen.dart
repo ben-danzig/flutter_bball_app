@@ -35,8 +35,7 @@ class _TeamPairingScreenState extends State<TeamPairingScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Focus the widget to receive keyboard events
-    FocusScope.of(context).requestFocus(FocusNode());
+    // Removed focus-stealing line to allow text input
   }
 
   Future<void> _loadPlayers() async {
