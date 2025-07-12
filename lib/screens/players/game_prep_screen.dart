@@ -84,7 +84,6 @@ class _GamePrepScreenState extends State<GamePrepScreen> {
     // 1 minute left cue
     if (secondsLeft == 60 && !_oneMinuteCuePlayed) {
       _oneMinuteCuePlayed = true;
-      await _audioPlayer.play(AssetSource('Peter Griffins Laugh Sound Effect.mp3'));
       await _tts.speak('one minute! uno!');
     }
     // Last 10 seconds cue
