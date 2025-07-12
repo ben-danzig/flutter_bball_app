@@ -79,6 +79,34 @@ class MockPlayerService {
     return null;
   }
 
+  Future<String?> updatePlayerQuestionnaire(
+    String id, {
+    String? preferredPartnerId,
+    int? heightFeet,
+    int? heightInches,
+    String? highestLevelPlayed,
+    String? layupAbility,
+    String? lastTimePlayed,
+    String? additionalNotes,
+  }) async {
+    final playerIndex = mockPlayers.indexWhere((p) => p.id == id);
+    if (playerIndex == -1) {
+      return 'Player not found';
+    }
+
+    mockPlayers[playerIndex] = mockPlayers[playerIndex].copyWith(
+      preferredPartnerId: preferredPartnerId,
+      heightFeet: heightFeet,
+      heightInches: heightInches,
+      highestLevelPlayed: highestLevelPlayed,
+      layupAbility: layupAbility,
+      lastTimePlayed: lastTimePlayed,
+      additionalNotes: additionalNotes,
+    );
+    
+    return null;
+  }
+
   Future<Map<String, String>> preRegisterPlayers(List<String> names) async {
     final Map<String, String> errors = {};
     
