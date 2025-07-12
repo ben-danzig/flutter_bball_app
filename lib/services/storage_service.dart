@@ -113,6 +113,11 @@ class StorageService {
     });
   }
 
+  Future<void> updateTournamentName(String tournamentId, String newName) async {
+    final CollectionReference tournamentsRef = FirebaseFirestore.instance.collection('tournaments');
+    await tournamentsRef.doc(tournamentId).update({'name': newName});
+  }
+
   Future<List<Map<String, dynamic>>> getTournaments() async {
     final CollectionReference tournamentsRef = FirebaseFirestore.instance.collection('tournaments');
     final snapshot = await tournamentsRef.orderBy('createdAt', descending: true).get();

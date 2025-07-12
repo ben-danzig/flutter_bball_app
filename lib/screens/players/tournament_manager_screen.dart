@@ -5,6 +5,7 @@ import '../../models/game_result.dart';
 import '../../models/tournament.dart';
 import '../../services/storage_service.dart';
 import 'game_prep_screen.dart';
+import 'tournament_manager_settings_page.dart';
 
 class TournamentManagerScreen extends StatefulWidget {
   final String? tournamentId;
@@ -178,6 +179,29 @@ class _TournamentManagerScreenState extends State<TournamentManagerScreen> {
       appBar: AppBar(
         title: const Text('Tournament Manager'),
         backgroundColor: const Color(0xFF1F2937),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            tooltip: 'Settings',
+            onPressed: () async {
+              if (_tournamentId != null && _config != null) {
+                await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => TournamentManagerSettingsPage(
+                      tournamentId: _tournamentId!,
+                      initialName: _config!.name,
+                      initialPrepTime: _prepTimeSeconds,
+                      initialGameTime: _gameTimeSeconds,
+                    ),
+                  ),
+                );
+                // After returning, reload tournament info
+                await _initTournament();
+              }
+            },
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -194,195 +218,147 @@ class _TournamentManagerScreenState extends State<TournamentManagerScreen> {
                     style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
-                    
-                    // Tournament time config UI
-                    Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Row(
-                          children: [
-                            const Text('Prep Time:', style: TextStyle(fontWeight: FontWeight.bold)),
-                            const SizedBox(width: 8),
-                            SizedBox(
-                              width: 60,
-                              child: TextField(
-                                keyboardType: TextInputType.number,
-                                decoration: const InputDecoration(suffixText: 's'),
-                                controller: TextEditingController(text: _prepTimeSeconds.toString()),
-                                onChanged: (val) {
-                                  final v = int.tryParse(val) ?? 10;
-                                  setState(() => _prepTimeSeconds = v);
-                                },
-                                onSubmitted: (_) => _updateTimes(),
-                              ),
-                            ),
-                            const SizedBox(width: 24),
-                            const Text('Game Time:', style: TextStyle(fontWeight: FontWeight.bold)),
-                            const SizedBox(width: 8),
-                            SizedBox(
-                              width: 60,
-                              child: TextField(
-                                keyboardType: TextInputType.number,
-                                decoration: const InputDecoration(suffixText: 's'),
-                                controller: TextEditingController(text: _gameTimeSeconds.toString()),
-                                onChanged: (val) {
-                                  final v = int.tryParse(val) ?? 300;
-                                  setState(() => _gameTimeSeconds = v);
-                                },
-                                onSubmitted: (_) => _updateTimes(),
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            ElevatedButton(
-                              onPressed: _updateTimes,
-                              child: const Text('Save Times'),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    
-                    const SizedBox(height: 16),
-                    const Text('Round Robin Schedule:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 8),
-                    Expanded(
-                      child: ListView.builder(
-                        itemCount: games.length,
-                        itemBuilder: (context, idx) {
-                          final t1 = games[idx][0];
-                          final t2 = games[idx][1];
-                          final team1 = _config!.teams[t1];
-                          final team2 = _config!.teams[t2];
-                          final gameNumber = idx + 1;
-                          final gameResult = _getGameResult(gameNumber);
-                          
-                          String teamName(List<String> team) => team.map((pid) => widget.playerMap[pid]?.name ?? 'Unknown').join(' & ');
-                          
-                          return Card(
-                            margin: const EdgeInsets.symmetric(vertical: 6),
-                            color: gameResult?.isCompleted == true ? const Color(0xFF1A2E1A) : null, // darker green background for completed
-                            elevation: gameResult?.isCompleted == true ? 4 : 1,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              side: gameResult?.isCompleted == true
-                                  ? const BorderSide(color: Colors.green, width: 2)
-                                  : BorderSide.none,
-                            ),
-                            child: Stack(
-                              children: [
-                                Row(
-                                  children: [
-                                    // Green accent bar
-                                    if (gameResult?.isCompleted == true)
-                                      Container(
-                                        width: 8,
-                                        height: 80,
-                                        decoration: BoxDecoration(
-                                          color: Colors.green,
-                                          borderRadius: const BorderRadius.only(
-                                            topLeft: Radius.circular(12),
-                                            bottomLeft: Radius.circular(12),
-                                          ),
-                                        ),
-                                      ),
-                                    Expanded(
-                                      child: ListTile(
-                                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                        leading: gameResult?.isCompleted == true
-                                            ? const Icon(Icons.check_circle, color: Colors.green, size: 36)
-                                            : null,
-                                        title: Text(
-                                          'Game $gameNumber',
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.white,
-                                            fontSize: 18,
-                                          ),
-                                        ),
-                                        subtitle: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              '${teamName(team1)}  vs  ${teamName(team2)}',
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 16,
-                                              ),
-                                            ),
-                                            if (gameResult?.isCompleted == true && gameResult?.team1Score != null && gameResult?.team2Score != null)
-                                              Padding(
-                                                padding: const EdgeInsets.only(top: 8.0),
-                                                child: Text(
-                                                  '${gameResult!.team1Score} - ${gameResult.team2Score}',
-                                                  style: const TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    color: Colors.green,
-                                                    fontSize: 24,
-                                                  ),
-                                                ),
-                                              ),
-                                          ],
-                                        ),
-                                        onTap: () {
-                                          Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) => GamePrepScreen(
-                                                gameNumber: gameNumber,
-                                                team1: team1,
-                                                team2: team2,
-                                                playerMap: widget.playerMap,
-                                                prepTimeSeconds: _prepTimeSeconds,
-                                                gameTimeSeconds: _gameTimeSeconds,
-                                                onGameComplete: (team1Score, team2Score) async {
-                                                  final result = GameResult(
-                                                    gameNumber: gameNumber,
-                                                    team1: team1,
-                                                    team2: team2,
-                                                    team1Score: team1Score,
-                                                    team2Score: team2Score,
-                                                    isCompleted: true,
-                                                    completedAt: DateTime.now(),
-                                                  );
-                                                  await _saveGameResult(result);
-                                                },
-                                              ),
-                                            ),
-                                          );
-                                        },
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                // Completed badge in top right
-                                if (gameResult?.isCompleted == true)
-                                  Positioned(
-                                    top: 8,
-                                    right: 16,
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  // Removed prep/game time config UI from here
+                  const Text('Schedule (click on a game to begin playing)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: games.length,
+                      itemBuilder: (context, idx) {
+                        final t1 = games[idx][0];
+                        final t2 = games[idx][1];
+                        final team1 = _config!.teams[t1];
+                        final team2 = _config!.teams[t2];
+                        final gameNumber = idx + 1;
+                        final gameResult = _getGameResult(gameNumber);
+                        
+                        String teamName(List<String> team) => team.map((pid) => widget.playerMap[pid]?.name ?? 'Unknown').join(' & ');
+                        
+                        return Card(
+                          margin: const EdgeInsets.symmetric(vertical: 6),
+                          color: gameResult?.isCompleted == true ? const Color(0xFF1A2E1A) : null, // darker green background for completed
+                          elevation: gameResult?.isCompleted == true ? 4 : 1,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            side: gameResult?.isCompleted == true
+                                ? const BorderSide(color: Colors.green, width: 2)
+                                : BorderSide.none,
+                          ),
+                          child: Stack(
+                            children: [
+                              Row(
+                                children: [
+                                  // Green accent bar
+                                  if (gameResult?.isCompleted == true)
+                                    Container(
+                                      width: 8,
+                                      height: 80,
                                       decoration: BoxDecoration(
                                         color: Colors.green,
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: const Text(
-                                        'Completed',
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 12,
-                                          letterSpacing: 1.1,
+                                        borderRadius: const BorderRadius.only(
+                                          topLeft: Radius.circular(12),
+                                          bottomLeft: Radius.circular(12),
                                         ),
+                                      ),
+                                    ),
+                                  Expanded(
+                                    child: ListTile(
+                                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                      leading: gameResult?.isCompleted == true
+                                          ? const Icon(Icons.check_circle, color: Colors.green, size: 36)
+                                          : null,
+                                      title: Text(
+                                        'Game $gameNumber',
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                          fontSize: 18,
+                                        ),
+                                      ),
+                                      subtitle: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            '${teamName(team1)}  vs  ${teamName(team2)}',
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 16,
+                                            ),
+                                          ),
+                                          if (gameResult?.isCompleted == true && gameResult?.team1Score != null && gameResult?.team2Score != null)
+                                            Padding(
+                                              padding: const EdgeInsets.only(top: 8.0),
+                                              child: Text(
+                                                '${gameResult!.team1Score} - ${gameResult.team2Score}',
+                                                style: const TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.green,
+                                                  fontSize: 24,
+                                                ),
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+                                      onTap: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (context) => GamePrepScreen(
+                                              gameNumber: gameNumber,
+                                              team1: team1,
+                                              team2: team2,
+                                              playerMap: widget.playerMap,
+                                              prepTimeSeconds: _prepTimeSeconds,
+                                              gameTimeSeconds: _gameTimeSeconds,
+                                              onGameComplete: (team1Score, team2Score) async {
+                                                final result = GameResult(
+                                                  gameNumber: gameNumber,
+                                                  team1: team1,
+                                                  team2: team2,
+                                                  team1Score: team1Score,
+                                                  team2Score: team2Score,
+                                                  isCompleted: true,
+                                                  completedAt: DateTime.now(),
+                                                );
+                                                await _saveGameResult(result);
+                                              },
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              // Completed badge in top right
+                              if (gameResult?.isCompleted == true)
+                                Positioned(
+                                  top: 8,
+                                  right: 16,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                    decoration: BoxDecoration(
+                                      color: Colors.green,
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: const Text(
+                                      'Completed',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 12,
+                                        letterSpacing: 1.1,
                                       ),
                                     ),
                                   ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
+                                ),
+                            ],
+                          ),
+                        );
+                      },
                     ),
+                  ),
                 ],
               ),
             ),
