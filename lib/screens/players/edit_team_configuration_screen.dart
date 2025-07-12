@@ -39,10 +39,18 @@ class _EditTeamConfigurationScreenState extends State<EditTeamConfigurationScree
 
   void _beginTournament() {
     if (_config == null) return;
+    // Remove empty teams before starting the tournament
+    final nonEmptyTeams = _config!.teams.where((team) => team.isNotEmpty).toList();
+    final cleanedConfig = TeamConfiguration(
+      id: _config!.id,
+      name: _config!.name,
+      createdAt: _config!.createdAt,
+      teams: nonEmptyTeams,
+    );
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => TournamentManagerScreen(config: _config!, playerMap: _playerMap),
+        builder: (context) => TournamentManagerScreen(config: cleanedConfig, playerMap: _playerMap),
       ),
     );
   }
