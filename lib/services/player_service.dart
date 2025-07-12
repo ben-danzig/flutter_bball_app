@@ -70,6 +70,35 @@ class PlayerService {
     return null; // Success
   }
 
+  /// Updates a player's questionnaire data
+  Future<String?> updatePlayerQuestionnaire(
+    String id, {
+    String? preferredPartnerId,
+    int? heightFeet,
+    int? heightInches,
+    String? highestLevelPlayed,
+    String? layupAbility,
+    String? lastTimePlayed,
+    String? additionalNotes,
+  }) async {
+    final doc = await _playersRef.doc(id).get();
+    if (!doc.exists) {
+      return 'Player not found';
+    }
+
+    final updateData = <String, dynamic>{};
+    if (preferredPartnerId != null) updateData['preferredPartnerId'] = preferredPartnerId;
+    if (heightFeet != null) updateData['heightFeet'] = heightFeet;
+    if (heightInches != null) updateData['heightInches'] = heightInches;
+    if (highestLevelPlayed != null) updateData['highestLevelPlayed'] = highestLevelPlayed;
+    if (layupAbility != null) updateData['layupAbility'] = layupAbility;
+    if (lastTimePlayed != null) updateData['lastTimePlayed'] = lastTimePlayed;
+    if (additionalNotes != null) updateData['additionalNotes'] = additionalNotes;
+
+    await _playersRef.doc(id).update(updateData);
+    return null; // Success
+  }
+
   /// Adds a batch of players for pre-registration
   Future<Map<String, String>> preRegisterPlayers(List<String> names) async {
     final Map<String, String> results = {};
