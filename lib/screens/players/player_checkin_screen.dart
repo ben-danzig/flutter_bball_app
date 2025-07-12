@@ -12,7 +12,6 @@ class PlayerCheckinScreen extends StatefulWidget {
 
 class _PlayerCheckinScreenState extends State<PlayerCheckinScreen> {
   final _playerService = PlayerService.instance;
-  final TextEditingController _nameController = TextEditingController();
   List<Player> _players = [];
   Player? _selectedPlayer;
   bool _isLoading = false;
@@ -23,12 +22,6 @@ class _PlayerCheckinScreenState extends State<PlayerCheckinScreen> {
     _loadPlayers();
   }
 
-  @override
-  void dispose() {
-    _nameController.dispose();
-    super.dispose();
-  }
-
   Future<void> _loadPlayers() async {
     setState(() => _isLoading = true);
     final players = await _playerService.getPlayers();
@@ -36,28 +29,6 @@ class _PlayerCheckinScreenState extends State<PlayerCheckinScreen> {
       _players = players;
       _isLoading = false;
     });
-  }
-
-  Future<void> _addPlayer() async {
-    final name = _nameController.text.trim();
-    if (name.isEmpty) return;
-    final error = await _playerService.addPlayer(name);
-    if (error != null) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(error), backgroundColor: Colors.red),
-        );
-      }
-    } else {
-      _nameController.clear();
-      await _loadPlayers();
-      // Auto-select the new player
-      final newPlayer = _players.firstWhere((p) => p.name == name, orElse: () => _players.last);
-      setState(() {
-        _selectedPlayer = newPlayer;
-      });
-      _goToQuestionnaire(newPlayer);
-    }
   }
 
   void _goToQuestionnaire(Player player) async {
@@ -94,41 +65,45 @@ class _PlayerCheckinScreenState extends State<PlayerCheckinScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Add New Player',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
-                  ),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: _nameController,
-                          decoration: const InputDecoration(
-                            hintText: 'Enter player name',
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16.0),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF374151),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Welcome to the Tournament!',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
                           ),
-                          onSubmitted: (_) => _addPlayer(),
                         ),
-                      ),
-                      const SizedBox(width: 8),
-                      ElevatedButton(
-                        onPressed: _addPlayer,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green,
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                        const SizedBox(height: 8),
+                        const Text(
+                          'Select your name from the list below, then fill out the B.R.O. (Basketball Roster Optimizer) assessment to get paired by our all-powerful algorithm. You\'ll be all set!',
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey,
+                          ),
                         ),
-                        child: const Text('Add'),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 32),
                   const Text(
-                    'Select Existing Player',
+                    'Who are you?',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
                   ),
+                  const SizedBox(height: 8),
                   DropdownButtonFormField<String>(
                     value: _selectedPlayer?.id,
                     decoration: const InputDecoration(
-                      hintText: 'Select a player',
+                      hintText: 'Select your name',
                     ),
                     items: _players.map((player) {
                       final completed = player.hasCompletedQuestionnaire;
@@ -166,7 +141,7 @@ class _PlayerCheckinScreenState extends State<PlayerCheckinScreen> {
                         padding: const EdgeInsets.symmetric(vertical: 16),
                       ),
                       child: const Text(
-                        'Select',
+                        'Start B.R.O. Assessment',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 16,
@@ -174,11 +149,6 @@ class _PlayerCheckinScreenState extends State<PlayerCheckinScreen> {
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 32),
-                  const Text(
-                    'Players who have already checked in are disabled in the list.',
-                    style: TextStyle(fontSize: 12, color: Colors.grey),
                   ),
                 ],
               ),
