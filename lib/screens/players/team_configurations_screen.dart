@@ -3,6 +3,7 @@ import '../../models/team_configuration.dart';
 import '../../services/team_configuration_service.dart';
 import '../../services/player_service.dart';
 import '../../models/player.dart';
+import 'edit_team_configuration_screen.dart';
 
 class TeamConfigurationsScreen extends StatefulWidget {
   const TeamConfigurationsScreen({Key? key}) : super(key: key);
@@ -92,6 +93,18 @@ class _TeamConfigurationsScreenState extends State<TeamConfigurationsScreen> {
                                 Text(
                                   'Saved: ${config.createdAt.toLocal().toString().split(".").first}',
                                   style: const TextStyle(fontSize: 12, color: Colors.grey),
+                                ),
+                                const SizedBox(width: 12),
+                                ElevatedButton(
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) => EditTeamConfigurationScreen(configId: config.id),
+                                      ),
+                                    );
+                                  },
+                                  child: const Text('Manage'),
                                 ),
                               ],
                             ),
