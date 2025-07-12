@@ -112,13 +112,20 @@ class _TeamConfigurationsScreenState extends State<TeamConfigurationsScreen> {
                                 ElevatedButton(
                                   style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
                                   onPressed: () async {
-                                    // Create tournament and navigate
+                                    // Filter out empty teams before creating the tournament
+                                    final filteredTeams = config.teams.where((team) => team.isNotEmpty).toList();
+                                    final filteredConfig = TeamConfiguration(
+                                      id: config.id,
+                                      name: config.name,
+                                      createdAt: config.createdAt,
+                                      teams: filteredTeams,
+                                    );
                                     final now = DateTime.now().toLocal();
-                                    final name = '${now.toString().replaceAll(":", "-").replaceAll(".", "-").split(" ").join("_")}_${config.name}';
+                                    final name = '${now.toString().replaceAll(":", "-").replaceAll(".", "-").split(" ").join("_")}_${filteredConfig.name}';
                                     final tournamentId = await StorageService.instance.createTournament(
                                       name: name,
-                                      teamConfigId: config.id,
-                                      teamConfigSnapshot: config.toJson(),
+                                      teamConfigId: filteredConfig.id,
+                                      teamConfigSnapshot: filteredConfig.toJson(),
                                     );
                                     Navigator.push(
                                       context,
@@ -126,7 +133,7 @@ class _TeamConfigurationsScreenState extends State<TeamConfigurationsScreen> {
                                         builder: (context) => TournamentManagerScreen(
                                           tournamentId: tournamentId,
                                           playerMap: _playerMap,
-                                          config: config,
+                                          config: filteredConfig,
                                         ),
                                       ),
                                     );
