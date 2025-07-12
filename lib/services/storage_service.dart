@@ -87,6 +87,8 @@ class StorageService {
     required String name,
     required String teamConfigId,
     required Map<String, dynamic> teamConfigSnapshot,
+    int prepTimeSeconds = 10,
+    int gameTimeSeconds = 300,
   }) async {
     final CollectionReference tournamentsRef = FirebaseFirestore.instance.collection('tournaments');
     final now = DateTime.now().toUtc();
@@ -97,8 +99,18 @@ class StorageService {
       'teamConfigId': teamConfigId,
       'createdAt': now.toIso8601String(),
       'teamConfigSnapshot': teamConfigSnapshot,
+      'prepTimeSeconds': prepTimeSeconds,
+      'gameTimeSeconds': gameTimeSeconds,
     });
     return id;
+  }
+
+  Future<void> updateTournamentTimes(String tournamentId, int prepTimeSeconds, int gameTimeSeconds) async {
+    final CollectionReference tournamentsRef = FirebaseFirestore.instance.collection('tournaments');
+    await tournamentsRef.doc(tournamentId).update({
+      'prepTimeSeconds': prepTimeSeconds,
+      'gameTimeSeconds': gameTimeSeconds,
+    });
   }
 
   Future<List<Map<String, dynamic>>> getTournaments() async {

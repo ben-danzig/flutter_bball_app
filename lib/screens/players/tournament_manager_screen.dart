@@ -23,6 +23,8 @@ class _TournamentManagerScreenState extends State<TournamentManagerScreen> {
   TeamConfiguration? _config;
   String? _tournamentId;
   bool _isLoading = true;
+  int _prepTimeSeconds = 10;
+  int _gameTimeSeconds = 300;
 
   @override
   void initState() {
@@ -39,6 +41,8 @@ class _TournamentManagerScreenState extends State<TournamentManagerScreen> {
         final tournament = Tournament.fromJson(tJson);
         _tournamentId = tournament.id;
         _config = TeamConfiguration.fromJson(tournament.teamConfigSnapshot as Map<String, dynamic>, tournament.teamConfigId);
+        _prepTimeSeconds = tournament.prepTimeSeconds;
+        _gameTimeSeconds = tournament.gameTimeSeconds;
       }
     } else {
       // Use provided config and create a new tournament
@@ -49,6 +53,8 @@ class _TournamentManagerScreenState extends State<TournamentManagerScreen> {
         name: name,
         teamConfigId: _config!.id,
         teamConfigSnapshot: _config!.toJson(),
+        prepTimeSeconds: _prepTimeSeconds,
+        gameTimeSeconds: _gameTimeSeconds,
       );
     }
     await _loadGameResults();
@@ -99,6 +105,12 @@ class _TournamentManagerScreenState extends State<TournamentManagerScreen> {
     return rounds.expand((r) => r).toList();
   }
 
+  Future<void> _updateTimes() async {
+    if (_tournamentId == null) return;
+    await _storageService.updateTournamentTimes(_tournamentId!, _prepTimeSeconds, _gameTimeSeconds);
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_isLoading || _config == null) {
@@ -129,35 +141,47 @@ class _TournamentManagerScreenState extends State<TournamentManagerScreen> {
             ),
             const SizedBox(height: 16),
             
-            // Test times toggle
+            // Tournament time config UI
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Test Mode',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
-                        Text(
-                          _useTestTimes 
-                            ? 'Prep: 3s, Game: 3s' 
-                            : 'Prep: 10s, Game: 5m',
-                          style: const TextStyle(fontSize: 14, color: Colors.grey),
-                        ),
-                      ],
+                    const Text('Prep Time:', style: TextStyle(fontWeight: FontWeight.bold)),
+                    const SizedBox(width: 8),
+                    SizedBox(
+                      width: 60,
+                      child: TextField(
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(suffixText: 's'),
+                        controller: TextEditingController(text: _prepTimeSeconds.toString()),
+                        onChanged: (val) {
+                          final v = int.tryParse(val) ?? 10;
+                          setState(() => _prepTimeSeconds = v);
+                        },
+                        onSubmitted: (_) => _updateTimes(),
+                      ),
                     ),
-                    Switch(
-                      value: _useTestTimes,
-                      onChanged: (value) {
-                        setState(() {
-                          _useTestTimes = value;
-                        });
-                      },
+                    const SizedBox(width: 24),
+                    const Text('Game Time:', style: TextStyle(fontWeight: FontWeight.bold)),
+                    const SizedBox(width: 8),
+                    SizedBox(
+                      width: 60,
+                      child: TextField(
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(suffixText: 's'),
+                        controller: TextEditingController(text: _gameTimeSeconds.toString()),
+                        onChanged: (val) {
+                          final v = int.tryParse(val) ?? 300;
+                          setState(() => _gameTimeSeconds = v);
+                        },
+                        onSubmitted: (_) => _updateTimes(),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    ElevatedButton(
+                      onPressed: _updateTimes,
+                      child: const Text('Save Times'),
                     ),
                   ],
                 ),
@@ -255,8 +279,8 @@ class _TournamentManagerScreenState extends State<TournamentManagerScreen> {
                                         team1: team1,
                                         team2: team2,
                                         playerMap: widget.playerMap,
-                                        prepTimeSeconds: prepTimeSeconds,
-                                        gameTimeSeconds: gameTimeSeconds,
+                                        prepTimeSeconds: _prepTimeSeconds,
+                                        gameTimeSeconds: _gameTimeSeconds,
                                         onGameComplete: (team1Score, team2Score) async {
                                           final result = GameResult(
                                             gameNumber: gameNumber,
