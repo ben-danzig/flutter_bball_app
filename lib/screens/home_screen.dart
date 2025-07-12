@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bball_app/screens/library/workout_library_screen.dart';
 import 'package:flutter_bball_app/screens/settings/settings_screen.dart';
 import 'package:flutter_bball_app/screens/players/players_screen.dart';
+import 'package:flutter_bball_app/screens/players/player_checkin_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -14,8 +15,9 @@ class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
 
   static List<Widget> _screens = <Widget>[
-    WorkoutLibraryScreen(),
+    PlayerCheckinScreen(),
     PlayersScreen(),
+    WorkoutLibraryScreen(),
     SettingsScreen(),
   ];
 
@@ -66,14 +68,19 @@ class _HomeScreenState extends State<HomeScreen> {
             onTap: _onItemTapped,
             items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(
-                icon: Icon(Icons.fitness_center, size: 24),
-                activeIcon: Icon(Icons.fitness_center, size: 28),
-                label: 'Workouts',
+                icon: Icon(Icons.how_to_reg, size: 24),
+                activeIcon: Icon(Icons.how_to_reg, size: 28),
+                label: 'Checkin',
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.people, size: 24),
                 activeIcon: Icon(Icons.people, size: 28),
                 label: 'Players',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.fitness_center, size: 24),
+                activeIcon: Icon(Icons.fitness_center, size: 28),
+                label: 'Workouts',
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.settings, size: 24),
