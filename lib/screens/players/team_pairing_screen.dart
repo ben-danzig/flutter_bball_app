@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../models/player.dart';
 import '../../services/player_service.dart';
+import '../../models/team_configuration.dart';
+import '../../services/team_configuration_service.dart';
+import 'team_configurations_screen.dart';
 
 class TeamPairingScreen extends StatefulWidget {
   const TeamPairingScreen({Key? key}) : super(key: key);
@@ -52,6 +55,21 @@ class _TeamPairingScreenState extends State<TeamPairingScreen> {
     });
   }
 
+  Future<void> _saveTeamConfiguration() async {
+    final config = TeamConfiguration(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      name: '',
+      createdAt: DateTime.now(),
+      teams: _teams.map((team) => team.map((p) => p.id).toList()).toList(),
+    );
+    await TeamConfigurationService.instance.saveConfiguration(config);
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Team configuration saved!')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -70,6 +88,30 @@ class _TeamPairingScreenState extends State<TeamPairingScreen> {
           ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    ElevatedButton.icon(
+                      onPressed: _saveTeamConfiguration,
+                      icon: const Icon(Icons.save),
+                      label: const Text('Save Team Configuration'),
+                    ),
+                    const SizedBox(width: 12),
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const TeamConfigurationsScreen(),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.list),
+                      label: const Text('View Saved Configurations'),
+                    ),
+                    const SizedBox(width: 16),
+                  ],
+                ),
                 // Available Players Section
                 Container(
                   margin: const EdgeInsets.all(16.0),
