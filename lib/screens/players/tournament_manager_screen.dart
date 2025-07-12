@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../models/team_configuration.dart';
 import '../../models/player.dart';
+import '../../models/game_result.dart';
+import '../../services/storage_service.dart';
 import 'game_prep_screen.dart';
 
 class TournamentManagerScreen extends StatefulWidget {
@@ -14,6 +16,30 @@ class TournamentManagerScreen extends StatefulWidget {
 
 class _TournamentManagerScreenState extends State<TournamentManagerScreen> {
   bool _useTestTimes = false;
+  List<GameResult> _gameResults = [];
+  final StorageService _storageService = StorageService.instance;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadGameResults();
+  }
+
+  Future<void> _loadGameResults() async {
+    final results = await _storageService.getGameResults(widget.config.name);
+    setState(() {
+      _gameResults = results;
+    });
+  }
+
+  Future<void> _saveGameResult(GameResult result) async {
+    await _storageService.saveGameResult(widget.config.name, result);
+    await _loadGameResults(); // Reload to update UI
+  }
+
+  GameResult? _getGameResult(int gameNumber) {
+    return _gameResults.where((result) => result.gameNumber == gameNumber).firstOrNull;
+  }
 
   List<List<int>> _generateRoundRobin(int numTeams) {
     List<List<List<int>>> rounds = [];
@@ -110,23 +136,56 @@ class _TournamentManagerScreenState extends State<TournamentManagerScreen> {
                   final t2 = games[idx][1];
                   final team1 = widget.config.teams[t1];
                   final team2 = widget.config.teams[t2];
+                  final gameNumber = idx + 1;
+                  final gameResult = _getGameResult(gameNumber);
+                  
                   String teamName(List<String> team) => team.map((pid) => widget.playerMap[pid]?.name ?? 'Unknown').join(' & ');
+                  
                   return Card(
                     margin: const EdgeInsets.symmetric(vertical: 6),
+                    color: gameResult?.isCompleted == true ? Colors.green.shade50 : null,
                     child: ListTile(
-                      title: Text('Game ${idx + 1}'),
-                      subtitle: Text('${teamName(team1)}  vs  ${teamName(team2)}'),
+                      leading: gameResult?.isCompleted == true 
+                          ? const Icon(Icons.check_circle, color: Colors.green, size: 24)
+                          : null,
+                      title: Text('Game $gameNumber'),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('${teamName(team1)}  vs  ${teamName(team2)}'),
+                          if (gameResult?.isCompleted == true && gameResult?.team1Score != null && gameResult?.team2Score != null)
+                            Text(
+                              '${gameResult!.team1Score} - ${gameResult.team2Score}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.green,
+                              ),
+                            ),
+                        ],
+                      ),
                       onTap: () {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (context) => GamePrepScreen(
-                              gameNumber: idx + 1,
+                              gameNumber: gameNumber,
                               team1: team1,
                               team2: team2,
                               playerMap: widget.playerMap,
                               prepTimeSeconds: prepTimeSeconds,
                               gameTimeSeconds: gameTimeSeconds,
+                              onGameComplete: (team1Score, team2Score) async {
+                                final result = GameResult(
+                                  gameNumber: gameNumber,
+                                  team1: team1,
+                                  team2: team2,
+                                  team1Score: team1Score,
+                                  team2Score: team2Score,
+                                  isCompleted: true,
+                                  completedAt: DateTime.now(),
+                                );
+                                await _saveGameResult(result);
+                              },
                             ),
                           ),
                         );

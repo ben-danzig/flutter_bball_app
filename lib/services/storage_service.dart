@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/workout_session.dart';
+import '../models/game_result.dart';
 
 class StorageService {
   static StorageService _instance = StorageService._();
@@ -78,5 +80,47 @@ class StorageService {
     final file = await _getLocalFile('session_${session.id}.json');
     final jsonString = jsonEncode(session.toJson());
     await file.writeAsString(jsonString);
+  }
+
+  // Game Results Methods using Firestore
+  Future<void> saveGameResult(String tournamentName, GameResult result) async {
+    final CollectionReference gameResultsRef = FirebaseFirestore.instance.collection('game_results');
+    
+    // Create a unique document ID for this game result
+    final String documentId = '${tournamentName}_game_${result.gameNumber}';
+    
+    await gameResultsRef.doc(documentId).set(result.toJson());
+  }
+
+  Future<List<GameResult>> getGameResults(String tournamentName) async {
+    try {
+      final CollectionReference gameResultsRef = FirebaseFirestore.instance.collection('game_results');
+      
+      // Query for all game results for this tournament
+      final QuerySnapshot snapshot = await gameResultsRef
+          .where('gameNumber', isGreaterThan: 0) // This will get all game results
+          .get();
+      
+      final List<GameResult> results = [];
+      
+      for (var doc in snapshot.docs) {
+        final data = doc.data() as Map<String, dynamic>;
+        // Only include results for this tournament
+        if (data.containsKey('team1') && data.containsKey('team2')) {
+          // Check if this result belongs to our tournament by looking at the document ID
+          if (doc.id.startsWith('${tournamentName}_game_')) {
+            results.add(GameResult.fromJson(data));
+          }
+        }
+      }
+      
+      // Sort by game number
+      results.sort((a, b) => a.gameNumber.compareTo(b.gameNumber));
+      
+      return results;
+    } catch (e) {
+      print('Error reading game results from Firestore: $e');
+      return [];
+    }
   }
 }

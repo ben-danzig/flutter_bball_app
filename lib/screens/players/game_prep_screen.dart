@@ -12,6 +12,7 @@ class GamePrepScreen extends StatefulWidget {
   final Map<String, Player> playerMap;
   final int prepTimeSeconds;
   final int gameTimeSeconds;
+  final Function(int, int)? onGameComplete;
   
   const GamePrepScreen({
     Key? key, 
@@ -21,6 +22,7 @@ class GamePrepScreen extends StatefulWidget {
     required this.playerMap,
     this.prepTimeSeconds = 10,
     this.gameTimeSeconds = 300,
+    this.onGameComplete,
   }) : super(key: key);
 
   @override
@@ -30,16 +32,23 @@ class GamePrepScreen extends StatefulWidget {
 class _GamePrepScreenState extends State<GamePrepScreen> {
   bool _prepStarted = false;
   bool _gameStarted = false;
+  bool _gameCompleted = false;
   bool _isPaused = false;
   final AudioPlayer _audioPlayer = AudioPlayer();
   final FlutterTts _tts = FlutterTts();
   bool _oneMinuteCuePlayed = false;
   bool _lastTenCueStarted = false;
+  
+  // Score input controllers
+  final TextEditingController _team1ScoreController = TextEditingController();
+  final TextEditingController _team2ScoreController = TextEditingController();
 
   @override
   void dispose() {
     _audioPlayer.dispose();
     _tts.stop();
+    _team1ScoreController.dispose();
+    _team2ScoreController.dispose();
     super.dispose();
   }
 
@@ -89,8 +98,23 @@ class _GamePrepScreenState extends State<GamePrepScreen> {
 
   void _onGameComplete() async {
     print('Game timer completed!');
+    setState(() {
+      _gameCompleted = true;
+    });
     // Play buzzer
     await _audioPlayer.play(AssetSource('buzzer.mp3'));
+  }
+
+  void _submitScores() {
+    final team1Score = int.tryParse(_team1ScoreController.text) ?? 0;
+    final team2Score = int.tryParse(_team2ScoreController.text) ?? 0;
+    
+    if (widget.onGameComplete != null) {
+      widget.onGameComplete!(team1Score, team2Score);
+    }
+    
+    // Navigate back to tournament schedule
+    Navigator.of(context).pop();
   }
 
   void _togglePause() {
@@ -101,7 +125,7 @@ class _GamePrepScreenState extends State<GamePrepScreen> {
 
   @override
   Widget build(BuildContext context) {
-    print('Building GamePrepScreen: _prepStarted=$_prepStarted, _gameStarted=$_gameStarted');
+    print('Building GamePrepScreen: _prepStarted=$_prepStarted, _gameStarted=$_gameStarted, _gameCompleted=$_gameCompleted');
     
     Widget teamColumn(List<String> team) {
       if (team.isEmpty) return const SizedBox();
@@ -123,46 +147,48 @@ class _GamePrepScreenState extends State<GamePrepScreen> {
       body: SafeArea(
         child: _prepStarted
             ? _buildTimerScreen(widget.prepTimeSeconds, 'Get Ready!', _onPrepComplete)
-            : _gameStarted
+            : _gameStarted && !_gameCompleted
                 ? _buildTimerScreen(widget.gameTimeSeconds, 'Game Time!', _onGameComplete, onTick: _onGameTick)
-                : Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Game ${widget.gameNumber}',
-                        style: const TextStyle(fontSize: 32, color: Colors.white, fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 24),
-                      Row(
+                : _gameCompleted
+                    ? _buildGameCompletionScreen()
+                    : Column(
                         mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          teamColumn(widget.team1),
-                          const SizedBox(width: 32),
-                          const Text('vs', style: TextStyle(fontSize: 32, color: Colors.white70, fontWeight: FontWeight.bold)),
-                          const SizedBox(width: 32),
-                          teamColumn(widget.team2),
+                          Text(
+                            'Game ${widget.gameNumber}',
+                            style: const TextStyle(fontSize: 32, color: Colors.white, fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 24),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              teamColumn(widget.team1),
+                              const SizedBox(width: 32),
+                              const Text('vs', style: TextStyle(fontSize: 32, color: Colors.white70, fontWeight: FontWeight.bold)),
+                              const SizedBox(width: 32),
+                              teamColumn(widget.team2),
+                            ],
+                          ),
+                          const SizedBox(height: 48),
+                          const Text(
+                            'Ready to start playing?',
+                            style: TextStyle(fontSize: 28, color: Colors.white),
+                          ),
+                          const SizedBox(height: 32),
+                          ElevatedButton(
+                            onPressed: _startPrepTimer,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.green,
+                              padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 32),
+                            ),
+                            child: const Text(
+                              "Let's Hoop!",
+                              style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white),
+                            ),
+                          ),
                         ],
                       ),
-                      const SizedBox(height: 48),
-                      const Text(
-                        'Ready to start playing?',
-                        style: TextStyle(fontSize: 28, color: Colors.white),
-                      ),
-                      const SizedBox(height: 32),
-                      ElevatedButton(
-                        onPressed: _startPrepTimer,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green,
-                          padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 32),
-                        ),
-                        child: const Text(
-                          "Let's Hoop!",
-                          style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white),
-                        ),
-                      ),
-                    ],
-                  ),
       ),
     );
   }
@@ -200,6 +226,99 @@ class _GamePrepScreenState extends State<GamePrepScreen> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildGameCompletionScreen() {
+    String team1Name = widget.team1.map((pid) => widget.playerMap[pid]?.name ?? 'Unknown').join(' & ');
+    String team2Name = widget.team2.map((pid) => widget.playerMap[pid]?.name ?? 'Unknown').join(' & ');
+    
+    return Padding(
+      padding: const EdgeInsets.all(20.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Text(
+            'Game Complete!',
+            style: TextStyle(fontSize: 36, color: Colors.white, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 40),
+          
+          // Team 1 Score Input
+          Card(
+            color: const Color(0xFF1f2937),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  Text(
+                    team1Name,
+                    style: const TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: _team1ScoreController,
+                    keyboardType: TextInputType.number,
+                    style: const TextStyle(fontSize: 24, color: Colors.white),
+                    textAlign: TextAlign.center,
+                    decoration: const InputDecoration(
+                      hintText: 'Enter score',
+                      hintStyle: TextStyle(color: Colors.grey),
+                      border: OutlineInputBorder(),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          
+          const SizedBox(height: 20),
+          
+          // Team 2 Score Input
+          Card(
+            color: const Color(0xFF1f2937),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  Text(
+                    team2Name,
+                    style: const TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: _team2ScoreController,
+                    keyboardType: TextInputType.number,
+                    style: const TextStyle(fontSize: 24, color: Colors.white),
+                    textAlign: TextAlign.center,
+                    decoration: const InputDecoration(
+                      hintText: 'Enter score',
+                      hintStyle: TextStyle(color: Colors.grey),
+                      border: OutlineInputBorder(),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          
+          const SizedBox(height: 40),
+          
+          ElevatedButton(
+            onPressed: _submitScores,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.green,
+              padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 32),
+            ),
+            child: const Text(
+              'Submit Scores',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white),
+            ),
+          ),
+        ],
+      ),
     );
   }
 } 
