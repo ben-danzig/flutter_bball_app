@@ -30,26 +30,59 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFF111827),
       body: _screens[_selectedIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: const Color(0xFF1f2937),
-        selectedItemColor: const Color(0xFF3b82f6),
-        unselectedItemColor: const Color(0xFF9ca3af),
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.fitness_center),
-            label: 'Workouts',
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFF1F2937),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.2),
+              blurRadius: 8,
+              offset: const Offset(0, -2),
+            ),
+          ],
+          border: Border(
+            top: BorderSide(
+              color: const Color(0xFF4B5563),
+              width: 1,
+            ),
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.people),
-            label: 'Players',
+        ),
+        child: SafeArea(
+          child: BottomNavigationBar(
+            backgroundColor: Colors.transparent,
+            selectedItemColor: const Color(0xFF3B82F6),
+            unselectedItemColor: const Color(0xFF9CA3AF),
+            selectedLabelStyle: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 12,
+            ),
+            unselectedLabelStyle: const TextStyle(
+              fontWeight: FontWeight.normal,
+              fontSize: 12,
+            ),
+            type: BottomNavigationBarType.fixed,
+            elevation: 0,
+            currentIndex: _selectedIndex,
+            onTap: _onItemTapped,
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(Icons.fitness_center, size: 24),
+                activeIcon: Icon(Icons.fitness_center, size: 28),
+                label: 'Workouts',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.people, size: 24),
+                activeIcon: Icon(Icons.people, size: 28),
+                label: 'Players',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.settings, size: 24),
+                activeIcon: Icon(Icons.settings, size: 28),
+                label: 'Settings',
+              ),
+            ],
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Settings',
-          ),
-        ],
+        ),
       ),
     );
   }

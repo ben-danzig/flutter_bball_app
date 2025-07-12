@@ -100,212 +100,488 @@ class _TeamPairingScreenState extends State<TeamPairingScreen> {
           ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    ElevatedButton.icon(
-                      onPressed: _saveTeamConfiguration,
-                      icon: const Icon(Icons.save),
-                      label: const Text('Save Team Configuration'),
-                    ),
-                    const SizedBox(width: 12),
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const TeamConfigurationsScreen(),
-                          ),
-                        );
-                      },
-                      icon: const Icon(Icons.list),
-                      label: const Text('View Saved Configurations'),
-                    ),
-                    const SizedBox(width: 16),
-                  ],
-                ),
-                // Available Players Section
+                // Action buttons with improved styling
                 Container(
-                  margin: const EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.all(16.0),
                   decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey),
-                    borderRadius: BorderRadius.circular(8),
+                    color: const Color(0xFF1F2937),
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      ElevatedButton.icon(
+                        onPressed: _saveTeamConfiguration,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF10B981),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        icon: const Icon(Icons.save),
+                        label: const Text('Save Configuration'),
+                      ),
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const TeamConfigurationsScreen(),
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF3B82F6),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                        ),
+                        icon: const Icon(Icons.list),
+                        label: const Text('View Saved'),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                // Available Players Section with enhanced styling
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 16.0),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1F2937),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: const Color(0xFF4B5563), width: 2),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
                   ),
                   child: Column(
                     children: [
                       Container(
                         width: double.infinity,
-                        padding: const EdgeInsets.all(12.0),
-                        decoration: const BoxDecoration(
-                          color: Color(0xFF374151),
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(8),
-                            topRight: Radius.circular(8),
+                        padding: const EdgeInsets.all(16.0),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF374151),
+                          borderRadius: const BorderRadius.only(
+                            topLeft: Radius.circular(16),
+                            topRight: Radius.circular(16),
+                          ),
+                          border: Border(
+                            bottom: BorderSide(color: const Color(0xFF4B5563), width: 1),
                           ),
                         ),
-                        child: Text(
-                          'Available Players (${_availablePlayers.length})',
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                          ),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF3B82F6),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: const Icon(
+                                Icons.people,
+                                color: Colors.white,
+                                size: 20,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Text(
+                              'Available Players (${_availablePlayers.length})',
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      SizedBox(
-                        height: 80,
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
-                          itemCount: _availablePlayers.length,
-                          itemBuilder: (context, index) {
-                            final player = _availablePlayers[index];
-                            return Draggable<Player>(
-                              data: player,
-                              feedback: Material(
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                                  decoration: BoxDecoration(
-                                    color: Colors.blue,
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Text(
-                                    player.name,
-                                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                      Container(
+                        height: 100,
+                        padding: const EdgeInsets.all(12.0),
+                        child: _availablePlayers.isEmpty
+                            ? Center(
+                                child: Text(
+                                  'No players available',
+                                  style: TextStyle(
+                                    color: Colors.grey[400],
+                                    fontSize: 16,
+                                    fontStyle: FontStyle.italic,
                                   ),
                                 ),
+                              )
+                            : ListView.builder(
+                                scrollDirection: Axis.horizontal,
+                                itemCount: _availablePlayers.length,
+                                itemBuilder: (context, index) {
+                                  final player = _availablePlayers[index];
+                                  return Draggable<Player>(
+                                    data: player,
+                                    feedback: Material(
+                                      elevation: 8,
+                                      borderRadius: BorderRadius.circular(12),
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFF3B82F6),
+                                          borderRadius: BorderRadius.circular(12),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: const Color(0xFF3B82F6).withOpacity(0.3),
+                                              blurRadius: 8,
+                                              offset: const Offset(0, 4),
+                                            ),
+                                          ],
+                                        ),
+                                        child: Text(
+                                          player.name,
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    childWhenDragging: Container(
+                                      width: 140,
+                                      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                                      decoration: BoxDecoration(
+                                        color: Colors.grey[700],
+                                        borderRadius: BorderRadius.circular(12),
+                                        border: Border.all(color: Colors.grey[600]!),
+                                      ),
+                                      child: Center(
+                                        child: Text(
+                                          player.name,
+                                          style: TextStyle(
+                                            color: Colors.grey[400],
+                                            fontStyle: FontStyle.italic,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    child: Container(
+                                      width: 140,
+                                      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFF374151),
+                                        borderRadius: BorderRadius.circular(12),
+                                        border: Border.all(color: const Color(0xFF4B5563)),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black.withOpacity(0.1),
+                                            blurRadius: 4,
+                                            offset: const Offset(0, 2),
+                                          ),
+                                        ],
+                                      ),
+                                      child: Center(
+                                        child: Column(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            Text(
+                                              player.name,
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.w600,
+                                                fontSize: 14,
+                                              ),
+                                              textAlign: TextAlign.center,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
                               ),
-                              childWhenDragging: Container(
-                                width: 120,
-                                margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                                decoration: BoxDecoration(
-                                  color: Colors.grey[700],
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                              ),
-                              child: Container(
-                                width: 120,
-                                margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFF374151),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Center(
-                                  child: Text(
-                                    player.name,
-                                    style: const TextStyle(color: Colors.white),
-                                  ),
-                                ),
-                              ),
-                            );
-                          },
-                        ),
                       ),
                     ],
                   ),
                 ),
-                // Teams Section
+                const SizedBox(height: 16),
+                // Teams Section with enhanced styling
                 Expanded(
                   child: Container(
-                    margin: const EdgeInsets.all(16.0),
+                    margin: const EdgeInsets.symmetric(horizontal: 16.0),
                     decoration: BoxDecoration(
-                      border: Border.all(color: Colors.grey),
-                      borderRadius: BorderRadius.circular(8),
+                      color: const Color(0xFF1F2937),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: const Color(0xFF4B5563), width: 2),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
                     ),
                     child: Column(
                       children: [
                         Container(
                           width: double.infinity,
-                          padding: const EdgeInsets.all(12.0),
-                          decoration: const BoxDecoration(
-                            color: Color(0xFF059669),
-                            borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(8),
-                              topRight: Radius.circular(8),
+                          padding: const EdgeInsets.all(16.0),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF374151),
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(16),
+                              topRight: Radius.circular(16),
+                            ),
+                            border: Border(
+                              bottom: BorderSide(color: const Color(0xFF4B5563), width: 1),
                             ),
                           ),
-                          child: const Text(
-                            'Teams',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
+                          child: Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF10B981),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: const Icon(
+                                  Icons.groups,
+                                  color: Colors.white,
+                                  size: 20,
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              const Text(
+                                'Teams',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                         Expanded(
-                          child: SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: Row(
-                              children: List.generate(_teams.length, (teamIndex) {
-                                final team = _teams[teamIndex];
-                                return DragTarget<Player>(
-                                  onWillAccept: (player) => team.length < 2,
-                                  onAccept: (player) {
-                                    setState(() {
-                                      team.add(player);
-                                      _availablePlayers.removeWhere((p) => p.id == player.id);
-                                    });
-                                  },
-                                  builder: (context, candidateData, rejectedData) {
-                                    return Container(
-                                      width: 220,
-                                      margin: const EdgeInsets.all(8.0),
-                                      decoration: BoxDecoration(
-                                        color: const Color(0xFF1F2937),
-                                        borderRadius: BorderRadius.circular(8),
-                                        border: Border.all(
-                                          color: candidateData.isNotEmpty ? Colors.green : Colors.orange,
-                                          width: 2,
-                                        ),
+                          child: GridView.builder(
+                            padding: const EdgeInsets.all(16.0),
+                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              crossAxisSpacing: 16,
+                              mainAxisSpacing: 16,
+                              childAspectRatio: 1.2,
+                            ),
+                            itemCount: _teams.length,
+                            itemBuilder: (context, teamIndex) {
+                              return DragTarget<Player>(
+                                onWillAccept: (data) => data != null && _teams[teamIndex].length < 2,
+                                onAccept: (player) {
+                                  setState(() {
+                                    _teams[teamIndex].add(player);
+                                    _availablePlayers.remove(player);
+                                  });
+                                },
+                                builder: (context, candidateData, rejectedData) {
+                                  final isHighlighted = candidateData.isNotEmpty && _teams[teamIndex].length < 2;
+                                  return Container(
+                                    decoration: BoxDecoration(
+                                      color: isHighlighted
+                                          ? const Color(0xFF10B981).withOpacity(0.2)
+                                          : const Color(0xFF374151),
+                                      borderRadius: BorderRadius.circular(16),
+                                      border: Border.all(
+                                        color: isHighlighted
+                                            ? const Color(0xFF10B981)
+                                            : const Color(0xFF4B5563),
+                                        width: isHighlighted ? 3 : 2,
                                       ),
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                            decoration: BoxDecoration(
-                                              color: Colors.orange,
-                                              borderRadius: const BorderRadius.only(
-                                                topLeft: Radius.circular(8),
-                                                topRight: Radius.circular(8),
+                                      boxShadow: isHighlighted
+                                          ? [
+                                              BoxShadow(
+                                                color: const Color(0xFF10B981).withOpacity(0.3),
+                                                blurRadius: 8,
+                                                offset: const Offset(0, 4),
                                               ),
-                                            ),
-                                            child: Text(
-                                              'Team ${teamIndex + 1}',
-                                              style: const TextStyle(
-                                                color: Colors.white,
-                                                fontWeight: FontWeight.bold,
+                                            ]
+                                          : [
+                                              BoxShadow(
+                                                color: Colors.black.withOpacity(0.1),
+                                                blurRadius: 4,
+                                                offset: const Offset(0, 2),
                                               ),
+                                            ],
+                                    ),
+                                    child: Column(
+                                      children: [
+                                        Container(
+                                          width: double.infinity,
+                                          padding: const EdgeInsets.all(12.0),
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFF4B5563),
+                                            borderRadius: const BorderRadius.only(
+                                              topLeft: Radius.circular(16),
+                                              topRight: Radius.circular(16),
                                             ),
                                           ),
-                                          if (team.isEmpty)
-                                            const Expanded(
-                                              child: Center(
-                                                child: Text(
-                                                  'No players yet',
-                                                  style: TextStyle(color: Colors.grey),
+                                          child: Row(
+                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                            children: [
+                                              Text(
+                                                'Team ${teamIndex + 1}',
+                                                style: const TextStyle(
+                                                  color: Colors.white,
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 16,
                                                 ),
                                               ),
-                                            )
-                                          else
-                                            ...team.map((player) => ListTile(
-                                                  title: Text(
-                                                    player.name,
-                                                    style: const TextStyle(color: Colors.white),
+                                              Container(
+                                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                                decoration: BoxDecoration(
+                                                  color: _teams[teamIndex].length == 2
+                                                      ? const Color(0xFF10B981)
+                                                      : const Color(0xFF6B7280),
+                                                  borderRadius: BorderRadius.circular(12),
+                                                ),
+                                                child: Text(
+                                                  '${_teams[teamIndex].length}/2',
+                                                  style: const TextStyle(
+                                                    color: Colors.white,
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 12,
                                                   ),
-                                                  trailing: IconButton(
-                                                    icon: const Icon(Icons.remove_circle, color: Colors.red),
-                                                    onPressed: () => _removePlayerFromTeam(teamIndex, team.indexOf(player)),
-                                                    tooltip: 'Remove player',
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                        Expanded(
+                                          child: Container(
+                                            padding: const EdgeInsets.all(12.0),
+                                            child: _teams[teamIndex].isEmpty
+                                                ? Center(
+                                                    child: Column(
+                                                      mainAxisAlignment: MainAxisAlignment.center,
+                                                      children: [
+                                                        Icon(
+                                                          Icons.person_add,
+                                                          color: Colors.grey[500],
+                                                          size: 32,
+                                                        ),
+                                                        const SizedBox(height: 8),
+                                                        Text(
+                                                          'Drop players here',
+                                                          style: TextStyle(
+                                                            color: Colors.grey[500],
+                                                            fontSize: 12,
+                                                            fontStyle: FontStyle.italic,
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  )
+                                                : ListView.builder(
+                                                    itemCount: _teams[teamIndex].length,
+                                                    itemBuilder: (context, playerIndex) {
+                                                      final player = _teams[teamIndex][playerIndex];
+                                                      return Draggable<Player>(
+                                                        data: player,
+                                                        feedback: Material(
+                                                          elevation: 8,
+                                                          borderRadius: BorderRadius.circular(8),
+                                                          child: Container(
+                                                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                                            decoration: BoxDecoration(
+                                                              color: const Color(0xFFEF4444),
+                                                              borderRadius: BorderRadius.circular(8),
+                                                            ),
+                                                            child: Text(
+                                                              player.name,
+                                                              style: const TextStyle(
+                                                                color: Colors.white,
+                                                                fontWeight: FontWeight.bold,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        childWhenDragging: Container(
+                                                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                                          decoration: BoxDecoration(
+                                                            color: Colors.grey[700],
+                                                            borderRadius: BorderRadius.circular(8),
+                                                            border: Border.all(color: Colors.grey[600]!),
+                                                          ),
+                                                          child: Text(
+                                                            player.name,
+                                                            style: TextStyle(
+                                                              color: Colors.grey[400],
+                                                              fontStyle: FontStyle.italic,
+                                                            ),
+                                                          ),
+                                                        ),
+                                                        child: Container(
+                                                          margin: const EdgeInsets.only(bottom: 8),
+                                                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                                          decoration: BoxDecoration(
+                                                            color: const Color(0xFF4B5563),
+                                                            borderRadius: BorderRadius.circular(8),
+                                                            border: Border.all(color: const Color(0xFF6B7280)),
+                                                          ),
+                                                          child: Row(
+                                                            children: [
+                                                              Expanded(
+                                                                child: Column(
+                                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                                  children: [
+                                                                    Text(
+                                                                      player.name,
+                                                                      style: const TextStyle(
+                                                                        color: Colors.white,
+                                                                        fontWeight: FontWeight.w600,
+                                                                        fontSize: 14,
+                                                                      ),
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                              ),
+                                                              GestureDetector(
+                                                                onTap: () => _removePlayerFromTeam(teamIndex, playerIndex),
+                                                                child: Container(
+                                                                  padding: const EdgeInsets.all(4),
+                                                                  decoration: BoxDecoration(
+                                                                    color: const Color(0xFFEF4444),
+                                                                    borderRadius: BorderRadius.circular(12),
+                                                                  ),
+                                                                  child: const Icon(
+                                                                    Icons.close,
+                                                                    color: Colors.white,
+                                                                    size: 16,
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                      );
+                                                    },
                                                   ),
-                                                )),
-                                        ],
-                                      ),
-                                    );
-                                  },
-                                );
-                              }),
-                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                              );
+                            },
                           ),
                         ),
                       ],
