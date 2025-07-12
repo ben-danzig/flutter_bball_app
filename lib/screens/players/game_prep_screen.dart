@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../../models/player.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import '../../utils/widgets/countdown_timer_widget.dart';
+import '../../utils/widgets/pause_resume_button.dart';
 
 class GamePrepScreen extends StatefulWidget {
   final int gameNumber;
@@ -17,9 +19,7 @@ class GamePrepScreen extends StatefulWidget {
 class _GamePrepScreenState extends State<GamePrepScreen> {
   bool _prepStarted = false;
   bool _gameStarted = false;
-  int _prepSeconds = 10;
-  int _gameSeconds = 300;
-  Ticker? _ticker;
+  bool _isPaused = false;
   final AudioPlayer _audioPlayer = AudioPlayer();
   final FlutterTts _tts = FlutterTts();
   bool _oneMinuteCuePlayed = false;
@@ -27,7 +27,6 @@ class _GamePrepScreenState extends State<GamePrepScreen> {
 
   @override
   void dispose() {
-    _ticker?.dispose();
     _audioPlayer.dispose();
     _tts.stop();
     super.dispose();
@@ -39,61 +38,43 @@ class _GamePrepScreenState extends State<GamePrepScreen> {
       _oneMinuteCuePlayed = false;
       _lastTenCueStarted = false;
     });
-    _ticker?.dispose();
-    _ticker = Ticker(_onTick)..start();
   }
 
-  void _onTick(Duration elapsed) async {
-    if (!_gameStarted && _prepStarted) {
-      final secondsLeft = 10 - elapsed.inSeconds;
-      if (secondsLeft <= 0) {
-        setState(() {
-          _prepStarted = false;
-          _gameStarted = true;
-        });
-        _ticker?.stop();
-        _ticker?.dispose();
-        _ticker = Ticker(_onGameTick)..start();
-        // Play whistle and TTS
-        await _audioPlayer.play(AssetSource('referee-whistle.mp3'));
-        await _tts.speak("let's hoop you dirty dirty boys");
-      } else {
-        setState(() {
-          _prepSeconds = secondsLeft;
-        });
-      }
+  void _onPrepComplete() async {
+    setState(() {
+      _prepStarted = false;
+      _gameStarted = true;
+    });
+    // Play whistle and TTS
+    await _audioPlayer.play(AssetSource('referee-whistle.mp3'));
+    await _tts.speak("let's hoop you dirty dirty boys");
+  }
+
+  void _onGameTick(int secondsLeft) async {
+    // 1 minute left cue
+    if (secondsLeft == 60 && !_oneMinuteCuePlayed) {
+      _oneMinuteCuePlayed = true;
+      await _audioPlayer.play(AssetSource('Peter Griffins Laugh Sound Effect.mp3'));
+      await _tts.speak('one minute! uno!');
+    }
+    // Last 10 seconds cue
+    if (secondsLeft <= 10 && !_lastTenCueStarted) {
+      _lastTenCueStarted = true;
+    }
+    if (_lastTenCueStarted && secondsLeft <= 10 && secondsLeft > 0) {
+      await _audioPlayer.play(AssetSource('timer-end.mp3'));
     }
   }
 
-  void _onGameTick(Duration elapsed) async {
-    final secondsLeft = 300 - elapsed.inSeconds;
-    if (secondsLeft <= 0) {
-      setState(() {
-        _gameSeconds = 0;
-      });
-      _ticker?.stop();
-      _ticker?.dispose();
-      _ticker = null;
-      // Play buzzer
-      await _audioPlayer.play(AssetSource('buzzer.mp3'));
-    } else {
-      setState(() {
-        _gameSeconds = secondsLeft;
-      });
-      // 1 minute left cue
-      if (secondsLeft == 60 && !_oneMinuteCuePlayed) {
-        _oneMinuteCuePlayed = true;
-        await _audioPlayer.play(AssetSource('Peter Griffins Laugh Sound Effect.mp3'));
-        await _tts.speak('one minute! uno!');
-      }
-      // Last 10 seconds cue
-      if (secondsLeft <= 10 && !_lastTenCueStarted) {
-        _lastTenCueStarted = true;
-      }
-      if (_lastTenCueStarted && secondsLeft <= 10 && secondsLeft > 0) {
-        await _audioPlayer.play(AssetSource('timer-end.mp3'));
-      }
-    }
+  void _onGameComplete() async {
+    // Play buzzer
+    await _audioPlayer.play(AssetSource('buzzer.mp3'));
+  }
+
+  void _togglePause() {
+    setState(() {
+      _isPaused = !_isPaused;
+    });
   }
 
   @override
@@ -112,13 +93,14 @@ class _GamePrepScreenState extends State<GamePrepScreen> {
         ],
       );
     }
+
     return Scaffold(
       backgroundColor: const Color(0xFF111827),
-      body: Center(
+      body: SafeArea(
         child: _prepStarted
-            ? _buildTimer(_prepSeconds, 'Get Ready!')
+            ? _buildTimerScreen(10, 'Get Ready!', _onPrepComplete)
             : _gameStarted
-                ? _buildTimer(_gameSeconds, 'Game Time!')
+                ? _buildTimerScreen(300, 'Game Time!', _onGameComplete, onTick: _onGameTick)
                 : Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -161,59 +143,36 @@ class _GamePrepScreenState extends State<GamePrepScreen> {
     );
   }
 
-  Widget _buildTimer(int seconds, String label) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            label,
-            style: const TextStyle(fontSize: 36, color: Colors.white, fontWeight: FontWeight.bold),
+  Widget _buildTimerScreen(int duration, String title, VoidCallback onComplete, {Function(int)? onTick}) {
+    return Column(
+      children: [
+        // Pause button at the top
+        Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              PauseResumeButton(
+                isPaused: _isPaused,
+                onTogglePause: _togglePause,
+                fontSize: 18,
+              ),
+            ],
           ),
-          const SizedBox(height: 32),
-          Text(
-            _formatTime(seconds),
-            style: const TextStyle(fontSize: 120, color: Colors.green, fontWeight: FontWeight.bold),
+        ),
+        // Timer in the center
+        Expanded(
+          child: CountdownTimerWidget(
+            durationSeconds: duration,
+            onComplete: onComplete,
+            onTick: onTick,
+            isPaused: _isPaused,
+            title: title,
+            fontSize: 600, // Much larger font size for game prep screen
+            textColor: Colors.green,
           ),
-        ],
-      ),
+        ),
+      ],
     );
-  }
-
-  String _formatTime(int seconds) {
-    final m = (seconds ~/ 60).toString().padLeft(2, '0');
-    final s = (seconds % 60).toString().padLeft(2, '0');
-    return '$m:$s';
-  }
-}
-
-class Ticker {
-  final void Function(Duration) onTick;
-  late final Stopwatch _stopwatch;
-  late final Duration _interval;
-  bool _running = false;
-  Ticker(this.onTick, {Duration interval = const Duration(seconds: 1)}) {
-    _interval = interval;
-    _stopwatch = Stopwatch();
-  }
-  void start() {
-    _running = true;
-    _stopwatch.reset();
-    _stopwatch.start();
-    _tick();
-  }
-  void _tick() async {
-    while (_running && _stopwatch.isRunning) {
-      await Future.delayed(_interval);
-      if (!_running) break;
-      onTick(_stopwatch.elapsed);
-    }
-  }
-  void stop() {
-    _running = false;
-    _stopwatch.stop();
-  }
-  void dispose() {
-    stop();
   }
 } 

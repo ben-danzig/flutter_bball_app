@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bball_app/services/workout_state.dart';
 import 'package:provider/provider.dart';
+import '../../../utils/widgets/pause_resume_button.dart';
 
 class ActiveDrillLayout extends StatelessWidget {
   final String drillName;
@@ -73,17 +74,11 @@ class ActiveDrillLayout extends StatelessWidget {
                   ),
                   Consumer<WorkoutState>(
                     builder: (context, workoutState, child) {
-                      return TextButton(
-                        onPressed: () {
+                      return PauseResumeButton(
+                        isPaused: workoutState.isPaused,
+                        onTogglePause: () {
                           workoutState.togglePause();
                         },
-                        child: Text(
-                          workoutState.isPaused ? 'RESUME' : '|| PAUSE',
-                          style: const TextStyle(
-                              color: Color(0xFF9ca3af),
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold),
-                        ),
                       );
                     },
                   ),
