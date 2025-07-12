@@ -1,7 +1,6 @@
 import 'package:flutter_bball_app/models/player.dart';
-import 'package:flutter_bball_app/services/player_service.dart';
 
-class MockPlayerService extends PlayerService {
+class MockPlayerService {
   List<Player> mockPlayers = [];
   String? lastAddedPlayerName;
   String? lastRemovedPlayerId;
@@ -12,19 +11,16 @@ class MockPlayerService extends PlayerService {
   bool loadPlayersCalled = false;
   bool savePlayersCalled = false;
 
-  MockPlayerService() : super._();
+  MockPlayerService();
 
-  @override
   Future<void> loadPlayers() async {
     loadPlayersCalled = true;
   }
 
-  @override
   Future<void> savePlayers() async {
     savePlayersCalled = true;
   }
 
-  @override
   Future<String?> addPlayer(String name) async {
     lastAddedPlayerName = name;
     
@@ -42,12 +38,10 @@ class MockPlayerService extends PlayerService {
     return null;
   }
 
-  @override
   Future<List<Player>> getPlayers() async {
     return List.unmodifiable(mockPlayers);
   }
 
-  @override
   Future<String?> removePlayer(String id) async {
     lastRemovedPlayerId = id;
     
@@ -61,7 +55,6 @@ class MockPlayerService extends PlayerService {
     return null;
   }
 
-  @override
   Future<String?> updatePlayer(String id, String newName) async {
     lastUpdatedPlayerId = id;
     lastUpdatedPlayerName = newName;
@@ -86,7 +79,6 @@ class MockPlayerService extends PlayerService {
     return null;
   }
 
-  @override
   Future<Map<String, String>> preRegisterPlayers(List<String> names) async {
     final Map<String, String> errors = {};
     
@@ -101,7 +93,6 @@ class MockPlayerService extends PlayerService {
     return errors;
   }
 
-  @override
   Future<List<Player>> findPlayerByName(String name) async {
     lastSearchTerm = name;
     
@@ -114,7 +105,6 @@ class MockPlayerService extends PlayerService {
         p.name.toLowerCase().contains(searchTerm)).toList();
   }
 
-  @override
   Future<void> clearAllPlayers() async {
     mockPlayers.clear();
   }
