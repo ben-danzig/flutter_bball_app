@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../models/player.dart';
 import '../../services/player_service.dart';
-import 'team_pairing_screen.dart';
-import 'player_questionnaire_screen.dart';
 
 class PlayersScreen extends StatefulWidget {
   const PlayersScreen({Key? key}) : super(key: key);
@@ -68,35 +66,12 @@ class _PlayersScreenState extends State<PlayersScreen> {
     }
   }
 
-  void _navigateToQuestionnaire(Player player) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => PlayerQuestionnaireScreen(player: player),
-      ),
-    ).then((_) => _loadPlayers()); // Reload players when returning
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Players'),
         backgroundColor: const Color(0xFF1F2937),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.group),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const TeamPairingScreen(),
-                ),
-              );
-            },
-            tooltip: 'Team Pairing',
-          ),
-        ],
       ),
       body: Column(
         children: [
@@ -124,73 +99,6 @@ class _PlayersScreenState extends State<PlayersScreen> {
                         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
                       ),
                       child: const Text('Add'),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: () {
-                          // Navigate to questionnaire for new player registration
-                          if (_players.isNotEmpty) {
-                            // For now, just show a message to add a player first
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Please add a player first, then use the questionnaire button next to their name.'),
-                                backgroundColor: Colors.blue,
-                              ),
-                            );
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Please add a player first, then use the questionnaire button next to their name.'),
-                                backgroundColor: Colors.blue,
-                              ),
-                            );
-                          }
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF3B82F6),
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                        ),
-                        icon: const Icon(Icons.person_add, color: Colors.white),
-                        label: const Text(
-                          'Register Player',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const TeamPairingScreen(),
-                            ),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF059669),
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                        ),
-                        icon: const Icon(Icons.group, color: Colors.white),
-                        label: const Text(
-                          'Create Teams',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
                     ),
                   ],
                 ),
@@ -225,47 +133,14 @@ class _PlayersScreenState extends State<PlayersScreen> {
                           final player = _players[index];
                           return ListTile(
                             title: Text(player.name),
-                            subtitle: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Registered: ${player.registeredAt.toString().split('.').first}',
-                                  style: const TextStyle(fontSize: 12),
-                                ),
-                                if (player.hasCompletedQuestionnaire)
-                                  const Text(
-                                    '✓ Questionnaire completed',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.green,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  )
-                                else
-                                  const Text(
-                                    '⚠ Questionnaire pending',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: Colors.orange,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                              ],
+                            subtitle: Text(
+                              'Registered: ${player.registeredAt.toString().split('.').first}',
+                              style: const TextStyle(fontSize: 12),
                             ),
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                IconButton(
-                                  icon: const Icon(Icons.quiz, color: Colors.blue),
-                                  onPressed: () => _navigateToQuestionnaire(player),
-                                  tooltip: 'Complete Questionnaire',
-                                ),
-                                IconButton(
-                                  icon: const Icon(Icons.delete, color: Colors.red),
-                                  onPressed: () => _removePlayer(player.id),
-                                  tooltip: 'Remove Player',
-                                ),
-                              ],
+                            trailing: IconButton(
+                              icon: const Icon(Icons.delete, color: Colors.red),
+                              onPressed: () => _removePlayer(player.id),
+                              tooltip: 'Remove Player',
                             ),
                           );
                         },

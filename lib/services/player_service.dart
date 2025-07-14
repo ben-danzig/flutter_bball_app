@@ -70,47 +70,6 @@ class PlayerService {
     return null; // Success
   }
 
-  /// Updates a player's questionnaire data
-  Future<String?> updatePlayerQuestionnaire(
-    String id, {
-    String? preferredPartnerId,
-    int? heightFeet,
-    int? heightInches,
-    String? highestLevelPlayed,
-    String? layupAbility,
-    String? lastTimePlayed,
-    String? additionalNotes,
-  }) async {
-    final doc = await _playersRef.doc(id).get();
-    if (!doc.exists) {
-      return 'Player not found';
-    }
-
-    final updateData = <String, dynamic>{};
-    if (preferredPartnerId != null) updateData['preferredPartnerId'] = preferredPartnerId;
-    if (heightFeet != null) updateData['heightFeet'] = heightFeet;
-    if (heightInches != null) updateData['heightInches'] = heightInches;
-    if (highestLevelPlayed != null) updateData['highestLevelPlayed'] = highestLevelPlayed;
-    if (layupAbility != null) updateData['layupAbility'] = layupAbility;
-    if (lastTimePlayed != null) updateData['lastTimePlayed'] = lastTimePlayed;
-    if (additionalNotes != null) updateData['additionalNotes'] = additionalNotes;
-
-    await _playersRef.doc(id).update(updateData);
-    return null; // Success
-  }
-
-  /// Adds a batch of players for pre-registration
-  Future<Map<String, String>> preRegisterPlayers(List<String> names) async {
-    final Map<String, String> results = {};
-    for (final name in names) {
-      final error = await addPlayer(name);
-      if (error != null) {
-        results[name] = error;
-      }
-    }
-    return results; // Returns any errors by player name
-  }
-
   /// Returns player(s) matching the name (partial, case-insensitive)
   Future<List<Player>> findPlayerByName(String name) async {
     final searchTerm = name.trim().toLowerCase();

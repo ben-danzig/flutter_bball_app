@@ -6,7 +6,6 @@ class MockPlayerService {
   String? lastRemovedPlayerId;
   String? lastUpdatedPlayerId;
   String? lastUpdatedPlayerName;
-  Map<String, String>? lastPreRegisterErrors;
   String? lastSearchTerm;
   bool loadPlayersCalled = false;
   bool savePlayersCalled = false;
@@ -79,48 +78,6 @@ class MockPlayerService {
     return null;
   }
 
-  Future<String?> updatePlayerQuestionnaire(
-    String id, {
-    String? preferredPartnerId,
-    int? heightFeet,
-    int? heightInches,
-    String? highestLevelPlayed,
-    String? layupAbility,
-    String? lastTimePlayed,
-    String? additionalNotes,
-  }) async {
-    final playerIndex = mockPlayers.indexWhere((p) => p.id == id);
-    if (playerIndex == -1) {
-      return 'Player not found';
-    }
-
-    mockPlayers[playerIndex] = mockPlayers[playerIndex].copyWith(
-      preferredPartnerId: preferredPartnerId,
-      heightFeet: heightFeet,
-      heightInches: heightInches,
-      highestLevelPlayed: highestLevelPlayed,
-      layupAbility: layupAbility,
-      lastTimePlayed: lastTimePlayed,
-      additionalNotes: additionalNotes,
-    );
-    
-    return null;
-  }
-
-  Future<Map<String, String>> preRegisterPlayers(List<String> names) async {
-    final Map<String, String> errors = {};
-    
-    for (final name in names) {
-      final error = await addPlayer(name);
-      if (error != null) {
-        errors[name] = error;
-      }
-    }
-    
-    lastPreRegisterErrors = errors;
-    return errors;
-  }
-
   Future<List<Player>> findPlayerByName(String name) async {
     lastSearchTerm = name;
     
@@ -148,7 +105,6 @@ class MockPlayerService {
     lastRemovedPlayerId = null;
     lastUpdatedPlayerId = null;
     lastUpdatedPlayerName = null;
-    lastPreRegisterErrors = null;
     lastSearchTerm = null;
     loadPlayersCalled = false;
     savePlayersCalled = false;
