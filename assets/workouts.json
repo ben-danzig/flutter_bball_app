@@ -329,5 +329,125 @@
         }
       }
     ]
+  },
+  {
+    "id": "all_around_fundamentals",
+    "name": "All Around Fundamentals Workout",
+    "objective": "A comprehensive workout to develop ball handling, finishing, pull-up shooting, and 3-point shooting fundamentals.",
+    "estimatedDuration": 40,
+    "drills": [
+      {
+        "drillId": "full_court_dribbling",
+        "name": "Full Court Dribbling",
+        "description": "Go up and down the full length of the court trying a single dribble move. Work on keeping your head up and don’t look at the ball as much as you can. Try to move as fast as you can - if you lose the ball a few times that’s a good sign that you’re challenging yourself, but if you’re constantly losing the ball then dial back the difficulty of the drill by going slower or occasionally glancing down at the ball. Dribble moves: right hand, left hand, crossover, between the legs, behind the back, 2-dribble combos, get creative.",
+        "type": "TIMED",
+        "config": { "duration": 300 }
+      },
+      {
+        "drillId": "free_throws_1",
+        "name": "Free Throws (First Set)",
+        "description": "Shoot 10 free throws and record the number of makes out of 10.",
+        "type": "REP_BASED",
+        "config": { "sets": 1, "targetMakes": 10 }
+      },
+      {
+        "drillId": "dribble_drive_left_crossover",
+        "name": "Dribble-Drive Series: Left Elbow Crossover",
+        "description": "Starting at the left elbow, take 1 dribble towards the hoop, change direction with a crossover, and finish a layup on the opposite side. 3 makes.",
+        "type": "MAKE_TARGET_TIMED",
+        "config": { "targetMakes": 3 }
+      },
+      {
+        "drillId": "dribble_drive_left_btl",
+        "name": "Dribble-Drive Series: Left Elbow Between the Legs",
+        "description": "Starting at the left elbow, take 1 dribble towards the hoop, change direction between the legs, and finish a layup on the opposite side. 3 makes.",
+        "type": "MAKE_TARGET_TIMED",
+        "config": { "targetMakes": 3 }
+      },
+      {
+        "drillId": "dribble_drive_left_btb",
+        "name": "Dribble-Drive Series: Left Elbow Behind the Back",
+        "description": "Starting at the left elbow, take 1 dribble towards the hoop, change direction behind the back, and finish a layup on the opposite side. 3 makes.",
+        "type": "MAKE_TARGET_TIMED",
+        "config": { "targetMakes": 3 }
+      },
+      {
+        "drillId": "dribble_drive_right_crossover",
+        "name": "Dribble-Drive Series: Right Elbow Crossover",
+        "description": "Starting at the right elbow, take 1 dribble towards the hoop, change direction with a crossover, and finish a layup on the opposite side. 3 makes.",
+        "type": "MAKE_TARGET_TIMED",
+        "config": { "targetMakes": 3 }
+      },
+      {
+        "drillId": "dribble_drive_right_btl",
+        "name": "Dribble-Drive Series: Right Elbow Between the Legs",
+        "description": "Starting at the right elbow, take 1 dribble towards the hoop, change direction between the legs, and finish a layup on the opposite side. 3 makes.",
+        "type": "MAKE_TARGET_TIMED",
+        "config": { "targetMakes": 3 }
+      },
+      {
+        "drillId": "dribble_drive_right_btb",
+        "name": "Dribble-Drive Series: Right Elbow Behind the Back",
+        "description": "Starting at the right elbow, take 1 dribble towards the hoop, change direction behind the back, and finish a layup on the opposite side. 3 makes.",
+        "type": "MAKE_TARGET_TIMED",
+        "config": { "targetMakes": 3 }
+      },
+      {
+        "drillId": "pullup_left",
+        "name": "Dribble Pull-up Left",
+        "description": "Start at the free throw line, take one dribble towards the basket going left, hit a pull up jumper. 5 makes.",
+        "type": "MAKE_TARGET_TIMED",
+        "config": { "targetMakes": 5 }
+      },
+      {
+        "drillId": "pullup_right",
+        "name": "Dribble Pull-up Right",
+        "description": "Start at the free throw line, take one dribble towards the basket going right, hit a pull up jumper. 5 makes.",
+        "type": "MAKE_TARGET_TIMED",
+        "config": { "targetMakes": 5 }
+      },
+      {
+        "drillId": "3pt_left_corner",
+        "name": "3pt Shooting: Left Corner",
+        "description": "Make 3 3-pointers from the left corner. Try to finish in as little time as possible.",
+        "type": "MAKE_TARGET_TIMED",
+        "config": { "targetMakes": 3 }
+      },
+      {
+        "drillId": "3pt_left_wing",
+        "name": "3pt Shooting: Left Wing",
+        "description": "Make 3 3-pointers from the left wing. Try to finish in as little time as possible.",
+        "type": "MAKE_TARGET_TIMED",
+        "config": { "targetMakes": 3 }
+      },
+      {
+        "drillId": "3pt_top_of_key",
+        "name": "3pt Shooting: Top of the Key",
+        "description": "Make 3 3-pointers from the top of the key. Try to finish in as little time as possible.",
+        "type": "MAKE_TARGET_TIMED",
+        "config": { "targetMakes": 3 }
+      },
+      {
+        "drillId": "3pt_right_wing",
+        "name": "3pt Shooting: Right Wing",
+        "description": "Make 3 3-pointers from the right wing. Try to finish in as little time as possible.",
+        "type": "MAKE_TARGET_TIMED",
+        "config": { "targetMakes": 3 }
+      },
+      {
+        "drillId": "3pt_right_corner",
+        "name": "3pt Shooting: Right Corner",
+        "description": "Make 3 3-pointers from the right corner. Try to finish in as little time as possible.",
+        "type": "MAKE_TARGET_TIMED",
+        "config": { "targetMakes": 3 }
+      },
+      {
+        "drillId": "free_throws_2",
+        "name": "Free Throws (Second Set)",
+        "description": "Shoot 10 free throws.",
+        "type": "REP_BASED",
+        "config": { "sets": 1, "targetMakes": 10 }
+      }
+    ]
   }
 ]

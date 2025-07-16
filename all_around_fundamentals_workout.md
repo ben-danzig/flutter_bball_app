@@ -1,0 +1,33 @@
+### All Around Fundamentals Workout
+
+- 5 mins dribbling
+    - Go up and down the full length of the court trying a single dribble move. Work on keeping your head up and don’t look at the ball as much as you can. Try to move as fast as you can - if you lose the ball a few times that’s a good sign that you’re challenging yourself, but if you’re constantly losing the ball then dial back the difficulty of the drill by going slower or occasionally glancing down at the ball.
+    - Dribble moves:
+        - Right hand dribble
+        - Left hand dribble
+        - Crossover
+        - Between the legs
+        - Behind the back
+        - 2 dribble move: Between the legs → crossover
+        - 2 dribble move: Between the legs → behind the back
+        - If any time remains, get creative!
+- 10 Free-Throws → record number of makes out of 10.
+- Dribble-drive series
+    - Starting at one of the elbows, take 1 dribble towards the hoop, make a dribble move to the opposite side of the paint, then finish a layup on the opposite side of the hoop. For example, you might start on the right elbow, take 1 dribble towards the hoop, then change direction with a crossover going left, and finish a left layup.
+    - 3 makes per drill
+    - Left elbow
+        - Crossover
+        - Between the legs
+        - Behind the back
+    - Right elbow
+        - Crossover
+        - Between the legs
+        - Behind the back
+- Dribble pull-up series
+    - Start at the free throw line, take one dribble towards the basket going left or right, hit a pull up jumper.
+        - Work on getting up high when shooting the ball
+        - As you get comfortable making these shots consistently, move the starting point further and further out until you’re stepping into a pull up 3-pointer.
+    - 5 makes going left, 5 makes going right
+- 3pt shooting: 3 makes from 5 spots.
+    - Try to finish each spot in as little time as possible.
+- 10 Free throws
