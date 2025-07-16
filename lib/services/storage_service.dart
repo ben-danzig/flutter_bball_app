@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import '../models/workout_session.dart';
+import 'workout_session_service.dart';
 
 class StorageService {
   static StorageService _instance = StorageService._();
@@ -78,5 +79,16 @@ class StorageService {
     final file = await _getLocalFile('session_${session.id}.json');
     final jsonString = jsonEncode(session.toJson());
     await file.writeAsString(jsonString);
+  }
+
+  /// Migrates all local sessions to Firestore and optionally deletes local files
+  Future<void> migrateSessionsToFirestore({bool deleteAfter = false}) async {
+    final sessions = await getAllSessions();
+    for (final session in sessions) {
+      await WorkoutSessionService.instance.addSession(session);
+      if (deleteAfter) {
+        await deleteSession(session.id);
+      }
+    }
   }
 }

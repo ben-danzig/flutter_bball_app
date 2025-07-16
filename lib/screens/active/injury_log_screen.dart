@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bball_app/screens/summary/workout_summary_screen.dart';
-import 'package:flutter_bball_app/services/storage_service.dart';
 import 'package:flutter_bball_app/services/workout_state.dart';
+import 'package:flutter_bball_app/services/workout_session_service.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 import '../../models/workout_session.dart';
@@ -16,7 +16,6 @@ class InjuryLogScreen extends StatefulWidget {
 class _InjuryLogScreenState extends State<InjuryLogScreen> {
   String? _selectedFeeling;
   final TextEditingController _notesController = TextEditingController();
-  final StorageService _storageService = StorageService.instance;
 
   @override
   Widget build(BuildContext context) {
@@ -120,7 +119,7 @@ class _InjuryLogScreenState extends State<InjuryLogScreen> {
       notes: _notesController.text,
     );
 
-    _storageService.saveSession(session).then((_) {
+    WorkoutSessionService.instance.addSession(session).then((_) {
       workoutState.endWorkout();
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(

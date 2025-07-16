@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../models/workout_session.dart';
-import '../../services/storage_service.dart';
+import '../../services/workout_session_service.dart';
 import '../summary/workout_summary_screen.dart';
 
 class WorkoutHistoryScreen extends StatefulWidget {
@@ -17,12 +17,12 @@ class _WorkoutHistoryScreenState extends State<WorkoutHistoryScreen> {
   @override
   void initState() {
     super.initState();
-    _sessionsFuture = StorageService.instance.getAllSessions();
+    _sessionsFuture = WorkoutSessionService.instance.getAllSessions();
   }
 
   void _refreshSessions() {
     setState(() {
-      _sessionsFuture = StorageService.instance.getAllSessions();
+      _sessionsFuture = WorkoutSessionService.instance.getAllSessions();
     });
   }
 
@@ -52,7 +52,7 @@ class _WorkoutHistoryScreenState extends State<WorkoutHistoryScreen> {
     );
 
     if (shouldDelete == true) {
-      await StorageService.instance.deleteSession(session.id);
+      await WorkoutSessionService.instance.deleteSession(session.id);
       _refreshSessions();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -144,7 +144,7 @@ class _WorkoutHistoryScreenState extends State<WorkoutHistoryScreen> {
         isPartial: session.isPartial,
       );
       
-      await StorageService.instance.updateSession(updatedSession);
+      await WorkoutSessionService.instance.updateSession(updatedSession);
       _refreshSessions();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
