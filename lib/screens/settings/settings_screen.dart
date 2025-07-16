@@ -67,11 +67,6 @@ class SettingsScreen extends StatelessWidget {
                   );
                 },
               ),
-              SwitchListTile(
-                title: const Text('TEST: Load data for unknown devices'),
-                value: settingsService.loadUnknownDeviceSessions,
-                onChanged: (value) => settingsService.setLoadUnknownDeviceSessions(value),
-              ),
             ],
           ),
         ),

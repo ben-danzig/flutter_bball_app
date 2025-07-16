@@ -27,12 +27,9 @@ class _WorkoutHistoryScreenState extends State<WorkoutHistoryScreen> {
 
   Future<void> _loadSessions() async {
     final deviceId = await getDeviceId();
-    final settingsService = Provider.of<SettingsService>(context, listen: false);
-    final loadUnknown = settingsService.loadUnknownDeviceSessions;
     setState(() {
       _sessionsFuture = WorkoutSessionService.instance.getAllSessions(
         deviceId: deviceId,
-        loadUnknownDeviceSessions: loadUnknown,
       );
     });
   }

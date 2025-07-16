@@ -31,11 +31,8 @@ class _WorkoutSummaryScreenState extends State<WorkoutSummaryScreen> {
   Future<void> _loadPreviousSession() async {
     try {
       final deviceId = await getDeviceId();
-      final settingsService = Provider.of<SettingsService>(context, listen: false);
-      final loadUnknown = settingsService.loadUnknownDeviceSessions;
       final allSessions = await WorkoutSessionService.instance.getAllSessions(
         deviceId: deviceId,
-        loadUnknownDeviceSessions: loadUnknown,
       );
       
       // Filter sessions for the same workout blueprint
