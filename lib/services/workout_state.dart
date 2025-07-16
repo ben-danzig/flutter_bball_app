@@ -5,7 +5,7 @@ import 'package:flutter_bball_app/models/workout_blueprint.dart';
 import 'package:flutter_bball_app/models/workout_session.dart';
 import 'package:flutter_bball_app/services/audio_service.dart';
 import 'package:flutter_bball_app/services/settings_service.dart';
-import 'package:flutter_bball_app/services/storage_service.dart';
+import 'package:flutter_bball_app/services/workout_session_service.dart';
 
 class WorkoutState extends ChangeNotifier {
   WorkoutBlueprint? _blueprint;
@@ -181,7 +181,7 @@ class WorkoutState extends ChangeNotifier {
       isPartial: true,
     );
 
-    await StorageService.instance.saveSession(session);
+    await WorkoutSessionService.instance.addSession(session);
     endWorkout();
   }
 

@@ -3,7 +3,7 @@ import 'package:intl/intl.dart';
 import '../../models/workout_session.dart';
 import '../../models/drill_result.dart';
 import 'package:flutter_bball_app/utils/format_duration.dart';
-import 'package:flutter_bball_app/services/storage_service.dart';
+import 'package:flutter_bball_app/services/workout_session_service.dart';
 import '../progress/workout_progress_screen.dart';
 
 class WorkoutSummaryScreen extends StatefulWidget {
@@ -27,7 +27,7 @@ class _WorkoutSummaryScreenState extends State<WorkoutSummaryScreen> {
 
   Future<void> _loadPreviousSession() async {
     try {
-      final allSessions = await StorageService.instance.getAllSessions();
+      final allSessions = await WorkoutSessionService.instance.getAllSessions();
       
       // Filter sessions for the same workout blueprint
       final sameBlueprintSessions = allSessions.where((session) => 
