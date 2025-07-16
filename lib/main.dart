@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bball_app/screens/home_screen.dart';
 import 'package:flutter_bball_app/services/settings_service.dart';
 import 'package:flutter_bball_app/services/workout_state.dart';
-import 'package:flutter_bball_app/services/player_service.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
@@ -11,9 +10,6 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform, // <-- This line is critical!
   );
-  
-  // Initialize PlayerService and load players
-  await PlayerService.instance.loadPlayers();
   
   runApp(
     MultiProvider(
