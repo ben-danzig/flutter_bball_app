@@ -34,8 +34,10 @@ All models use JSON serialization with code generation:
 
 ### Data Layer
 - `WorkoutRepository` - Loads workout blueprints from JSON assets
-- `StorageService` - Handles persistent storage of workout history using local files
-- Workout data stored in `assets/workouts.json` and `assets/test_workouts.json`
+- `WorkoutSessionService` - Handles persistent storage of workout session history using Firestore
+- Workout session data is stored in the Firestore `workout_sessions` collection
+- `StorageService` (legacy) - Previously handled local file storage for workout history; now deprecated
+- Workout blueprints/templates are stored in `assets/workouts.json` and `assets/test_workouts.json`
 
 ### Screen Structure
 - **Library**: Browse available workouts
