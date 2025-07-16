@@ -3,6 +3,9 @@ import 'package:intl/intl.dart';
 import '../../models/workout_session.dart';
 import '../../services/workout_session_service.dart';
 import '../summary/workout_summary_screen.dart';
+import 'package:flutter_bball_app/utils/device_id_util.dart';
+import 'package:flutter_bball_app/services/settings_service.dart';
+import 'package:provider/provider.dart';
 
 class WorkoutHistoryScreen extends StatefulWidget {
   const WorkoutHistoryScreen({Key? key}) : super(key: key);
@@ -12,18 +15,28 @@ class WorkoutHistoryScreen extends StatefulWidget {
 }
 
 class _WorkoutHistoryScreenState extends State<WorkoutHistoryScreen> {
-  late Future<List<WorkoutSession>> _sessionsFuture;
+  Future<List<WorkoutSession>> _sessionsFuture = Future.value([]);
 
   @override
   void initState() {
     super.initState();
-    _sessionsFuture = WorkoutSessionService.instance.getAllSessions();
+    _loadSessions();
+  }
+
+  Future<void> _loadSessions() async {
+    final deviceId = await getDeviceId();
+    final settingsService = Provider.of<SettingsService>(context, listen: false);
+    final loadUnknown = settingsService.loadUnknownDeviceSessions;
+    setState(() {
+      _sessionsFuture = WorkoutSessionService.instance.getAllSessions(
+        deviceId: deviceId,
+        loadUnknownDeviceSessions: loadUnknown,
+      );
+    });
   }
 
   void _refreshSessions() {
-    setState(() {
-      _sessionsFuture = WorkoutSessionService.instance.getAllSessions();
-    });
+    _loadSessions();
   }
 
   Future<void> _deleteSession(WorkoutSession session) async {
@@ -141,7 +154,8 @@ class _WorkoutHistoryScreenState extends State<WorkoutHistoryScreen> {
         completedAt: session.completedAt,
         feeling: feelingController.text.isEmpty ? null : feelingController.text,
         notes: notesController.text.isEmpty ? null : notesController.text,
-        isPartial: session.isPartial,
+        isPartial: session.isPartial, 
+        deviceId: session.deviceId,
       );
       
       await WorkoutSessionService.instance.updateSession(updatedSession);

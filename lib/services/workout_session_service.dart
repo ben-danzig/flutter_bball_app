@@ -20,9 +20,24 @@ class WorkoutSessionService {
   }
 
   /// Returns a list of all workout sessions, ordered by completion date
-  Future<List<WorkoutSession>> getAllSessions() async {
-    final snapshot = await _sessionsRef.orderBy('completedAt', descending: true).get();
-    return snapshot.docs.map((doc) => WorkoutSession.fromJson(doc.data() as Map<String, dynamic>)).toList();
+  Future<List<WorkoutSession>> getAllSessions({required String deviceId, required bool loadUnknownDeviceSessions}) async {
+    Query query = _sessionsRef.orderBy('completedAt', descending: true)
+      .where('deviceId', isEqualTo: deviceId);
+    final deviceSessionsSnapshot = await query.get();
+    final deviceSessions = deviceSessionsSnapshot.docs.map((doc) => WorkoutSession.fromJson(doc.data() as Map<String, dynamic>)).toList();
+
+    if (loadUnknownDeviceSessions) {
+      final migratedQuery = _sessionsRef.orderBy('completedAt', descending: true)
+        .where('deviceId', isEqualTo: 'migratedFromLocal');
+      final migratedSnapshot = await migratedQuery.get();
+      final migratedSessions = migratedSnapshot.docs.map((doc) => WorkoutSession.fromJson(doc.data() as Map<String, dynamic>)).toList();
+      // Merge and sort
+      final allSessions = [...deviceSessions, ...migratedSessions];
+      allSessions.sort((a, b) => b.completedAt.compareTo(a.completedAt));
+      return allSessions;
+    } else {
+      return deviceSessions;
+    }
   }
 
   /// Updates an existing session

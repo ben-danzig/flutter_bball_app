@@ -8,6 +8,7 @@ class SettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final settingsService = Provider.of<SettingsService>(context);
 
     return Scaffold(
       backgroundColor: const Color(0xFF111827),
@@ -65,6 +66,11 @@ class SettingsScreen extends StatelessWidget {
                     ],
                   );
                 },
+              ),
+              SwitchListTile(
+                title: const Text('TEST: Load data for unknown devices'),
+                value: settingsService.loadUnknownDeviceSessions,
+                onChanged: (value) => settingsService.setLoadUnknownDeviceSessions(value),
               ),
             ],
           ),

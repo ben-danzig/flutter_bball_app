@@ -10,11 +10,13 @@ class SettingsService extends ChangeNotifier {
   bool _announceDrillName = true;
   bool _announceDrillDescription = true;
   bool _announceDrillTargetMakes = true;
+  bool _loadUnknownDeviceSessions = false;
 
   // Getters
   bool get announceDrillName => _announceDrillName;
   bool get announceDrillDescription => _announceDrillDescription;
   bool get announceDrillTargetMakes => _announceDrillTargetMakes;
+  bool get loadUnknownDeviceSessions => _loadUnknownDeviceSessions;
 
   SettingsService() {
     _loadSettings();
@@ -37,6 +39,7 @@ class SettingsService extends ChangeNotifier {
         _announceDrillName = data['announceDrillName'] ?? true;
         _announceDrillDescription = data['announceDrillDescription'] ?? true;
         _announceDrillTargetMakes = data['announceDrillTargetMakes'] ?? true;
+        _loadUnknownDeviceSessions = data['loadUnknownDeviceSessions'] ?? false;
         
         notifyListeners();
       }
@@ -54,6 +57,7 @@ class SettingsService extends ChangeNotifier {
         'announceDrillName': _announceDrillName,
         'announceDrillDescription': _announceDrillDescription,
         'announceDrillTargetMakes': _announceDrillTargetMakes,
+        'loadUnknownDeviceSessions': _loadUnknownDeviceSessions,
       };
       
       await file.writeAsString(json.encode(data));
@@ -76,6 +80,12 @@ class SettingsService extends ChangeNotifier {
 
   Future<void> setAnnounceDrillTargetMakes(bool value) async {
     _announceDrillTargetMakes = value;
+    notifyListeners();
+    await _saveSettings();
+  }
+
+  Future<void> setLoadUnknownDeviceSessions(bool value) async {
+    _loadUnknownDeviceSessions = value;
     notifyListeners();
     await _saveSettings();
   }

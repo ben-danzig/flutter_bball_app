@@ -6,6 +6,7 @@ import 'package:flutter_bball_app/models/workout_session.dart';
 import 'package:flutter_bball_app/services/audio_service.dart';
 import 'package:flutter_bball_app/services/settings_service.dart';
 import 'package:flutter_bball_app/services/workout_session_service.dart';
+import 'package:flutter_bball_app/utils/device_id_util.dart';
 
 class WorkoutState extends ChangeNotifier {
   WorkoutBlueprint? _blueprint;
@@ -173,12 +174,14 @@ class WorkoutState extends ChangeNotifier {
       return;
     }
 
+    final deviceId = await getDeviceId();
     final session = WorkoutSession(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       workoutBlueprint: _blueprint!,
       results: List.from(_sessionResults),
       completedAt: DateTime.now(),
       isPartial: true,
+      deviceId: deviceId,
     );
 
     await WorkoutSessionService.instance.addSession(session);
