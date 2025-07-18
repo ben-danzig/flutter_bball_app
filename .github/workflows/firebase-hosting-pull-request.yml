@@ -17,6 +17,10 @@ jobs:
         with:
           flutter-version: '3.24.0'
           channel: 'stable'
+      - name: Print Flutter and Dart versions
+        run: |
+          flutter --version
+          dart --version
       - run: flutter build web
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
