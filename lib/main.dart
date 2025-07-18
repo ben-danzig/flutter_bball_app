@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bball_app/screens/home_screen.dart';
+import 'package:flutter_bball_app/screens/auth/auth_wrapper.dart';
+import 'package:flutter_bball_app/services/auth_service.dart';
 import 'package:flutter_bball_app/services/settings_service.dart';
 import 'package:flutter_bball_app/services/workout_state.dart';
 import 'package:provider/provider.dart';
@@ -14,6 +15,7 @@ void main() async {
   runApp(
     MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (context) => AuthService()),
         ChangeNotifierProvider(create: (context) => WorkoutState()),
         ChangeNotifierProvider(create: (context) => SettingsService()),
       ],
@@ -152,8 +154,8 @@ class BballTrainerApp extends StatelessWidget {
           elevation: 0,
         ),
       ),
-      // Change the home property to our new screen
-      home: const HomeScreen(),
+      // Use AuthWrapper to handle authentication state
+      home: const AuthWrapper(),
     );
   }
 }
