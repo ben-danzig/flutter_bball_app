@@ -23,7 +23,14 @@ This document tracks all the steps required before releasing the app to the publ
 
 ---
 
-## 2. [Add other productionization steps here]
+## 2. iOS Deployment (Future)
+
+- **Note:**
+  - Once we begin deploying to iOS, we will need to add an iOS deploy step to our CI/CD workflow using `macos-latest` as the runner in GitHub Actions. This is required because iOS builds need Xcode, which is only available on macOS runners.
+
+---
+
+## 3. [Add other productionization steps here]
 
 - e.g., Set up app icons and splash screens
 - e.g., Configure privacy policy and terms of service
