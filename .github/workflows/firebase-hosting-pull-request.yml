@@ -20,8 +20,8 @@ jobs:
       # VSCode: The following secret is set in GitHub repo settings.
       # The 'Context access might be invalid' warning can be ignored.
       # There is currently no way for VSCode to verify this secret exists in GitHub without disabling all linting for the file.
-      - name: Write .env file from GitHub Secrets
-        run: echo "WEB_CLIENT_ID=${{ secrets.WEB_CLIENT_ID }}" > .env
+      - name: Write .env.public file from GitHub Secrets
+        run: echo "WEB_CLIENT_ID=${{ secrets.WEB_CLIENT_ID }}" > .env.public
       - run: flutter build web
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
