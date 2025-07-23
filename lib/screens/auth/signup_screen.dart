@@ -39,14 +39,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
         _passwordController.text,
       );
       
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Account created successfully!'),
-            backgroundColor: Color(0xFF10B981),
-          ),
-        );
-      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
