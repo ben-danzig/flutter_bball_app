@@ -13,15 +13,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      # .env.public must be created before the flutter-action step so that it exists once
+      # flutter pub get is run
+      - name: Write .env.public file from GitHub Secrets
+        run: echo "WEB_CLIENT_ID=${{ secrets.WEB_CLIENT_ID }}" > .env.public
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.32.1'
           channel: 'stable'
-      # VSCode: The following secret is set in GitHub repo settings.
-      # The 'Context access might be invalid' warning can be ignored.
-      # There is currently no way for VSCode to verify this secret exists in GitHub without disabling all linting for the file.
-      - name: Write .env.public file from GitHub Secrets
-        run: echo "WEB_CLIENT_ID=${{ secrets.WEB_CLIENT_ID }}" > .env.public
       - run: flutter build web
       - name: List build/web/assets directory
         run: ls -l build/web/assets
