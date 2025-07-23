@@ -23,8 +23,10 @@
     "public": "build/web",
     "ignore": [
       "firebase.json",
+      "**/.git",
+      "**/node_modules/**",
       "**/.*",
-      "**/node_modules/**"
+      "!.env.public"
     ]
   }
 }
