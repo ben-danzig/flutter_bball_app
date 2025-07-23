@@ -1,12 +1,15 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_bball_app/repositories/user_repository.dart';
 import 'package:flutter_bball_app/models/user_profile.dart';
 
 class AuthService extends ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  final GoogleSignIn _googleSignIn = GoogleSignIn(
+    clientId: kIsWeb ? dotenv.env['WEB_CLIENT_ID'] : null,
+  );
   final UserRepository _userRepository = UserRepository();
 
   User? get currentUser => _auth.currentUser;
