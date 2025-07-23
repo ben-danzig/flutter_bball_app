@@ -20,6 +20,7 @@ WorkoutSession _$WorkoutSessionFromJson(Map<String, dynamic> json) =>
       notes: json['notes'] as String?,
       isPartial: json['isPartial'] as bool? ?? false,
       deviceId: json['deviceId'] as String,
+      userId: json['userId'] as String,
     );
 
 Map<String, dynamic> _$WorkoutSessionToJson(WorkoutSession instance) =>
@@ -32,4 +33,5 @@ Map<String, dynamic> _$WorkoutSessionToJson(WorkoutSession instance) =>
       'notes': instance.notes,
       'isPartial': instance.isPartial,
       'deviceId': instance.deviceId,
+      'userId': instance.userId,
     };

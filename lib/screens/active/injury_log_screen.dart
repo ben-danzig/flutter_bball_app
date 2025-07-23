@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 import '../../models/workout_session.dart';
 import 'package:flutter_bball_app/utils/device_id_util.dart';
+import 'package:flutter_bball_app/services/auth_service.dart';
 
 class InjuryLogScreen extends StatefulWidget {
   const InjuryLogScreen({Key? key}) : super(key: key);
@@ -112,6 +113,9 @@ class _InjuryLogScreenState extends State<InjuryLogScreen> {
   void _saveWorkout() async {
     final workoutState = Provider.of<WorkoutState>(context, listen: false);
     final deviceId = await getDeviceId();
+    final authService = Provider.of<AuthService>(context, listen: false);
+    final userId = authService.currentUser?.uid;
+    if (userId == null) return;
     final session = WorkoutSession(
       id: const Uuid().v4(),
       workoutBlueprint: workoutState.workoutBlueprint!,
@@ -120,6 +124,7 @@ class _InjuryLogScreenState extends State<InjuryLogScreen> {
       feeling: _selectedFeeling,
       notes: _notesController.text,
       deviceId: deviceId,
+      userId: userId,
     );
 
     WorkoutSessionService.instance.addSession(session).then((_) {

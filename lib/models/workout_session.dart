@@ -14,6 +14,7 @@ class WorkoutSession {
   final String? notes;
   final bool isPartial;
   final String deviceId; // New field
+  final String userId; // New field for user identification
 
   WorkoutSession({
     required this.id,
@@ -24,6 +25,7 @@ class WorkoutSession {
     this.notes,
     this.isPartial = false,
     required this.deviceId, // New param
+    required this.userId, // New param
   });
 
   factory WorkoutSession.fromJson(Map<String, dynamic> json) => _$WorkoutSessionFromJson(json);
