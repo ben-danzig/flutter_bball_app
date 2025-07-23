@@ -20,13 +20,13 @@ class WorkoutSessionService {
   }
 
   /// Returns a list of all workout sessions, ordered by completion date
-  Future<List<WorkoutSession>> getAllSessions({required String deviceId}) async {
+  Future<List<WorkoutSession>> getAllSessions({required String userId}) async {
     Query query = _sessionsRef.orderBy('completedAt', descending: true)
-      .where('deviceId', isEqualTo: deviceId);
-    final deviceSessionsSnapshot = await query.get();
-    final deviceSessions = deviceSessionsSnapshot.docs.map((doc) => WorkoutSession.fromJson(doc.data() as Map<String, dynamic>)).toList();
+      .where('userId', isEqualTo: userId);
+    final userSessionsSnapshot = await query.get();
+    final userSessions = userSessionsSnapshot.docs.map((doc) => WorkoutSession.fromJson(doc.data() as Map<String, dynamic>)).toList();
 
-    return deviceSessions;
+    return userSessions;
   }
 
   /// Updates an existing session
