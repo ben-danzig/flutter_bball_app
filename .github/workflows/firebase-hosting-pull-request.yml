@@ -22,6 +22,8 @@ jobs:
       # There is currently no way for VSCode to verify this secret exists in GitHub without disabling all linting for the file.
       - name: Write .env.public file from GitHub Secrets
         run: echo "WEB_CLIENT_ID=${{ secrets.WEB_CLIENT_ID }}" > .env.public
+      - name: List build/web/assets directory
+        run: ls -l build/web/assets
       - run: flutter build web
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
