@@ -172,13 +172,47 @@ class _MakeTargetTimedDrillWidgetState extends State<MakeTargetTimedDrillWidget>
           ),
         ),
         const SizedBox(height: 20),
-        Text(
-          widget.drill.description,
-          style: const TextStyle(
-            fontSize: 18,
-            color: Color(0xFF9ca3af),
-          ),
-          textAlign: TextAlign.center,
+        LayoutBuilder(
+          builder: (context, constraints) {
+            // Estimate if the description will overflow (roughly > 2 lines)
+            final textSpan = TextSpan(
+              text: widget.drill.description,
+              style: const TextStyle(
+                fontSize: 18,
+                color: Color(0xFF9ca3af),
+              ),
+            );
+            final tp = TextPainter(
+              text: textSpan,
+              maxLines: null,
+              textDirection: TextDirection.ltr,
+            );
+            tp.layout(maxWidth: constraints.maxWidth);
+            if (tp.height > 80) {
+              return SizedBox(
+                height: 80,
+                child: SingleChildScrollView(
+                  child: Text(
+                    widget.drill.description,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      color: Color(0xFF9ca3af),
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              );
+            } else {
+              return Text(
+                widget.drill.description,
+                style: const TextStyle(
+                  fontSize: 18,
+                  color: Color(0xFF9ca3af),
+                ),
+                textAlign: TextAlign.center,
+              );
+            }
+          },
         ),
         const Spacer(),
         if (!_isComplete)

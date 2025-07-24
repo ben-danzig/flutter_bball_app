@@ -1,0 +1,30 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "flutter-bball-app",
+          "appId": "1:758737339378:android:aab23855bbbe3ffe75a16b",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "flutter-bball-app",
+          "configurations": {
+            "android": "1:758737339378:android:aab23855bbbe3ffe75a16b",
+            "web": "1:758737339378:web:69265f75b19f606a75a16b"
+          }
+        }
+      }
+    }
+  },
+  "hosting": {
+    "public": "build/web",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ]
+  }
+}

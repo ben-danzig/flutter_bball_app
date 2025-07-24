@@ -30,6 +30,7 @@ void main() {
       completedAt: DateTime.now(),
       feeling: '😌 Feeling Great',
       notes: 'Good session today.',
+      deviceId: 'testDevice'
     );
 
     await tester.pumpWidget(

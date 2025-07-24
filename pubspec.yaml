@@ -41,7 +41,12 @@ dependencies:
   intl: ^0.20.2
   numberpicker: ^2.1.2
   fl_chart: ^0.64.0
-  flutter_tts: ^4.2.3
+  flutter_tts: ^3.8.5
+  firebase_core: ^2.30.0
+  cloud_firestore: ^4.17.2
+  audioplayers: ^5.2.1
+  device_info_plus: ^10.1.0
+  shared_preferences: ^2.2.2
 
 dev_dependencies:
   flutter_test:

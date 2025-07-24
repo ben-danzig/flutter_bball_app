@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bball_app/screens/summary/workout_summary_screen.dart';
-import 'package:flutter_bball_app/services/storage_service.dart';
 import 'package:flutter_bball_app/services/workout_state.dart';
+import 'package:flutter_bball_app/services/workout_session_service.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 import '../../models/workout_session.dart';
+import 'package:flutter_bball_app/utils/device_id_util.dart';
 
 class InjuryLogScreen extends StatefulWidget {
   const InjuryLogScreen({Key? key}) : super(key: key);
@@ -16,7 +17,6 @@ class InjuryLogScreen extends StatefulWidget {
 class _InjuryLogScreenState extends State<InjuryLogScreen> {
   String? _selectedFeeling;
   final TextEditingController _notesController = TextEditingController();
-  final StorageService _storageService = StorageService.instance;
 
   @override
   Widget build(BuildContext context) {
@@ -109,8 +109,9 @@ class _InjuryLogScreenState extends State<InjuryLogScreen> {
     );
   }
 
-  void _saveWorkout() {
+  void _saveWorkout() async {
     final workoutState = Provider.of<WorkoutState>(context, listen: false);
+    final deviceId = await getDeviceId();
     final session = WorkoutSession(
       id: const Uuid().v4(),
       workoutBlueprint: workoutState.workoutBlueprint!,
@@ -118,9 +119,10 @@ class _InjuryLogScreenState extends State<InjuryLogScreen> {
       completedAt: DateTime.now(),
       feeling: _selectedFeeling,
       notes: _notesController.text,
+      deviceId: deviceId,
     );
 
-    _storageService.saveSession(session).then((_) {
+    WorkoutSessionService.instance.addSession(session).then((_) {
       workoutState.endWorkout();
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(

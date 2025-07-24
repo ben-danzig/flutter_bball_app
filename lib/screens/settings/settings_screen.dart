@@ -8,6 +8,7 @@ class SettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
+    final settingsService = Provider.of<SettingsService>(context);
 
     return Scaffold(
       backgroundColor: const Color(0xFF111827),

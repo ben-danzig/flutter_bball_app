@@ -1,10 +1,8 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../models/drill.dart';
 import '../../../services/workout_state.dart';
-import 'package:flutter_bball_app/utils/format_duration.dart';
-import 'package:flutter_bball_app/screens/active/widgets/time_picker_dialog.dart' as custom_picker;
+import '../../../utils/widgets/countdown_timer_widget.dart';
 
 class TimedDrillWidget extends StatefulWidget {
   final Drill drill;
@@ -16,16 +14,14 @@ class TimedDrillWidget extends StatefulWidget {
 }
 
 class _TimedDrillWidgetState extends State<TimedDrillWidget> {
-  late Timer _timer;
-  late int _remainingSeconds;
   int? _lastDrillIndex;
   int? _lastResetCounter;
+  late int _currentDuration;
 
   @override
   void initState() {
     super.initState();
-    _remainingSeconds = widget.drill.config['duration']!;
-    _startTimer();
+    _currentDuration = widget.drill.config['duration']!;
   }
 
   @override
@@ -34,16 +30,15 @@ class _TimedDrillWidgetState extends State<TimedDrillWidget> {
     final workoutState = Provider.of<WorkoutState>(context);
     final currentDrillIndex = workoutState.currentDrillIndex;
     final resetCounter = workoutState.resetDrillCounter;
+    
     if (_lastDrillIndex == null) {
       _lastDrillIndex = currentDrillIndex;
       _lastResetCounter = resetCounter;
     } else if (_lastDrillIndex == currentDrillIndex && _lastResetCounter != resetCounter) {
       // Only reset if resetDrillCounter changed
-      _timer.cancel();
       setState(() {
-        _remainingSeconds = widget.drill.config['duration']!;
+        _currentDuration = widget.drill.config['duration']!;
       });
-      _startTimer();
       _lastResetCounter = resetCounter;
     } else {
       _lastDrillIndex = currentDrillIndex;
@@ -51,94 +46,28 @@ class _TimedDrillWidgetState extends State<TimedDrillWidget> {
     }
   }
 
-  void _startTimer() {
+  void _onTimerComplete() {
     final workoutState = Provider.of<WorkoutState>(context, listen: false);
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (workoutState.isPaused) {
-        return;
-      }
+    workoutState.logTimedDrill();
+    workoutState.nextDrill();
+  }
 
-      if (_remainingSeconds > 0) {
-        setState(() {
-          _remainingSeconds--;
-        });
-      } else {
-        _timer.cancel();
-        workoutState.logTimedDrill();
-        workoutState.nextDrill();
-      }
+  void _onTimeEdit(int newDuration) {
+    setState(() {
+      _currentDuration = newDuration;
     });
   }
 
   @override
-  void dispose() {
-    _timer.cancel();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Text(
-          widget.drill.name.toUpperCase(),
-          style: const TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFFf9fafb),
-            letterSpacing: 1.2,
-          ),
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 30),
-        Expanded(
-          child: Center(
-            child: GestureDetector(
-              onTap: () async {
-                final workoutState = Provider.of<WorkoutState>(context, listen: false);
-                final wasPaused = workoutState.isPaused;
-                if (!wasPaused) {
-                  workoutState.togglePause();
-                }
-                final result = await showDialog<int>(
-                  context: context,
-                  builder: (context) => custom_picker.TimePickerDialog(initialSeconds: _remainingSeconds),
-                );
-                if (result != null) {
-                  setState(() {
-                    _remainingSeconds = result;
-                  });
-                }
-                if (!wasPaused) {
-                  workoutState.togglePause();
-                }
-              },
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text(
-                  formatDuration(_remainingSeconds),
-                  style: const TextStyle(
-                    fontSize: 300,
-                    fontWeight: FontWeight.w900,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 30),
-        Text(
-          widget.drill.description,
-          style: const TextStyle(
-            fontSize: 18,
-            color: Color(0xFF9ca3af),
-          ),
-          textAlign: TextAlign.center,
-        ),
-      ],
+    return CountdownTimerWidget(
+      durationSeconds: _currentDuration,
+      onComplete: _onTimerComplete,
+      isPaused: Provider.of<WorkoutState>(context).isPaused,
+      showTapToEdit: true,
+      onTimeEdit: _onTimeEdit,
+      title: widget.drill.name,
+      subtitle: widget.drill.description,
     );
   }
 }

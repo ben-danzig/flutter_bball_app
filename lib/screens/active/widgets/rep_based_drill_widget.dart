@@ -115,13 +115,13 @@ class RepBasedDrillWidget extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text('Log Your Set',
-                style: Theme.of(context)
+                style: Theme.of(ctx)
                     .textTheme
                     .headlineSmall
                     ?.copyWith(color: Colors.white)),
             const SizedBox(height: 8),
             Text('How many shots did you make?',
-                style: Theme.of(context)
+                style: Theme.of(ctx)
                     .textTheme
                     .bodyMedium
                     ?.copyWith(color: Colors.grey[400])),
