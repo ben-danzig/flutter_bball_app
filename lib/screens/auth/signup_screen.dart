@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bball_app/services/auth_service.dart';
 import 'package:flutter_bball_app/screens/auth/login_screen.dart';
+import 'package:flutter_bball_app/screens/auth/auth_wrapper.dart';
+import 'package:flutter_bball_app/screens/home_screen.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -18,6 +21,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   bool _isLoading = false;
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
+  bool _isSubmitting = false; // Add flag to prevent double submission
 
   @override
   void dispose() {
@@ -29,38 +33,144 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   Future<void> _signUpWithEmail() async {
     if (!_formKey.currentState!.validate()) return;
-
-    setState(() => _isLoading = true);
+    if (_isSubmitting) return; // Prevent double submission
+    
+    setState(() {
+      _isLoading = true;
+      _isSubmitting = true;
+    });
 
     try {
-      final authService = context.read<AuthService>();
-      await authService.signUpWithEmailAndPassword(
+      final authService = Provider.of<AuthService>(context, listen: false);
+      final result = await authService.signUpWithEmailAndPassword(
         _emailController.text.trim(),
         _passwordController.text,
       );
       
+      if (result != null && mounted) {
+        print('[SignUpScreen] Sign-up successful, showing success popup');
+        _showSuccessPopup();
+      }
+    } on FirebaseAuthException catch (e) {
+      if (mounted) {
+        String message = 'An error occurred';
+        switch (e.code) {
+          case 'weak-password':
+            message = 'The password provided is too weak.';
+            break;
+          case 'email-already-in-use':
+            message = 'The account already exists for that email.';
+            break;
+          case 'invalid-email':
+            message = 'The email address is not valid.';
+            break;
+          default:
+            message = e.message ?? 'An error occurred';
+        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(message)),
+        );
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.toString()),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
+          SnackBar(content: Text('An error occurred: ${e.toString()}')),
         );
       }
     } finally {
       if (mounted) {
-        setState(() => _isLoading = false);
+        setState(() {
+          _isLoading = false;
+          _isSubmitting = false;
+        });
       }
     }
   }
 
+  void _showSuccessPopup() {
+    showDialog(
+      context: context,
+      barrierDismissible: false, // Prevent dismissing by tapping outside
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: const Color(0xFF1f2937),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          title: Row(
+            children: [
+              const Icon(
+                Icons.check_circle,
+                color: Colors.green,
+                size: 28,
+              ),
+              const SizedBox(width: 8),
+              const Text(
+                'Success!',
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          content: const Text(
+            'Your account has been created successfully!',
+            style: TextStyle(color: Colors.white70, fontSize: 16),
+          ),
+          actions: [
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close dialog
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (context) => const AuthWrapper()),
+                  (route) => false,
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF3B82F6),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              child: const Text('Go to Homepage'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Future<void> _signInWithGoogle() async {
-    setState(() => _isLoading = true);
+    // Prevent double submission
+    if (_isSubmitting) {
+      print('[SignUpScreen] Already submitting Google sign-in, ignoring duplicate call');
+      return;
+    }
+    
+    setState(() {
+      _isLoading = true;
+      _isSubmitting = true;
+    });
 
     try {
       final authService = context.read<AuthService>();
-      await authService.signInWithGoogle();
+      final credential = await authService.signInWithGoogle();
+      
+      if (credential != null && mounted) {
+        print('[SignUpScreen] Google sign-in successful, checking for redirect');
+        
+        // Give the AuthWrapper a moment to respond
+        await Future.delayed(const Duration(milliseconds: 500));
+        
+        // Manual redirect as fallback
+        if (mounted && authService.isAuthenticated) {
+          print('[SignUpScreen] Manual redirect to home screen after Google sign-in');
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (context) => const HomeScreen()),
+            (route) => false,
+          );
+        }
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -72,7 +182,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
       }
     } finally {
       if (mounted) {
-        setState(() => _isLoading = false);
+        setState(() {
+          _isLoading = false;
+          _isSubmitting = false;
+        });
       }
     }
   }
@@ -121,6 +234,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   TextFormField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
+                    autocorrect: false,
+                    enableSuggestions: false,
                     decoration: const InputDecoration(
                       labelText: 'Email',
                       prefixIcon: Icon(Icons.email_outlined),
@@ -204,7 +319,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
                   // Sign Up Button
                   ElevatedButton(
-                    onPressed: _isLoading ? null : _signUpWithEmail,
+                    onPressed: (_isLoading || _isSubmitting) ? null : _signUpWithEmail,
                     child: _isLoading
                         ? const SizedBox(
                             height: 20,
@@ -237,7 +352,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
                   // Google Sign In Button
                   OutlinedButton.icon(
-                    onPressed: _isLoading ? null : _signInWithGoogle,
+                    onPressed: (_isLoading || _isSubmitting) ? null : _signInWithGoogle,
                     icon: const Icon(Icons.g_mobiledata, size: 24),
                     label: const Text('Continue with Google'),
                     style: OutlinedButton.styleFrom(
