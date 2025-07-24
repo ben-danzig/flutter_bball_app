@@ -87,10 +87,6 @@ class _WorkoutLibraryScreenState extends State<WorkoutLibraryScreen> {
                     }
                     if (snapshot.hasData && snapshot.data!.isNotEmpty) {
                       final workouts = snapshot.data!;
-                      print('DEBUG: WorkoutLibraryScreen - Displaying ${workouts.length} workouts');
-                      for (var workout in workouts) {
-                        print('DEBUG: Displaying workout: "${workout.name}" (id: ${workout.id})');
-                      }
                       return ListView.builder(
                         itemCount: workouts.length,
                         itemBuilder: (context, index) {
@@ -113,19 +109,9 @@ class _WorkoutLibraryScreenState extends State<WorkoutLibraryScreen> {
                         },
                       );
                     }
-                    return Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Text('No workouts found.',
-                                style: TextStyle(color: Colors.white)),
-                            const SizedBox(height: 16),
-                            Text('Snapshot data: ${snapshot.data}',
-                                style: const TextStyle(color: Colors.grey, fontSize: 12)),
-                            Text('Has data: ${snapshot.hasData}',
-                                style: const TextStyle(color: Colors.grey, fontSize: 12)),
-                          ],
-                        ));
+                    return const Center(
+                        child: Text('No workouts found.',
+                            style: TextStyle(color: Colors.white)));
                   },
                 ),
               ),
