@@ -1,0 +1,20 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"name": "global .agent-os",
+			"path": "../../.agent-os"
+		},
+		{
+			"name": "project-specific .agent-os",
+			"path": ".agent-os"
+		},
+		{
+			"name": ".cursor/rules",
+			"path": ".cursor/rules"
+		}
+	],
+	"settings": {}
+}
