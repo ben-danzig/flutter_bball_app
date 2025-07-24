@@ -46,13 +46,13 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
   - [x] 5.5 Update ReadAndReactDrillWidget to work with new layout constraints  
   - [x] 5.6 Verify all tests pass and drill functionality remains intact with new layout
 
-- [ ] 6. Integrate Layout System in Active Workout Screen
-  - [ ] 6.1 Write tests for ActiveWorkoutScreen with new SplitPriorityLayout integration
-  - [ ] 6.2 Replace ActiveDrillLayout usage with SplitPriorityLayout in ActiveWorkoutScreen
-  - [ ] 6.3 Wire up primary action callbacks to appropriate drill completion methods
-  - [ ] 6.4 Connect secondary control callbacks to WorkoutState methods
-  - [ ] 6.5 Add progress indicator integration with workout progress tracking
-  - [ ] 6.6 Verify all tests pass and complete workout flow works with new layout
+- [x] 6. Integrate Layout System in Active Workout Screen
+  - [x] 6.1 Write tests for ActiveWorkoutScreen with new SplitPriorityLayout integration
+  - [x] 6.2 Replace ActiveDrillLayout usage with SplitPriorityLayout in ActiveWorkoutScreen
+  - [x] 6.3 Wire up primary action callbacks to appropriate drill completion methods
+  - [x] 6.4 Connect secondary control callbacks to WorkoutState methods
+  - [x] 6.5 Add progress indicator integration with workout progress tracking
+  - [x] 6.6 Verify all tests pass and complete workout flow works with new layout
 
 - [ ] 7. Mobile Browser Optimizations
   - [ ] 7.1 Write tests for mobile browser viewport handling and responsive adjustments  
