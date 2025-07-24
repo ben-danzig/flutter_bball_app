@@ -40,7 +40,12 @@ class _WorkoutProgressScreenState extends State<WorkoutProgressScreen> {
     try {
       final authService = Provider.of<AuthService>(context, listen: false);
       final userId = authService.currentUser?.uid;
-      if (userId == null) return;
+      if (userId == null) {
+        setState(() {
+          isLoading = false;
+        });
+        return;
+      }
       final allSessions = await WorkoutSessionService.instance.getAllSessions(
         userId: userId,
       );
