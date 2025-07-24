@@ -30,13 +30,13 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
   - [x] 3.5 Add proper title and subtitle handling with overflow protection
   - [x] 3.6 Verify all tests pass and timer displays at correct sizes across devices
 
-- [ ] 4. Build Secondary Control Bar
-  - [ ] 4.1 Write tests for SecondaryControlBar with all control buttons and touch targets
-  - [ ] 4.2 Implement SecondaryControlBar widget with consistent button layout
-  - [ ] 4.3 Create proper button spacing and minimum 44px touch targets
-  - [ ] 4.4 Add gesture handling for PREV (tap) and reset (long press) functionality
-  - [ ] 4.5 Integrate pause/resume button state updates from WorkoutState
-  - [ ] 4.6 Verify all tests pass and all controls are accessible and functional
+- [x] 4. Build Secondary Control Bar
+  - [x] 4.1 Write tests for SecondaryControlBar with all control buttons and touch targets
+  - [x] 4.2 Implement SecondaryControlBar widget with consistent button layout
+  - [x] 4.3 Create proper button spacing and minimum 44px touch targets
+  - [x] 4.4 Add gesture handling for PREV (tap) and reset (long press) functionality
+  - [x] 4.5 Integrate pause/resume button state updates from WorkoutState
+  - [x] 4.6 Verify all tests pass and all controls are accessible and functional
 
 - [ ] 5. Update Drill Widgets for New Layout
   - [ ] 5.1 Write tests for TimedDrillWidget integration with SplitPriorityLayout
