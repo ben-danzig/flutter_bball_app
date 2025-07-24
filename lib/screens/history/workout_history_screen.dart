@@ -29,8 +29,12 @@ class _WorkoutHistoryScreenState extends State<WorkoutHistoryScreen> {
   Future<void> _loadSessions() async {
     final authService = Provider.of<AuthService>(context, listen: false);
     final userId = authService.currentUser?.uid;
-    print("BDBD: userId is ${userId}");
-    if (userId == null) return;
+    if (userId == null) {
+      setState(() {
+        _sessionsFuture = Future.value([]);
+      });
+      return;
+    }
     final deviceId = await getDeviceId();
     setState(() {
       _sessionsFuture = WorkoutSessionService.instance.getAllSessions(
