@@ -38,13 +38,13 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
   - [x] 4.5 Integrate pause/resume button state updates from WorkoutState
   - [x] 4.6 Verify all tests pass and all controls are accessible and functional
 
-- [ ] 5. Update Drill Widgets for New Layout
-  - [ ] 5.1 Write tests for TimedDrillWidget integration with SplitPriorityLayout
-  - [ ] 5.2 Refactor TimedDrillWidget to use LargeTimerDisplay and new layout system
-  - [ ] 5.3 Update MakeTargetTimedDrillWidget to integrate with PrimaryActionBar for FINISH button
-  - [ ] 5.4 Modify RepBasedDrillWidget to use LOG SET button in primary action bar
-  - [ ] 5.5 Update ReadAndReactDrillWidget to work with new layout constraints  
-  - [ ] 5.6 Verify all tests pass and drill functionality remains intact with new layout
+- [x] 5. Update Drill Widgets for New Layout
+  - [x] 5.1 Write tests for TimedDrillWidget integration with SplitPriorityLayout
+  - [x] 5.2 Refactor TimedDrillWidget to use LargeTimerDisplay and new layout system
+  - [x] 5.3 Update MakeTargetTimedDrillWidget to integrate with PrimaryActionBar for FINISH button
+  - [x] 5.4 Modify RepBasedDrillWidget to use LOG SET button in primary action bar
+  - [x] 5.5 Update ReadAndReactDrillWidget to work with new layout constraints  
+  - [x] 5.6 Verify all tests pass and drill functionality remains intact with new layout
 
 - [ ] 6. Integrate Layout System in Active Workout Screen
   - [ ] 6.1 Write tests for ActiveWorkoutScreen with new SplitPriorityLayout integration
