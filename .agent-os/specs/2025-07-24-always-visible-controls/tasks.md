@@ -14,13 +14,13 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
   - [x] 1.4 Add responsive design breakpoint handling for mobile vs desktop layouts
   - [x] 1.5 Verify all tests pass and layout renders correctly on different screen sizes
 
-- [ ] 2. Implement Primary Action Bar System
-  - [ ] 2.1 Write tests for PrimaryActionBar with drill-type-specific button rendering
-  - [ ] 2.2 Create PrimaryActionBar widget with dynamic button content based on drill type
-  - [ ] 2.3 Implement drill-specific button logic (FINISH DRILL, LOG SET, none for timed drills)
-  - [ ] 2.4 Add next drill name display and proper styling
-  - [ ] 2.5 Integrate button enable/disable state based on drill completion status
-  - [ ] 2.6 Verify all tests pass and buttons appear correctly for each drill type
+- [x] 2. Implement Primary Action Bar System
+  - [x] 2.1 Write tests for PrimaryActionBar with drill-type-specific button rendering
+  - [x] 2.2 Create PrimaryActionBar widget with dynamic button content based on drill type
+  - [x] 2.3 Implement drill-specific button logic (FINISH DRILL, LOG SET, none for timed drills)
+  - [x] 2.4 Add next drill name display and proper styling
+  - [x] 2.5 Integrate button enable/disable state based on drill completion status
+  - [x] 2.6 Verify all tests pass and buttons appear correctly for each drill type
 
 - [ ] 3. Create Large Timer Display Component
   - [ ] 3.1 Write tests for LargeTimerDisplay with minimum 150px font size calculations
