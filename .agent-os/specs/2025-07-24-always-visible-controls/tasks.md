@@ -7,12 +7,12 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
 
 ## Tasks
 
-- [ ] 1. Create Core Layout Infrastructure
-  - [ ] 1.1 Write tests for SplitPriorityLayout widget with responsive height calculations
-  - [ ] 1.2 Implement SplitPriorityLayout widget with primary bar, content area, and secondary bar sections
-  - [ ] 1.3 Create ResponsiveContentArea widget with adaptive padding based on screen height
-  - [ ] 1.4 Add responsive design breakpoint handling for mobile vs desktop layouts
-  - [ ] 1.5 Verify all tests pass and layout renders correctly on different screen sizes
+- [x] 1. Create Core Layout Infrastructure
+  - [x] 1.1 Write tests for SplitPriorityLayout widget with responsive height calculations
+  - [x] 1.2 Implement SplitPriorityLayout widget with primary bar, content area, and secondary bar sections
+  - [x] 1.3 Create ResponsiveContentArea widget with adaptive padding based on screen height
+  - [x] 1.4 Add responsive design breakpoint handling for mobile vs desktop layouts
+  - [x] 1.5 Verify all tests pass and layout renders correctly on different screen sizes
 
 - [ ] 2. Implement Primary Action Bar System
   - [ ] 2.1 Write tests for PrimaryActionBar with drill-type-specific button rendering
