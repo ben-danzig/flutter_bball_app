@@ -13,17 +13,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      # .env.public must be created before the flutter-action step so that it exists once
-      # flutter pub get is run
-      - name: Write .env.public file from GitHub Secrets
-        run: echo "WEB_CLIENT_ID=${{ secrets.WEB_CLIENT_ID }}" > .env.public
       - uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.32.1'
           channel: 'stable'
-      - run: flutter build web
-      - name: List build/web/assets directory
-        run: ls -l build/web/assets
+      # Create production config from GitHub Secrets
+      - name: Create production config from secrets
+        run: |
+          echo '{
+            "WEB_CLIENT_ID": "${{ secrets.WEB_CLIENT_ID }}"
+          }' > config.prod.json
+      - name: Build Flutter web app (PR Preview)
+        run: flutter build web --dart-define-from-file=config.prod.json
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}

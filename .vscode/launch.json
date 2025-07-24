@@ -4,12 +4,25 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
-
         {
-            "name": "Run and debug",
+            "name": "Development",
             "request": "launch",
             "type": "dart",
-            "program":  "lib/main.dart"
+            "program": "lib/main.dart",
+            "args": [
+                "--dart-define-from-file=config.dev.json"
+            ]
         },
+        {
+            "name": "Development (Web)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "args": [
+                "--dart-define-from-file=config.dev.json",
+                "-d",
+                "web-server"
+            ]
+        }
     ]
 }

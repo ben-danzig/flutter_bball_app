@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_bball_app/screens/auth/auth_wrapper.dart';
 import 'package:flutter_bball_app/services/auth_service.dart';
 import 'package:flutter_bball_app/services/settings_service.dart';
@@ -10,7 +9,6 @@ import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load(fileName: '.env.public');
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform, // <-- This line is critical!
   );
   

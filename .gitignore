@@ -44,8 +44,11 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
-# Ignore environment variables file
-.env.secret
+# Ignore environment variables and config files
+config.dev.json
+config.prod.json
+config.*.json
+!config.*.json.template
 
 
 flutter-bball-app-firebase-admin-key.json
