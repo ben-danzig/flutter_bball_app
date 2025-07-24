@@ -16,16 +16,12 @@ class AuthWrapper extends StatelessWidget {
         final currentUser = authService.currentUser;
         final isAuthenticated = authService.isAuthenticated;
         
-        print('[AuthWrapper] AuthService state - isAuthenticated: $isAuthenticated, currentUser: ${currentUser?.uid}');
-        
         // Simple logic: if authenticated and has user, show home screen
         if (isAuthenticated && currentUser != null) {
-          print('[AuthWrapper] User authenticated, showing home screen');
           return const HomeScreen();
         }
         
         // Otherwise, show login screen
-        print('[AuthWrapper] User not authenticated, showing login screen');
         return const LoginScreen();
       },
     );

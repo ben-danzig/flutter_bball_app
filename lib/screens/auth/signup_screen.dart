@@ -48,7 +48,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
       );
       
       if (result != null && mounted) {
-        print('[SignUpScreen] Sign-up successful, showing success popup');
         _showSuccessPopup();
       }
     } on FirebaseAuthException catch (e) {
