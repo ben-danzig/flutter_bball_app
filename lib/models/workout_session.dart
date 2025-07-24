@@ -14,7 +14,7 @@ class WorkoutSession {
   final String? notes;
   final bool isPartial;
   final String deviceId; // New field
-  final String userId; // New field for user identification
+  final String? userId; // Made nullable to handle existing sessions
 
   WorkoutSession({
     required this.id,
@@ -25,9 +25,27 @@ class WorkoutSession {
     this.notes,
     this.isPartial = false,
     required this.deviceId, // New param
-    required this.userId, // New param
+    this.userId, // Made optional to handle existing sessions
   });
 
   factory WorkoutSession.fromJson(Map<String, dynamic> json) => _$WorkoutSessionFromJson(json);
   Map<String, dynamic> toJson() => _$WorkoutSessionToJson(this);
+
+  // Helper method to get userId with fallback
+  String get effectiveUserId => userId ?? 'legacy_user';
+  
+  // Helper method to create a copy with userId
+  WorkoutSession copyWithUserId(String newUserId) {
+    return WorkoutSession(
+      id: id,
+      workoutBlueprint: workoutBlueprint,
+      results: results,
+      completedAt: completedAt,
+      feeling: feeling,
+      notes: notes,
+      isPartial: isPartial,
+      deviceId: deviceId,
+      userId: newUserId,
+    );
+  }
 }
