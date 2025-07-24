@@ -22,13 +22,13 @@ These are the tasks to be completed for the spec detailed in @.agent-os/specs/20
   - [x] 2.5 Integrate button enable/disable state based on drill completion status
   - [x] 2.6 Verify all tests pass and buttons appear correctly for each drill type
 
-- [ ] 3. Create Large Timer Display Component
-  - [ ] 3.1 Write tests for LargeTimerDisplay with minimum 150px font size calculations
-  - [ ] 3.2 Implement LargeTimerDisplay widget with responsive font size scaling
-  - [ ] 3.3 Add font size calculation logic (minimum 150px, scales up on larger screens)
-  - [ ] 3.4 Implement FittedBox integration for text scaling when content exceeds space
-  - [ ] 3.5 Add proper title and subtitle handling with overflow protection
-  - [ ] 3.6 Verify all tests pass and timer displays at correct sizes across devices
+- [x] 3. Create Large Timer Display Component
+  - [x] 3.1 Write tests for LargeTimerDisplay with minimum 150px font size calculations
+  - [x] 3.2 Implement LargeTimerDisplay widget with responsive font size scaling
+  - [x] 3.3 Add font size calculation logic (minimum 150px, scales up on larger screens)
+  - [x] 3.4 Implement FittedBox integration for text scaling when content exceeds space
+  - [x] 3.5 Add proper title and subtitle handling with overflow protection
+  - [x] 3.6 Verify all tests pass and timer displays at correct sizes across devices
 
 - [ ] 4. Build Secondary Control Bar
   - [ ] 4.1 Write tests for SecondaryControlBar with all control buttons and touch targets
