@@ -73,19 +73,6 @@ class _WorkoutSummaryScreenState extends State<WorkoutSummaryScreen> {
               padding: const EdgeInsets.all(20),
               child: Column(
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        DateFormat.jm().format(widget.session.completedAt),
-                        style: const TextStyle(color: Colors.white, fontSize: 16),
-                      ),
-                      const Text(
-                        '79%',
-                        style: TextStyle(color: Colors.white, fontSize: 16),
-                      ),
-                    ],
-                  ),
                   const SizedBox(height: 32),
                   const Text(
                     'Workout\nComplete!',
