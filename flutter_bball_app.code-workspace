@@ -8,7 +8,7 @@
 			"path": "../../.agent-os"
 		},
 		{
-			"name": "project-specific .agent-os",
+			"name": "flutter_bball_app .agent-os",
 			"path": ".agent-os"
 		},
 		{
