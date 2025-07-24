@@ -10,6 +10,7 @@ DrillResult _$DrillResultFromJson(Map<String, dynamic> json) => DrillResult(
   drillId: json['drillId'] as String,
   makes: (json['makes'] as num?)?.toInt(),
   elapsedSeconds: (json['elapsedSeconds'] as num?)?.toInt(),
+  reps: (json['reps'] as num?)?.toInt(),
 );
 
 Map<String, dynamic> _$DrillResultToJson(DrillResult instance) =>
@@ -17,4 +18,5 @@ Map<String, dynamic> _$DrillResultToJson(DrillResult instance) =>
       'drillId': instance.drillId,
       'makes': instance.makes,
       'elapsedSeconds': instance.elapsedSeconds,
+      'reps': instance.reps,
     };

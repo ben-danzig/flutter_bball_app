@@ -5,6 +5,7 @@ import 'package:flutter_bball_app/screens/active/widgets/active_drill_layout.dar
 import 'package:flutter_bball_app/screens/active/widgets/make_target_timed_drill_widget.dart';
 import 'package:flutter_bball_app/screens/active/widgets/rep_based_drill_widget.dart';
 import 'package:flutter_bball_app/screens/active/widgets/timed_drill_widget.dart';
+import 'package:flutter_bball_app/screens/active/widgets/read_and_react_drill_widget.dart';
 import 'package:flutter_bball_app/services/workout_state.dart';
 import 'package:provider/provider.dart';
 
@@ -57,6 +58,8 @@ class ActiveWorkoutScreen extends StatelessWidget {
         return RepBasedDrillWidget(key: ValueKey(drill.drillId), drill: drill);
       case 'MAKE_TARGET_TIMED':
         return MakeTargetTimedDrillWidget(key: ValueKey(drill.drillId), drill: drill);
+      case 'READ_AND_REACT':
+        return ReadAndReactDrillWidget(key: ValueKey(drill.drillId), drill: drill);
       default:
         return Center(child: Text('Unknown drill type: ${drill.type}'));
     }

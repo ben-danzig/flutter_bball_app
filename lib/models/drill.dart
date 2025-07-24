@@ -8,7 +8,7 @@ class Drill {
   final String name;
   final String description;
   final String type;
-  final Map<String, int> config;
+  final Map<String, dynamic> config;
 
   Drill({
     required this.drillId,
