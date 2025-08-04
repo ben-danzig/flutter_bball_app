@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bball_app/models/drill.dart';
 import 'package:flutter_bball_app/screens/active/injury_log_screen.dart';
-import 'package:flutter_bball_app/screens/active/widgets/active_drill_layout.dart';
 import 'package:flutter_bball_app/screens/active/widgets/make_target_timed_drill_widget.dart';
 import 'package:flutter_bball_app/screens/active/widgets/rep_based_drill_widget.dart';
 import 'package:flutter_bball_app/screens/active/widgets/timed_drill_widget.dart';
@@ -20,8 +19,11 @@ class ActiveWorkoutScreen extends StatelessWidget {
           return const Scaffold(
             backgroundColor: Color(0xFF111827),
             body: Center(
-                child: Text('No active workout.',
-                    style: TextStyle(color: Colors.white))),
+              child: Text(
+                'No active workout.',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
           );
         }
 
@@ -39,12 +41,9 @@ class ActiveWorkoutScreen extends StatelessWidget {
 
         final drill = workoutState.currentDrill!;
 
-        return ActiveDrillLayout(
-          drillName: drill.name,
-          nextDrillName: workoutState.nextDrillName,
-          progress: workoutState.workoutProgress,
-          child: _buildDrillView(drill),
-        );
+        // Drill widgets now handle their own complete layout via SplitPriorityLayout
+        // No need for ActiveDrillLayout wrapper anymore
+        return _buildDrillView(drill);
       },
     );
   }
@@ -61,9 +60,16 @@ class ActiveWorkoutScreen extends StatelessWidget {
       case 'READ_AND_REACT':
         return ReadAndReactDrillWidget(key: ValueKey(drill.drillId), drill: drill);
       default:
-        return Center(child: Text('Unknown drill type: ${drill.type}'));
+        return const Scaffold(
+          backgroundColor: Color(0xFF111827),
+          body: Center(
+            child: Text(
+              'Unknown drill type. Please check your workout configuration.',
+              style: TextStyle(color: Colors.white),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        );
     }
   }
 }
-
-// All placeholder widgets have been replaced.
