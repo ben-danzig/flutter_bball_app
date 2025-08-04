@@ -8,6 +8,7 @@ import 'package:flutter_bball_app/services/workout_session_service.dart';
 import 'package:flutter_bball_app/utils/format_duration.dart';
 import 'package:flutter_bball_app/utils/device_id_util.dart';
 import 'package:flutter_bball_app/services/settings_service.dart';
+import 'package:flutter_bball_app/services/auth_service.dart'; // Added import for AuthService
 import 'package:provider/provider.dart';
 
 class WorkoutProgressScreen extends StatefulWidget {
@@ -37,9 +38,16 @@ class _WorkoutProgressScreenState extends State<WorkoutProgressScreen> {
 
   Future<void> _loadHistoricalData() async {
     try {
-      final deviceId = await getDeviceId();
+      final authService = Provider.of<AuthService>(context, listen: false);
+      final userId = authService.currentUser?.uid;
+      if (userId == null) {
+        setState(() {
+          isLoading = false;
+        });
+        return;
+      }
       final allSessions = await WorkoutSessionService.instance.getAllSessions(
-        deviceId: deviceId,
+        userId: userId,
       );
       
       // Filter sessions for the same workout blueprint

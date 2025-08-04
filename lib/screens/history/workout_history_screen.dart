@@ -6,6 +6,7 @@ import '../summary/workout_summary_screen.dart';
 import 'package:flutter_bball_app/utils/device_id_util.dart';
 import 'package:flutter_bball_app/services/settings_service.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_bball_app/services/auth_service.dart';
 
 class WorkoutHistoryScreen extends StatefulWidget {
   const WorkoutHistoryScreen({Key? key}) : super(key: key);
@@ -26,10 +27,18 @@ class _WorkoutHistoryScreenState extends State<WorkoutHistoryScreen> {
   }
 
   Future<void> _loadSessions() async {
+    final authService = Provider.of<AuthService>(context, listen: false);
+    final userId = authService.currentUser?.uid;
+    if (userId == null) {
+      setState(() {
+        _sessionsFuture = Future.value([]);
+      });
+      return;
+    }
     final deviceId = await getDeviceId();
     setState(() {
       _sessionsFuture = WorkoutSessionService.instance.getAllSessions(
-        deviceId: deviceId,
+        userId: userId,
       );
     });
   }
@@ -66,31 +75,6 @@ class _WorkoutHistoryScreenState extends State<WorkoutHistoryScreen> {
         _selectedSessionIds.remove(sessionId);
       }
     });
-  }
-
-  Future<void> _claimSelectedSessions() async {
-    final deviceId = await getDeviceId();
-    final sessions = await _sessionsFuture;
-    final toClaim = sessions.where((s) => _selectedSessionIds.contains(s.id)).toList();
-    for (final session in toClaim) {
-      final claimedSession = WorkoutSession(
-        id: session.id,
-        workoutBlueprint: session.workoutBlueprint,
-        results: session.results,
-        completedAt: session.completedAt,
-        feeling: session.feeling,
-        notes: session.notes,
-        isPartial: session.isPartial,
-        deviceId: deviceId,
-      );
-      await WorkoutSessionService.instance.updateSession(claimedSession);
-    }
-    _refreshSessions();
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Claimed ${toClaim.length} session(s) for this device')),
-      );
-    }
   }
 
   Future<void> _deleteSession(WorkoutSession session) async {
@@ -215,6 +199,7 @@ class _WorkoutHistoryScreenState extends State<WorkoutHistoryScreen> {
         notes: notesController.text.isEmpty ? null : notesController.text,
         isPartial: session.isPartial,
         deviceId: session.deviceId,
+        userId: session.userId,
       );
       await WorkoutSessionService.instance.updateSession(updatedSession);
       _refreshSessions();
@@ -224,6 +209,9 @@ class _WorkoutHistoryScreenState extends State<WorkoutHistoryScreen> {
         );
       }
     } else if (result == 'claim') {
+      final authService = Provider.of<AuthService>(context, listen: false);
+      final userId = authService.currentUser?.uid;
+      if (userId == null) return;
       final deviceId = await getDeviceId();
       final claimedSession = WorkoutSession(
         id: session.id,
@@ -234,6 +222,7 @@ class _WorkoutHistoryScreenState extends State<WorkoutHistoryScreen> {
         notes: session.notes,
         isPartial: session.isPartial,
         deviceId: deviceId,
+        userId: userId,
       );
       await WorkoutSessionService.instance.updateSession(claimedSession);
       _refreshSessions();
@@ -280,6 +269,20 @@ class _WorkoutHistoryScreenState extends State<WorkoutHistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final authService = Provider.of<AuthService>(context, listen: false);
+    final userId = authService.currentUser?.uid;
+    if (userId == null) {
+      return const Scaffold(
+        backgroundColor: Color(0xFF111827),
+        body: Center(
+          child: Text(
+            'Please log in to view workout history.',
+            style: TextStyle(color: Colors.white),
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       backgroundColor: const Color(0xFF111827),
       appBar: AppBar(

@@ -74,8 +74,16 @@ class _WorkoutLibraryScreenState extends State<WorkoutLibraryScreen> {
                     }
                     if (snapshot.hasError) {
                       return Center(
-                          child: Text('Error: ${snapshot.error}',
-                              style: const TextStyle(color: Colors.white)));
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text('Error: ${snapshot.error}',
+                                  style: const TextStyle(color: Colors.white)),
+                              const SizedBox(height: 16),
+                              Text('Stack trace: ${snapshot.stackTrace}',
+                                  style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                            ],
+                          ));
                     }
                     if (snapshot.hasData && snapshot.data!.isNotEmpty) {
                       final workouts = snapshot.data!;

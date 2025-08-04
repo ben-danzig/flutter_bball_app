@@ -17,11 +17,14 @@ jobs:
         with:
           flutter-version: '3.32.1'
           channel: 'stable'
-      - name: Print Flutter and Dart versions
+      # Create production config from GitHub Secrets
+      - name: Create production config from secrets
         run: |
-          flutter --version
-          dart --version
-      - run: flutter build web
+          echo '{
+            "WEB_CLIENT_ID": "${{ secrets.WEB_CLIENT_ID }}"
+          }' > config.prod.json
+      - name: Build Flutter web app (PR Preview)
+        run: flutter build web --dart-define-from-file=config.prod.json
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
