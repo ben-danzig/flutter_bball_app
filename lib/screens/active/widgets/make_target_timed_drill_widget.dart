@@ -3,8 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../models/drill.dart';
 import '../../../services/workout_state.dart';
-import 'package:flutter_bball_app/utils/format_duration.dart';
-import 'package:flutter_bball_app/screens/active/widgets/time_picker_dialog.dart' as custom_picker;
+import '../../../widgets/layout/split_priority_layout.dart';
+import '../../../widgets/layout/primary_action_bar.dart';
+import '../../../widgets/layout/secondary_control_bar.dart';
+import '../../../widgets/layout/large_timer_display.dart';
+import '../../../widgets/layout/responsive_content_area.dart';
+import '../../../utils/drill_types.dart';
+import 'time_picker_dialog.dart' as custom_picker;
 
 class MakeTargetTimedDrillWidget extends StatefulWidget {
   final Drill drill;
@@ -80,6 +85,46 @@ class _MakeTargetTimedDrillWidgetState extends State<MakeTargetTimedDrillWidget>
     });
   }
 
+  void _logAllMakes() {
+    setState(() {
+      _currentMakes = widget.drill.config['targetMakes']!;
+      _isComplete = true;
+      _timer.cancel();
+    });
+  }
+
+  void _finishDrill() {
+    final workoutState = Provider.of<WorkoutState>(context, listen: false);
+    workoutState.logMakeTargetTimedDrill(elapsedSeconds: _elapsedSeconds);
+    workoutState.nextDrill();
+  }
+
+  Future<void> _showTimePickerDialog() async {
+    if (_isComplete) return;
+    
+    final workoutState = Provider.of<WorkoutState>(context, listen: false);
+    final wasPaused = workoutState.isPaused;
+    
+    if (!wasPaused) {
+      workoutState.togglePause();
+    }
+    
+    final result = await showDialog<int>(
+      context: context,
+      builder: (context) => custom_picker.TimePickerDialog(initialSeconds: _elapsedSeconds),
+    );
+    
+    if (result != null) {
+      setState(() {
+        _elapsedSeconds = result;
+      });
+    }
+    
+    if (!wasPaused) {
+      workoutState.togglePause();
+    }
+  }
+
   @override
   void dispose() {
     _timer.cancel();
@@ -90,191 +135,178 @@ class _MakeTargetTimedDrillWidgetState extends State<MakeTargetTimedDrillWidget>
   Widget build(BuildContext context) {
     final targetMakes = widget.drill.config['targetMakes']!;
 
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Text(
-          widget.drill.name.toUpperCase(),
-          style: const TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFFf9fafb),
-            letterSpacing: 1.2,
+    return Consumer<WorkoutState>(
+      builder: (context, workoutState, child) {
+        // Calculate progress based on makes completed
+        final progress = targetMakes > 0 ? _currentMakes / targetMakes : 0.0;
+
+        return SplitPriorityLayout(
+          // Primary Action Bar - Show FINISH DRILL when complete
+          primaryActionBar: PrimaryActionBar(
+            drillType: DrillType.makeTargetTimed,
+            nextDrillName: workoutState.nextDrillName,
+            onPrimaryAction: _isComplete ? _finishDrill : null,
+            isPrimaryActionEnabled: _isComplete,
           ),
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 20),
-        LayoutBuilder(
-          builder: (context, constraints) {
-            double fontSize = 150;
-            return Center(
-              child: GestureDetector(
-                onTap: !_isComplete
-                    ? () async {
-                        final workoutState = Provider.of<WorkoutState>(context, listen: false);
-                        final wasPaused = workoutState.isPaused;
-                        if (!wasPaused) {
-                          workoutState.togglePause();
-                        }
-                        final result = await showDialog<int>(
-                          context: context,
-                          builder: (context) => custom_picker.TimePickerDialog(initialSeconds: _elapsedSeconds),
-                        );
-                        if (result != null) {
-                          setState(() {
-                            _elapsedSeconds = result;
-                          });
-                        }
-                        if (!wasPaused) {
-                          workoutState.togglePause();
-                        }
-                      }
-                    : null,
-                child: Text(
-                  formatDuration(_elapsedSeconds),
-                  style: TextStyle(
-                    fontSize: fontSize,
-                    fontWeight: FontWeight.w900,
-                    color: _isComplete ? Colors.greenAccent : Colors.white,
+          
+          // Content Area - Timer Display + Make Controls
+          content: ResponsiveContentArea(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Large Timer Display
+                GestureDetector(
+                  onTap: _showTimePickerDialog,
+                  child: LargeTimerDisplay(
+                    seconds: _elapsedSeconds,
+                    title: widget.drill.name.toUpperCase(),
+                    subtitle: 'MAKES: $_currentMakes / $targetMakes',
+                    textColor: _isComplete ? Colors.greenAccent : Colors.white,
                   ),
                 ),
-              ),
-            );
-          },
-        ),
-        const SizedBox(height: 12),
-        Text(
-          'MAKES',
-          style: TextStyle(
-            fontSize: 18,
-            color: Colors.grey[400],
-          ),
-        ),
-        RichText(
-          text: TextSpan(
-            style: const TextStyle(fontFamily: 'Inter', color: Colors.white),
-            children: [
-              TextSpan(
-                text: '$_currentMakes',
-                style:
-                    const TextStyle(fontSize: 72, fontWeight: FontWeight.w900),
-              ),
-              TextSpan(
-                text: ' / $targetMakes',
-                style: TextStyle(
-                  fontSize: 50,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.grey[700],
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 20),
-        LayoutBuilder(
-          builder: (context, constraints) {
-            // Estimate if the description will overflow (roughly > 2 lines)
-            final textSpan = TextSpan(
-              text: widget.drill.description,
-              style: const TextStyle(
-                fontSize: 18,
-                color: Color(0xFF9ca3af),
-              ),
-            );
-            final tp = TextPainter(
-              text: textSpan,
-              maxLines: null,
-              textDirection: TextDirection.ltr,
-            );
-            tp.layout(maxWidth: constraints.maxWidth);
-            if (tp.height > 80) {
-              return SizedBox(
-                height: 80,
-                child: SingleChildScrollView(
-                  child: Text(
+                
+                const SizedBox(height: 40),
+                
+                // Make Controls - Only show when not complete
+                if (!_isComplete) ...[
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF1f2937),
+                          minimumSize: const Size(120, 60),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                          ),
+                        ),
+                        onPressed: _incrementMakes,
+                        child: const Text(
+                          '+1 MAKE',
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      
+                      const SizedBox(width: 20),
+                      
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF3B82F6),
+                          minimumSize: const Size(120, 60),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12.0),
+                          ),
+                        ),
+                        onPressed: _logAllMakes,
+                        child: const Text(
+                          'LOG ALL',
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ],
+                  ),
+                  
+                  const SizedBox(height: 20),
+                  
+                  Text(
                     widget.drill.description,
                     style: const TextStyle(
-                      fontSize: 18,
+                      fontSize: 16,
                       color: Color(0xFF9ca3af),
                     ),
                     textAlign: TextAlign.center,
                   ),
-                ),
-              );
-            } else {
-              return Text(
-                widget.drill.description,
-                style: const TextStyle(
-                  fontSize: 18,
-                  color: Color(0xFF9ca3af),
-                ),
-                textAlign: TextAlign.center,
-              );
-            }
-          },
-        ),
-        const Spacer(),
-        if (!_isComplete)
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF1f2937),
-                  minimumSize: const Size(120, 60),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12.0),
+                ],
+                
+                // Completion message
+                if (_isComplete) ...[
+                  const Icon(
+                    Icons.check_circle,
+                    color: Colors.greenAccent,
+                    size: 48,
                   ),
-                ),
-                onPressed: _incrementMakes,
-                child: const Text('+1 MAKE',
-                    style:
-                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              ),
-              const SizedBox(width: 20),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF3B82F6),
-                  minimumSize: const Size(120, 60),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12.0),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Target Completed!\nTap FINISH DRILL above to continue.',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      color: Colors.greenAccent,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
                   ),
-                ),
-                onPressed: () {
-                  setState(() {
-                    _currentMakes = widget.drill.config['targetMakes']!;
-                    _isComplete = true;
-                    _timer.cancel();
-                  });
-                },
-                child: const Text('LOG ALL',
-                    style:
-                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              ),
-            ],
-          )
-        else
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.green,
-              minimumSize: const Size(150, 60),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12.0),
+                ],
+              ],
+            ),
+          ),
+          
+          // Secondary Control Bar - Universal workout controls
+          secondaryControlBar: SecondaryControlBar(
+            isPaused: workoutState.isPaused,
+            onTogglePause: workoutState.togglePause,
+            onPreviousDrill: workoutState.previousDrill,
+            onNextDrill: workoutState.nextDrill,
+            onEndWorkout: () => _showEndWorkoutDialog(context, workoutState),
+            onResetCurrentDrill: workoutState.resetCurrentDrill,
+          ),
+          
+          // Progress indication
+          showProgressIndicator: true,
+          progress: progress,
+        );
+      },
+    );
+  }
+
+  void _showEndWorkoutDialog(BuildContext context, WorkoutState workoutState) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: const Color(0xFF1f2937),
+          title: const Text(
+            'End Workout?',
+            style: TextStyle(color: Colors.white),
+          ),
+          content: const Text(
+            'You can save your progress so far or discard this workout session.',
+            style: TextStyle(color: Color(0xFF9ca3af)),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text(
+                'Cancel',
+                style: TextStyle(color: Color(0xFF9ca3af)),
               ),
             ),
-            onPressed: () {
-              final workoutState =
-                  Provider.of<WorkoutState>(context, listen: false);
-              workoutState.logMakeTargetTimedDrill(
-                  elapsedSeconds: _elapsedSeconds);
-              workoutState.nextDrill();
-            },
-            child: const Text('FINISH DRILL',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-          ),
-        const SizedBox(height: 20),
-      ],
+            TextButton(
+              onPressed: () {
+                workoutState.discardWorkout();
+                Navigator.of(context).pop();
+                Navigator.of(context).popUntil((route) => route.isFirst);
+              },
+              child: const Text(
+                'Discard',
+                style: TextStyle(color: Color(0xFFef4444)),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                workoutState.savePartialWorkout();
+                Navigator.of(context).pop();
+                Navigator.of(context).popUntil((route) => route.isFirst);
+              },
+              child: const Text(
+                'Save Progress',
+                style: TextStyle(color: Color(0xFF3b82f6)),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }
