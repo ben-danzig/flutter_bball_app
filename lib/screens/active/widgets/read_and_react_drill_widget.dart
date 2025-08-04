@@ -5,7 +5,12 @@ import 'package:flutter_tts/flutter_tts.dart';
 import 'package:provider/provider.dart';
 import '../../../models/drill.dart';
 import '../../../services/workout_state.dart';
-import 'package:flutter_bball_app/utils/format_duration.dart';
+import '../../../widgets/layout/split_priority_layout.dart';
+import '../../../widgets/layout/primary_action_bar.dart';
+import '../../../widgets/layout/secondary_control_bar.dart';
+import '../../../widgets/layout/large_timer_display.dart';
+import '../../../widgets/layout/responsive_content_area.dart';
+import '../../../utils/drill_types.dart';
 import 'read_and_react_cue_overlay.dart';
 import '../../../models/cue_action.dart';
 
@@ -145,38 +150,36 @@ class _ReadAndReactDrillWidgetState extends State<ReadAndReactDrillWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Text(
-          widget.drill.name.toUpperCase(),
-          style: const TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFFf9fafb),
-            letterSpacing: 1.2,
+    return Consumer<WorkoutState>(
+      builder: (context, workoutState, child) {
+        // Calculate progress based on reps completed
+        final progress = _totalReps > 0 ? (_currentRep - 1) / _totalReps : 0.0;
+
+        return SplitPriorityLayout(
+          // Primary Action Bar - READ_AND_REACT drills have no primary action (auto-complete)
+          primaryActionBar: PrimaryActionBar(
+            drillType: DrillType.readAndReact,
+            nextDrillName: workoutState.nextDrillName,
+            onPrimaryAction: null, // READ_AND_REACT drills auto-complete
+            isPrimaryActionEnabled: false,
           ),
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 30),
-        Expanded(
-          child: Center(
+          
+          // Content Area - Timer Display with Rep Counter
+          content: ResponsiveContentArea(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                FittedBox(
-                  fit: BoxFit.scaleDown,
-                  child: Text(
-                    formatDuration(_remainingSeconds > 0 ? _remainingSeconds : 1),
-                    style: const TextStyle(
-                      fontSize: 200,
-                      fontWeight: FontWeight.w900,
-                      color: Colors.white,
-                    ),
-                  ),
+                // Large Timer Display
+                LargeTimerDisplay(
+                  seconds: _remainingSeconds > 0 ? _remainingSeconds : 1,
+                  title: widget.drill.name.toUpperCase(),
+                  subtitle: null, // We'll show rep count separately for better layout
+                  textColor: Colors.white,
                 ),
+                
                 const SizedBox(height: 40),
+                
+                // Rep Counter
                 Text(
                   'REP $_currentRep / $_totalReps',
                   style: const TextStyle(
@@ -185,20 +188,132 @@ class _ReadAndReactDrillWidgetState extends State<ReadAndReactDrillWidget> {
                     color: Color(0xFF9ca3af),
                   ),
                 ),
+                
+                const SizedBox(height: 40),
+                
+                // Drill description/instructions
+                if (widget.drill.description.isNotEmpty) ...[
+                  Text(
+                    widget.drill.description,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      color: Color(0xFF9ca3af),
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 30),
+                ],
+                
+                // Status indicator
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF1f2937),
+                    borderRadius: BorderRadius.circular(25),
+                    border: Border.all(
+                      color: const Color(0xFF3b82f6),
+                      width: 2,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        _remainingSeconds > 5 
+                            ? Icons.accessibility_new 
+                            : Icons.flash_on,
+                        color: _remainingSeconds > 5 
+                            ? const Color(0xFF10b981) 
+                            : const Color(0xFFf59e0b),
+                        size: 24,
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        _remainingSeconds > 5 
+                            ? 'Get ready for the cue...' 
+                            : 'Cue incoming!',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: _remainingSeconds > 5 
+                              ? const Color(0xFF10b981) 
+                              : const Color(0xFFf59e0b),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
-        ),
-        const SizedBox(height: 30),
-        Text(
-          widget.drill.description,
-          style: const TextStyle(
-            fontSize: 18,
-            color: Color(0xFF9ca3af),
+          
+          // Secondary Control Bar - Universal workout controls
+          secondaryControlBar: SecondaryControlBar(
+            isPaused: workoutState.isPaused,
+            onTogglePause: workoutState.togglePause,
+            onPreviousDrill: workoutState.previousDrill,
+            onNextDrill: workoutState.nextDrill,
+            onEndWorkout: () => _showEndWorkoutDialog(context, workoutState),
+            onResetCurrentDrill: workoutState.resetCurrentDrill,
           ),
-          textAlign: TextAlign.center,
-        ),
-      ],
+          
+          // Progress indication
+          showProgressIndicator: true,
+          progress: progress,
+        );
+      },
+    );
+  }
+
+  void _showEndWorkoutDialog(BuildContext context, WorkoutState workoutState) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: const Color(0xFF1f2937),
+          title: const Text(
+            'End Workout?',
+            style: TextStyle(color: Colors.white),
+          ),
+          content: const Text(
+            'You can save your progress so far or discard this workout session.',
+            style: TextStyle(color: Color(0xFF9ca3af)),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text(
+                'Cancel',
+                style: TextStyle(color: Color(0xFF9ca3af)),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                workoutState.discardWorkout();
+                Navigator.of(context).pop();
+                Navigator.of(context).popUntil((route) => route.isFirst);
+              },
+              child: const Text(
+                'Discard',
+                style: TextStyle(color: Color(0xFFef4444)),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                workoutState.savePartialWorkout();
+                Navigator.of(context).pop();
+                Navigator.of(context).popUntil((route) => route.isFirst);
+              },
+              child: const Text(
+                'Save Progress',
+                style: TextStyle(color: Color(0xFF3b82f6)),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

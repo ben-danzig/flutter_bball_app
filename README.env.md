@@ -74,8 +74,8 @@ Production config is automatically created from GitHub Secrets during CI/CD. The
 
 - All `config.*.json` files (except templates) are gitignored
 - Values are compiled into the app at build time using Flutter's built-in mechanism
-- Production builds automatically use `--obfuscate` flag to make reverse engineering harder
-- Debug info is separated (stored in CI artifacts) to enable crash analysis while keeping production build secure
+- Production builds use minification (automatic in release mode) to make reverse engineering harder
+- Flutter web automatically applies code minification and tree shaking in release mode
 
 ## Build Commands
 
@@ -86,5 +86,5 @@ flutter build web --dart-define-from-file=config.prod.json
 
 ### Production Builds (Secure & Optimized)
 ```bash
-flutter build web --release --obfuscate --split-debug-info=./debug_info --dart-define-from-file=config.prod.json
+flutter build web --release --dart-define-from-file=config.prod.json
 ``` 

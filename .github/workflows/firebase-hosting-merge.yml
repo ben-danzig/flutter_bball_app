@@ -22,7 +22,7 @@ jobs:
             "WEB_CLIENT_ID": "${{ secrets.WEB_CLIENT_ID }}"
           }' > config.prod.json
       - name: Build Flutter web app (Production)
-        run: flutter build web --release --obfuscate --split-debug-info=./debug_info --dart-define-from-file=config.prod.json
+        run: flutter build web --release --dart-define-from-file=config.prod.json
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
