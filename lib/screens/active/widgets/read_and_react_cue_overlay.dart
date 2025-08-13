@@ -6,7 +6,7 @@ import '../../../models/cue_action.dart';
 class ReadAndReactCueOverlay extends StatefulWidget {
   final CueAction cue;
 
-  const ReadAndReactCueOverlay({Key? key, required this.cue}) : super(key: key);
+  const ReadAndReactCueOverlay({super.key, required this.cue});
 
   @override
   State<ReadAndReactCueOverlay> createState() => _ReadAndReactCueOverlayState();

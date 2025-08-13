@@ -14,7 +14,7 @@ import 'time_picker_dialog.dart' as custom_picker;
 class MakeTargetTimedDrillWidget extends StatefulWidget {
   final Drill drill;
 
-  const MakeTargetTimedDrillWidget({Key? key, required this.drill}) : super(key: key);
+  const MakeTargetTimedDrillWidget({super.key, required this.drill});
 
   @override
   _MakeTargetTimedDrillWidgetState createState() => _MakeTargetTimedDrillWidgetState();

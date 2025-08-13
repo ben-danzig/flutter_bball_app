@@ -38,12 +38,10 @@ class BballTrainerApp extends StatelessWidget {
           primary: Color(0xFF3B82F6),
           secondary: Color(0xFF10B981),
           surface: Color(0xFF1F2937),
-          background: Color(0xFF111827),
           error: Color(0xFFEF4444),
           onPrimary: Colors.white,
           onSecondary: Colors.white,
           onSurface: Colors.white,
-          onBackground: Colors.white,
           onError: Colors.white,
         ),
 

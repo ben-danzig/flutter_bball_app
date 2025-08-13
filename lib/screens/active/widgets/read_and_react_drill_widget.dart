@@ -17,7 +17,7 @@ import '../../../models/cue_action.dart';
 class ReadAndReactDrillWidget extends StatefulWidget {
   final Drill drill;
 
-  const ReadAndReactDrillWidget({Key? key, required this.drill}) : super(key: key);
+  const ReadAndReactDrillWidget({super.key, required this.drill});
 
   @override
   _ReadAndReactDrillWidgetState createState() => _ReadAndReactDrillWidgetState();
@@ -47,7 +47,7 @@ class _ReadAndReactDrillWidgetState extends State<ReadAndReactDrillWidget> {
     final rawActions = widget.drill.config['actions'];
     if (rawActions is List && (rawActions).isNotEmpty) {
       _actions = (rawActions)
-          .where((a) => a is Map)
+          .whereType<Map>()
           .map((a) => CueAction.fromJson(Map<String, dynamic>.from(a)))
           .toList();
     } else {

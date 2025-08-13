@@ -13,7 +13,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
 
-  static List<Widget> _screens = <Widget>[
+  static final List<Widget> _screens = <Widget>[
     WorkoutLibraryScreen(),
     WorkoutHistoryScreen(),
     SettingsScreen(),

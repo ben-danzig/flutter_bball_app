@@ -13,7 +13,7 @@ import '../progress/workout_progress_screen.dart';
 class WorkoutSummaryScreen extends StatefulWidget {
   final WorkoutSession session;
 
-  const WorkoutSummaryScreen({Key? key, required this.session}) : super(key: key);
+  const WorkoutSummaryScreen({super.key, required this.session});
 
   @override
   State<WorkoutSummaryScreen> createState() => _WorkoutSummaryScreenState();
@@ -185,7 +185,7 @@ class _WorkoutSummaryScreenState extends State<WorkoutSummaryScreen> {
           }
           
           return _buildResultRow(drill.name, result, drill, previousResult);
-        }).toList(),
+        }),
       ],
     );
   }
@@ -221,7 +221,7 @@ class _WorkoutSummaryScreenState extends State<WorkoutSummaryScreen> {
         // For make-target-timed drills, less time is better
         final diff = (result.elapsedSeconds ?? 0) - (previousResult.elapsedSeconds ?? 0);
         if (diff < 0) {
-          comparisonText = '${formatDurationVerbose(diff.abs())}';
+          comparisonText = formatDurationVerbose(diff.abs());
           comparisonColor = Colors.green;
         } else if (diff > 0) {
           comparisonText = '+${formatDurationVerbose(diff)}';
@@ -247,7 +247,7 @@ class _WorkoutSummaryScreenState extends State<WorkoutSummaryScreen> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
-            drillName + ':',
+            '$drillName:',
             style: const TextStyle(color: Colors.white, fontSize: 16),
           ),
           Row(
@@ -357,7 +357,7 @@ class _WorkoutSummaryScreenState extends State<WorkoutSummaryScreen> {
     } else if (drill.type == 'REP_BASED') {
       return '${result.makes} / ${drill.config['targetMakes']}';
     } else if (drill.type == 'MAKE_TARGET_TIMED') {
-      return '${formatDurationVerbose(result.elapsedSeconds)}';
+      return formatDurationVerbose(result.elapsedSeconds);
     }
     return '';
   }

@@ -27,13 +27,13 @@ class SplitPriorityLayout extends StatelessWidget {
   final double progress;
 
   const SplitPriorityLayout({
-    Key? key,
+    super.key,
     required this.primaryActionBar,
     required this.content,
     required this.secondaryControlBar,
     this.showProgressIndicator = true,
     this.progress = 0.0,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +47,7 @@ class SplitPriorityLayout extends StatelessWidget {
         child: Column(
           children: [
             // Primary Action Bar (Fixed Height)
-            Container(
+            SizedBox(
               height: 70,
               width: double.infinity,
               child: primaryActionBar,
@@ -70,7 +70,7 @@ class SplitPriorityLayout extends StatelessWidget {
             ],
             
             // Secondary Control Bar (Fixed Height)
-            Container(
+            SizedBox(
               height: 70,
               width: double.infinity,
               child: secondaryControlBar,

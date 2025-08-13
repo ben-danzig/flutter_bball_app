@@ -3,7 +3,7 @@ import 'package:numberpicker/numberpicker.dart';
 
 class TimePickerDialog extends StatefulWidget {
   final int initialSeconds;
-  const TimePickerDialog({Key? key, required this.initialSeconds}) : super(key: key);
+  const TimePickerDialog({super.key, required this.initialSeconds});
 
   @override
   State<TimePickerDialog> createState() => _TimePickerDialogState();

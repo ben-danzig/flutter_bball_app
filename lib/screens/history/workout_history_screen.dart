@@ -9,7 +9,7 @@ import 'package:provider/provider.dart';
 import 'package:flutter_bball_app/services/auth_service.dart';
 
 class WorkoutHistoryScreen extends StatefulWidget {
-  const WorkoutHistoryScreen({Key? key}) : super(key: key);
+  const WorkoutHistoryScreen({super.key});
 
   @override
   _WorkoutHistoryScreenState createState() => _WorkoutHistoryScreenState();
@@ -18,7 +18,7 @@ class WorkoutHistoryScreen extends StatefulWidget {
 class _WorkoutHistoryScreenState extends State<WorkoutHistoryScreen> {
   Future<List<WorkoutSession>> _sessionsFuture = Future.value([]);
   bool _selectionMode = false;
-  Set<String> _selectedSessionIds = {};
+  final Set<String> _selectedSessionIds = {};
 
   @override
   void initState() {

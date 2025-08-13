@@ -8,13 +8,13 @@ class PauseResumeButton extends StatelessWidget {
   final FontWeight? fontWeight;
 
   const PauseResumeButton({
-    Key? key,
+    super.key,
     required this.isPaused,
     required this.onTogglePause,
     this.textColor,
     this.fontSize,
     this.fontWeight,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

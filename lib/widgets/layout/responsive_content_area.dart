@@ -17,10 +17,10 @@ class ResponsiveContentArea extends StatelessWidget {
   final EdgeInsets? padding;
 
   const ResponsiveContentArea({
-    Key? key,
+    super.key,
     required this.child,
     this.padding,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
