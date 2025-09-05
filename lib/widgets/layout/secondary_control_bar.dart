@@ -31,14 +31,14 @@ class SecondaryControlBar extends StatelessWidget {
   final VoidCallback onResetCurrentDrill;
 
   const SecondaryControlBar({
-    Key? key,
+    super.key,
     required this.isPaused,
     required this.onTogglePause,
     required this.onPreviousDrill,
     required this.onNextDrill,
     required this.onEndWorkout,
     required this.onResetCurrentDrill,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

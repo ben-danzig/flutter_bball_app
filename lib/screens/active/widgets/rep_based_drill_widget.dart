@@ -11,7 +11,7 @@ import '../../../utils/drill_types.dart';
 class RepBasedDrillWidget extends StatelessWidget {
   final Drill drill;
 
-  const RepBasedDrillWidget({Key? key, required this.drill}) : super(key: key);
+  const RepBasedDrillWidget({super.key, required this.drill});
 
   void _showLogSetDialog(BuildContext context, WorkoutState workoutState) {
     final makesController = TextEditingController();

@@ -9,7 +9,7 @@ import 'package:flutter_bball_app/utils/device_id_util.dart';
 import 'package:flutter_bball_app/services/auth_service.dart';
 
 class InjuryLogScreen extends StatefulWidget {
-  const InjuryLogScreen({Key? key}) : super(key: key);
+  const InjuryLogScreen({super.key});
 
   @override
   _InjuryLogScreenState createState() => _InjuryLogScreenState();

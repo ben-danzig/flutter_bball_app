@@ -17,7 +17,7 @@ class CountdownTimerWidget extends StatefulWidget {
   final Color backgroundColor;
 
   const CountdownTimerWidget({
-    Key? key,
+    super.key,
     required this.durationSeconds,
     this.onComplete,
     this.onTick,
@@ -30,7 +30,7 @@ class CountdownTimerWidget extends StatefulWidget {
     this.fontSize = 300,
     this.textColor = Colors.white,
     this.backgroundColor = Colors.transparent,
-  }) : super(key: key);
+  });
 
   @override
   _CountdownTimerWidgetState createState() => _CountdownTimerWidgetState();
@@ -258,7 +258,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
                     icon: const Icon(Icons.remove, color: Colors.white),
                   ),
                   Text(
-                    '${_seconds.toString().padLeft(2, '0')}',
+                    _seconds.toString().padLeft(2, '0'),
                     style: const TextStyle(
                       fontSize: 24,
                       color: Colors.white,

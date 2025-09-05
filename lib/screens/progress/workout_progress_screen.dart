@@ -16,10 +16,10 @@ class WorkoutProgressScreen extends StatefulWidget {
   final String workoutBlueprintId;
 
   const WorkoutProgressScreen({
-    Key? key,
+    super.key,
     required this.currentSession,
     required this.workoutBlueprintId,
-  }) : super(key: key);
+  });
 
   @override
   State<WorkoutProgressScreen> createState() => _WorkoutProgressScreenState();

@@ -23,12 +23,12 @@ class PrimaryActionBar extends StatelessWidget {
   final bool isPrimaryActionEnabled;
 
   const PrimaryActionBar({
-    Key? key,
+    super.key,
     required this.drillType,
     this.nextDrillName,
     this.onPrimaryAction,
     this.isPrimaryActionEnabled = true,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

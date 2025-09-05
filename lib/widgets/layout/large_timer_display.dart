@@ -29,12 +29,12 @@ class LargeTimerDisplay extends StatelessWidget {
   final String? subtitle;
 
   const LargeTimerDisplay({
-    Key? key,
+    super.key,
     required this.seconds,
     required this.textColor,
     this.title,
     this.subtitle,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
