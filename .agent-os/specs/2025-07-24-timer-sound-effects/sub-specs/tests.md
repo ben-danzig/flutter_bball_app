@@ -28,6 +28,7 @@ This is the tests coverage details for the spec detailed in @.agent-os/specs/202
 - Should not play sound when TIMED drill timer completes and setting is disabled
 - Should not interfere with existing drill progression and logging functionality
 - Should maintain sound preference across app restarts
+- Should fail silently on Web autoplay restriction without blocking flow
 
 **Settings Screen Integration**
 - Should display timer sound toggle in settings screen
@@ -42,6 +43,7 @@ This is the tests coverage details for the spec detailed in @.agent-os/specs/202
 - Should not call sound service when timer completes and setting disabled
 - Should continue normal drill completion flow regardless of sound setting
 - Should handle sound service errors without affecting timer completion
+- Settings toggle should default to ON and reflect persisted OFF after change
 
 **Settings Screen (Modified)**
 - Should render timer sound toggle switch correctly
@@ -56,6 +58,7 @@ This is the tests coverage details for the spec detailed in @.agent-os/specs/202
 - Start workout with TIMED drill, disable timer sounds, verify no sound plays
 - Toggle timer sound setting mid-workout, verify setting takes effect on next drill
 - Complete multiple TIMED drills with sounds enabled, verify consistent behavior
+- Verify manual Web run: initial user interaction unlocks audio context; subsequent completions play sound
 
 ### Mocking Requirements
 

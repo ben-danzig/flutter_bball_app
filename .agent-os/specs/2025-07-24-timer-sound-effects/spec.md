@@ -52,3 +52,61 @@ As a user, I want to control whether timer completion sounds play, so that I can
 1. **Timer Sound Plays on Completion** - When a TIMED drill countdown reaches zero, an audio effect plays automatically
 2. **Settings Toggle Available** - Users can find and toggle "Timer Sound Effects" option in the Settings screen
 3. **Preference Persistence** - User's timer sound preference is saved and restored between app sessions 
+
+## Acceptance Criteria
+
+- [ ] **Timer completion audio**: For TIMED drills, a sound plays within 150ms of the countdown reaching zero.
+- [ ] **Settings default**: "Timer Sound Effects" is enabled by default for first-time users.
+- [ ] **Settings persistence**: Toggling the setting is persisted and restored on app restart.
+- [ ] **Respect preference**: When disabled, no timer completion sound plays.
+- [ ] **Non-blocking**: Sound playback does not block drill completion or navigation.
+- [ ] **Cross-platform**: Behavior verified on Android and Web without runtime errors.
+- [ ] **Asset usage**: Uses `assets/timer-end.mp3` by default, with `assets/buzzer.mp3` available as fallback if needed.
+
+## Milestones & Tasks
+
+### M1: Service & Settings (1–2 days)
+- [ ] Create `SoundEffectsService` with `playTimerComplete()` using `audioplayers`.
+- [ ] Extend `SettingsService` with `playTimerSounds` (default true) and persistence.
+- [ ] Unit tests for service and settings persistence.
+
+### M2: UI Integration (0.5–1 day)
+- [ ] Add "Timer Sound Effects" toggle to `SettingsScreen` under Audio Cues.
+- [ ] Wire toggle to `SettingsService` and verify state updates.
+- [ ] Widget/integration tests for UI toggle behavior.
+
+### M3: Timer Hookup (1 day)
+- [ ] Trigger sound on TIMED drill completion in `TimedDrillWidget`.
+- [ ] Ensure `CountdownTimerWidget` API remains backward compatible.
+- [ ] Integration tests verifying sound/no-sound paths.
+
+### M4: Platform Verification (0.5 day)
+- [ ] Manual verification on Android device/emulator.
+- [ ] Manual verification on Web (gesture-unlocked audio context).
+- [ ] Document any platform-specific caveats.
+
+## Risks & Mitigations
+
+- **Web autoplay restrictions**: Browsers may block playback without prior user interaction.
+  - Mitigation: Ensure audio context is unlocked via prior tap (starting a workout), and document behavior.
+- **Audio latency on cold start**: First playback may be delayed.
+  - Mitigation: Initialize the `AudioPlayer` early (app startup or first workout screen) to warm up.
+- **Conflicts with TTS**: Overlapping audio with text-to-speech could reduce clarity.
+  - Mitigation: Use separate service; keep short, single-shot effect and do not await completion.
+
+## Dependencies
+
+- `audioplayers: ^5.2.1` (already in `pubspec.yaml`)
+- Assets present: `assets/timer-end.mp3`, `assets/buzzer.mp3`
+
+## Rollout & Verification
+
+- Smoke test on Android and Web.
+- Confirm acceptance criteria via automated tests plus manual checks.
+- Add release notes entry: "Timer completion sound with settings toggle."
+
+## Open Questions
+
+- Do we want a vibration/haptic cue alongside audio on supported devices? (Future scope)
+- Should we add a per-workout override for timer sounds, or keep it global-only for now?
+- Any need for a short cooldown to avoid overlapping sounds if multiple timers end quickly?
