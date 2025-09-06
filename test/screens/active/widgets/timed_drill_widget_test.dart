@@ -8,6 +8,7 @@ import 'package:flutter_bball_app/widgets/layout/large_timer_display.dart';
 import 'package:flutter_bball_app/models/drill.dart';
 import 'package:flutter_bball_app/services/workout_state.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_bball_app/services/settings_service.dart';
 import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
 
@@ -33,16 +34,18 @@ void main() {
       when(mockWorkoutState.isPaused).thenReturn(false);
       when(mockWorkoutState.currentDrillIndex).thenReturn(0);
       when(mockWorkoutState.resetDrillCounter).thenReturn(0);
+      when(mockWorkoutState.nextDrillName).thenReturn('Next Drill');
     });
 
-    Widget createTestWidget({bool isPaused = false}) {
+    Widget createTestWidget({bool isPaused = false, SettingsService? settings}) {
       when(mockWorkoutState.isPaused).thenReturn(isPaused);
+      final providedSettings = settings ?? SettingsService();
       
       return MaterialApp(
-        home: ChangeNotifierProvider<WorkoutState>.value(
-          value: mockWorkoutState,
-          child: TimedDrillWidget(drill: testDrill),
-        ),
+        home: MultiProvider(providers: [
+          ChangeNotifierProvider<WorkoutState>.value(value: mockWorkoutState),
+          ChangeNotifierProvider<SettingsService>.value(value: providedSettings),
+        ], child: TimedDrillWidget(drill: testDrill)),
       );
     }
 
@@ -189,10 +192,10 @@ void main() {
 
         await tester.pumpWidget(
           MaterialApp(
-            home: ChangeNotifierProvider<WorkoutState>.value(
-              value: mockWorkoutState,
-              child: TimedDrillWidget(drill: shortDrill),
-            ),
+            home: MultiProvider(providers: [
+              ChangeNotifierProvider<WorkoutState>.value(value: mockWorkoutState),
+              ChangeNotifierProvider<SettingsService>.value(value: SettingsService()),
+            ], child: TimedDrillWidget(drill: shortDrill)),
           ),
         );
 
@@ -202,6 +205,60 @@ void main() {
         // Should have called the completion methods
         verify(mockWorkoutState.logTimedDrill()).called(1);
         verify(mockWorkoutState.nextDrill()).called(1);
+      });
+
+      testWidgets('plays sound on completion when setting enabled', (WidgetTester tester) async {
+        final shortDrill = Drill(
+          drillId: 'short-drill',
+          name: 'Short Test Drill',
+          description: 'Quick test',
+          type: 'TIMED',
+          config: {'duration': 1},
+        );
+
+        int playCalls = 0;
+
+        final settings = SettingsService();
+        await settings.setPlayTimerSounds(true);
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: MultiProvider(providers: [
+              ChangeNotifierProvider<WorkoutState>.value(value: mockWorkoutState),
+              ChangeNotifierProvider<SettingsService>.value(value: settings),
+            ], child: TimedDrillWidget(drill: shortDrill, playSoundOverride: () async { playCalls++; })),
+          ),
+        );
+
+        await tester.pump(const Duration(seconds: 2));
+        expect(playCalls, 1);
+      });
+
+      testWidgets('does not play sound on completion when setting disabled', (WidgetTester tester) async {
+        final shortDrill = Drill(
+          drillId: 'short-drill',
+          name: 'Short Test Drill',
+          description: 'Quick test',
+          type: 'TIMED',
+          config: {'duration': 1},
+        );
+
+        int playCalls = 0;
+
+        final settings = SettingsService();
+        await settings.setPlayTimerSounds(false);
+
+        await tester.pumpWidget(
+          MaterialApp(
+            home: MultiProvider(providers: [
+              ChangeNotifierProvider<WorkoutState>.value(value: mockWorkoutState),
+              ChangeNotifierProvider<SettingsService>.value(value: settings),
+            ], child: TimedDrillWidget(drill: shortDrill, playSoundOverride: () async { playCalls++; })),
+          ),
+        );
+
+        await tester.pump(const Duration(seconds: 2));
+        expect(playCalls, 0);
       });
     });
 
@@ -288,4 +345,7 @@ void main() {
       });
     });
   });
+
 }
+
+// Spy is no longer needed due to playSoundOverride in widget

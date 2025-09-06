@@ -10,11 +10,14 @@ import '../../../widgets/layout/large_timer_display.dart';
 import '../../../widgets/layout/responsive_content_area.dart';
 import '../../../utils/drill_types.dart';
 import '../widgets/time_picker_dialog.dart' as custom_picker;
+import '../../../services/settings_service.dart';
+import '../../../services/sound_effects_service.dart';
 
 class TimedDrillWidget extends StatefulWidget {
   final Drill drill;
+  final Future<void> Function()? playSoundOverride;
 
-  const TimedDrillWidget({super.key, required this.drill});
+  const TimedDrillWidget({super.key, required this.drill, this.playSoundOverride});
 
   @override
   _TimedDrillWidgetState createState() => _TimedDrillWidgetState();
@@ -80,6 +83,20 @@ class _TimedDrillWidgetState extends State<TimedDrillWidget> {
 
   void _onTimerComplete() {
     final workoutState = Provider.of<WorkoutState>(context, listen: false);
+    final settings = Provider.of<SettingsService>(context, listen: false);
+    if (settings.playTimerSounds) {
+      try {
+        if (widget.playSoundOverride != null) {
+          widget.playSoundOverride!.call();
+        } else {
+          final soundEffects = Provider.of<SoundEffectsService>(context, listen: false);
+          // Fire-and-forget to avoid blocking UI/thread
+          soundEffects.playTimerComplete();
+        }
+      } catch (_) {
+        // Ignore sound errors in this path
+      }
+    }
     workoutState.logTimedDrill();
     workoutState.nextDrill();
   }

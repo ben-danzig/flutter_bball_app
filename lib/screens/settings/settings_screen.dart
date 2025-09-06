@@ -9,7 +9,6 @@ class SettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    final settingsService = Provider.of<SettingsService>(context);
 
     return Scaffold(
       backgroundColor: const Color(0xFF111827),
@@ -63,6 +62,15 @@ class SettingsScreen extends StatelessWidget {
                         subtitle: 'Speak the target makes for drills that have targets',
                         value: settings.announceDrillTargetMakes,
                         onChanged: (value) => settings.setAnnounceDrillTargetMakes(value),
+                      ),
+                      const SizedBox(height: 12),
+                      _buildSettingTile(
+                        context: context,
+                        title: 'Timer Sound Effects',
+                        subtitle: 'Play a sound when the timer completes',
+                        value: settings.playTimerSounds,
+                        onChanged: (value) => settings.setPlayTimerSounds(value),
+                        switchKey: const Key('settings_timer_sound_effects_switch'),
                       ),
                     ],
                   );
@@ -162,6 +170,7 @@ class SettingsScreen extends StatelessWidget {
     required String subtitle,
     required bool value,
     required Function(bool) onChanged,
+    Key? switchKey,
   }) {
     final textTheme = Theme.of(context).textTheme;
 
@@ -196,6 +205,7 @@ class SettingsScreen extends StatelessWidget {
             ),
           ),
           Switch(
+            key: switchKey,
             value: value,
             onChanged: onChanged,
             activeColor: const Color(0xFF3b82f6),
