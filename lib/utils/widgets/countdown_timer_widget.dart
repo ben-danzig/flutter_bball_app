@@ -65,14 +65,18 @@ class _CountdownTimerWidgetState extends State<CountdownTimerWidget> {
         return;
       }
 
-      if (_remainingSeconds > 1) {
-        setState(() {
-          _remainingSeconds--;
-        });
-        widget.onTick?.call(_remainingSeconds);
-      } else {
-        _timer.cancel();
+      setState(() {
+        _remainingSeconds--;
+      });
+      widget.onTick?.call(_remainingSeconds);
+
+      // Trigger completion when timer reaches 1 second to eliminate delay
+      if (_remainingSeconds == 1) {
         widget.onComplete?.call();
+      }
+
+      if (_remainingSeconds <= 0) {
+        _timer.cancel();
       }
     });
   }

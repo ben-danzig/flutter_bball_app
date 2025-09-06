@@ -2,25 +2,47 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/foundation.dart';
 
 class SoundEffectsService {
+  static const String _timerEndSoundFile = 'timer-end-new.mp3';
+  static const String _fallbackSoundFile = 'buzzer.mp3';
+  
   static final SoundEffectsService _instance = SoundEffectsService._internal();
   factory SoundEffectsService() => _instance;
-  SoundEffectsService._internal();
+  SoundEffectsService._internal() {
+    _preloadSounds();
+  }
 
   final AudioPlayer _audioPlayer = AudioPlayer();
 
+  Future<void> _preloadSounds() async {
+    try {
+      // Preload the primary sound for faster initial playback
+      await _audioPlayer.setSource(AssetSource(_timerEndSoundFile));
+    } catch (e) {
+      debugPrint('Failed to preload $_timerEndSoundFile: $e');
+      try {
+        // Fallback to preloading buzzer
+        await _audioPlayer.setSource(AssetSource(_fallbackSoundFile));
+      } catch (e2) {
+        debugPrint('Failed to preload $_fallbackSoundFile: $e2');
+      }
+    }
+  }
+
   Future<void> playTimerComplete() async {
     try {
+      // Always use play() to ensure sound starts from beginning
+      // The preloading helps with faster initialization, but we still call play()
       await _audioPlayer
-          .play(AssetSource('timer-end.mp3'))
+          .play(AssetSource(_timerEndSoundFile))
           .timeout(const Duration(seconds: 2));
     } catch (e) {
-      debugPrint('Error playing timer-end.mp3: $e');
+      debugPrint('Error playing $_timerEndSoundFile: $e');
       try {
         await _audioPlayer
-            .play(AssetSource('buzzer.mp3'))
+            .play(AssetSource(_fallbackSoundFile))
             .timeout(const Duration(seconds: 2));
       } catch (e2) {
-        debugPrint('Error playing fallback buzzer.mp3: $e2');
+        debugPrint('Error playing fallback $_fallbackSoundFile: $e2');
       }
     }
   }

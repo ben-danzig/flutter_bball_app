@@ -213,7 +213,7 @@ void main() {
           name: 'Short Test Drill',
           description: 'Quick test',
           type: 'TIMED',
-          config: {'duration': 1},
+          config: {'duration': 2},
         );
 
         int playCalls = 0;
@@ -230,7 +230,10 @@ void main() {
           ),
         );
 
-        await tester.pump(const Duration(seconds: 2));
+        // Wait for timer to tick through 2 -> 1 -> 0 and complete
+        await tester.pump(const Duration(seconds: 1));  // 2 -> 1
+        expect(playCalls, 0);
+        await tester.pump(const Duration(seconds: 1));  // 1 -> 0 (completion)
         expect(playCalls, 1);
       });
 
@@ -240,7 +243,7 @@ void main() {
           name: 'Short Test Drill',
           description: 'Quick test',
           type: 'TIMED',
-          config: {'duration': 1},
+          config: {'duration': 2},
         );
 
         int playCalls = 0;
@@ -257,7 +260,9 @@ void main() {
           ),
         );
 
-        await tester.pump(const Duration(seconds: 2));
+        // Wait for timer to complete but sound should not play due to disabled setting
+        await tester.pump(const Duration(seconds: 1));  // 2 -> 1
+        await tester.pump(const Duration(seconds: 1));  // 1 -> 0 (completion)
         expect(playCalls, 0);
       });
     });

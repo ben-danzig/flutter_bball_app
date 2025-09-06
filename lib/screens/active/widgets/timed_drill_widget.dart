@@ -70,19 +70,24 @@ class _TimedDrillWidgetState extends State<TimedDrillWidget> {
         return;
       }
 
-      if (_remainingSeconds > 1) {
-        setState(() {
-          _remainingSeconds--;
-        });
-      } else {
+      setState(() {
+        _remainingSeconds--;
+      });
+
+      // Trigger completion actions when timer reaches 1 second to eliminate delay
+      if (_remainingSeconds == 1) {
+        _handleTimerCompletion();
+      }
+
+      if (_remainingSeconds <= 0) {
         _timer.cancel();
-        _onTimerComplete();
+        _finalizeTimerCompletion();
       }
     });
   }
 
-  void _onTimerComplete() {
-    final workoutState = Provider.of<WorkoutState>(context, listen: false);
+  void _handleTimerCompletion() {
+    // Play sound when timer shows 1 second remaining to eliminate delay
     final settings = Provider.of<SettingsService>(context, listen: false);
     if (settings.playTimerSounds) {
       try {
@@ -97,6 +102,11 @@ class _TimedDrillWidgetState extends State<TimedDrillWidget> {
         // Ignore sound errors in this path
       }
     }
+  }
+
+  void _finalizeTimerCompletion() {
+    // Handle the actual completion logic (logging and navigation)
+    final workoutState = Provider.of<WorkoutState>(context, listen: false);
     workoutState.logTimedDrill();
     workoutState.nextDrill();
   }
