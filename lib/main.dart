@@ -4,6 +4,7 @@ import 'package:flutter_bball_app/services/auth_service.dart';
 import 'package:flutter_bball_app/services/settings_service.dart';
 import 'package:flutter_bball_app/services/workout_state.dart';
 import 'package:flutter_bball_app/services/sound_effects_service.dart';
+import 'package:flutter_bball_app/services/voice_command_service.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
@@ -20,6 +21,12 @@ void main() async {
         ChangeNotifierProvider(create: (context) => WorkoutState()),
         ChangeNotifierProvider(create: (context) => SettingsService()),
         Provider<SoundEffectsService>(create: (context) => SoundEffectsService()),
+        ChangeNotifierProxyProvider<SettingsService, VoiceCommandService>(
+          create: (context) => VoiceCommandService(
+            Provider.of<SettingsService>(context, listen: false),
+          ),
+          update: (context, settings, voice) => voice ?? VoiceCommandService(settings),
+        ),
       ],
       child: const BballTrainerApp(),
     ),

@@ -60,6 +60,42 @@ class SoundEffectsService {
     }
   }
 
+  // Voice command feedback sounds
+  Future<void> playPauseSound() async {
+    // Using tick sound for pause feedback
+    await playTimerTick();
+  }
+
+  Future<void> playResumeSound() async {
+    // Using tick sound for resume feedback
+    await playTimerTick();
+  }
+
+  Future<void> playNextSound() async {
+    // Using tick sound for next feedback
+    await playTimerTick();
+  }
+
+  Future<void> playPreviousSound() async {
+    // Using tick sound for previous feedback
+    await playTimerTick();
+  }
+
+  Future<void> playResetSound() async {
+    // Using timer complete sound for reset feedback
+    await playTimerComplete();
+  }
+
+  Future<void> playCommandRecognizedSound() async {
+    // Using tick sound for command recognition feedback
+    await playTimerTick();
+  }
+
+  Future<void> playCommandErrorSound() async {
+    // Using timer complete sound for error feedback
+    await playTimerComplete();
+  }
+
   void dispose() {
     _audioPlayer.dispose();
   }
