@@ -6,6 +6,7 @@ class CountdownTimerWidget extends StatefulWidget {
   final int durationSeconds;
   final VoidCallback? onComplete;
   final Function(int)? onTick;
+  final VoidCallback? onTickSound; // Called for final 3 seconds (3, 2)
   final bool isPaused;
   final VoidCallback? onTogglePause;
   final bool showTapToEdit;
@@ -21,6 +22,7 @@ class CountdownTimerWidget extends StatefulWidget {
     required this.durationSeconds,
     this.onComplete,
     this.onTick,
+    this.onTickSound,
     this.isPaused = false,
     this.onTogglePause,
     this.showTapToEdit = false,
@@ -69,6 +71,11 @@ class _CountdownTimerWidgetState extends State<CountdownTimerWidget> {
         _remainingSeconds--;
       });
       widget.onTick?.call(_remainingSeconds);
+
+      // Play tick sound for final 3 seconds (but not at 1 second since completion sound plays then)
+      if (_remainingSeconds <= 3 && _remainingSeconds > 1) {
+        widget.onTickSound?.call();
+      }
 
       // Trigger completion when timer reaches 1 second to eliminate delay
       if (_remainingSeconds == 1) {

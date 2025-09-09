@@ -36,6 +36,7 @@ CountdownTimerWidget(
 - `durationSeconds` (required): The total duration in seconds
 - `onComplete` (optional): Callback when timer reaches zero
 - `onTick` (optional): Callback called every second with remaining seconds
+- `onTickSound` (optional): Callback for tick sounds during final 3 seconds (at 3s and 2s remaining)
 - `isPaused` (optional): Whether the timer is paused
 - `showTapToEdit` (optional): Whether tapping the timer shows edit dialog
 - `onTimeEdit` (optional): Callback when time is edited via dialog

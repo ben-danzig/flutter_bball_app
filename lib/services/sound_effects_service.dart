@@ -2,7 +2,8 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/foundation.dart';
 
 class SoundEffectsService {
-  static const String _timerEndSoundFile = 'timer-end-new.mp3';
+  static const String _timerEndSoundFile = 'timer-end-buzzer.mp3';
+  static const String _timerTickSoundFile = 'timer-tick.mp3';
   static const String _fallbackSoundFile = 'buzzer.mp3';
   
   static final SoundEffectsService _instance = SoundEffectsService._internal();
@@ -15,7 +16,7 @@ class SoundEffectsService {
 
   Future<void> _preloadSounds() async {
     try {
-      // Preload the primary sound for faster initial playback
+      // Preload the timer end sound for faster initial playback
       await _audioPlayer.setSource(AssetSource(_timerEndSoundFile));
     } catch (e) {
       debugPrint('Failed to preload $_timerEndSoundFile: $e');
@@ -44,6 +45,18 @@ class SoundEffectsService {
       } catch (e2) {
         debugPrint('Error playing fallback $_fallbackSoundFile: $e2');
       }
+    }
+  }
+
+  Future<void> playTimerTick() async {
+    try {
+      // Play tick sound for countdown (final 3 seconds)
+      await _audioPlayer
+          .play(AssetSource(_timerTickSoundFile))
+          .timeout(const Duration(seconds: 1));
+    } catch (e) {
+      debugPrint('Error playing $_timerTickSoundFile: $e');
+      // No fallback for tick sound - just fail silently
     }
   }
 

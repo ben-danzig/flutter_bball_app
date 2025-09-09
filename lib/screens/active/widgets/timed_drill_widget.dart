@@ -74,16 +74,35 @@ class _TimedDrillWidgetState extends State<TimedDrillWidget> {
         _remainingSeconds--;
       });
 
+      // Play tick sound for final 3 seconds (but not at 1 second since completion sound plays then)
+      if (_remainingSeconds <= 3 && _remainingSeconds > 1) {
+        _playTickSound();
+      }
+
       // Trigger completion actions when timer reaches 1 second to eliminate delay
       if (_remainingSeconds == 1) {
         _handleTimerCompletion();
       }
 
-      if (_remainingSeconds <= 0) {
-        _timer.cancel();
-        _finalizeTimerCompletion();
-      }
+        if (_remainingSeconds <= 0) {
+          _timer.cancel();
+          _finalizeTimerCompletion();
+        }
     });
+  }
+
+  void _playTickSound() {
+    // Play tick sound for countdown (3, 2 seconds remaining)
+    final settings = Provider.of<SettingsService>(context, listen: false);
+    if (settings.playTimerSounds) {
+      try {
+        final soundEffects = Provider.of<SoundEffectsService>(context, listen: false);
+        // Fire-and-forget to avoid blocking UI/thread
+        soundEffects.playTimerTick();
+      } catch (_) {
+        // Ignore sound errors in this path
+      }
+    }
   }
 
   void _handleTimerCompletion() {
