@@ -4,6 +4,7 @@ import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_recognition_error.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_bball_app/services/settings_service.dart';
+import 'package:flutter_bball_app/services/sound_effects_service.dart';
 
 enum VoiceCommandState {
   uninitialized,
@@ -48,6 +49,7 @@ class CommandResult {
 class VoiceCommandService extends ChangeNotifier {
   final SettingsService _settingsService;
   final SpeechToText _speechToText = SpeechToText();
+  final SoundEffectsService _soundService = SoundEffectsService();
   
   // State management
   VoiceCommandState _state = VoiceCommandState.uninitialized;
@@ -73,6 +75,11 @@ class VoiceCommandService extends ChangeNotifier {
   List<LocaleName> get availableLocales => _locales;
   String get currentLocaleId => _currentLocaleId;
   CommandResult? get lastRecognizedCommand => _lastRecognizedCommand;
+  
+  // Method to clear the last recognized command (prevents duplicate processing)
+  void clearLastCommand() {
+    _lastRecognizedCommand = null;
+  }
   
   VoiceCommandService(this._settingsService) {
     debugPrint('VoiceCommandService constructor called with _settingsService: $_settingsService');
@@ -180,24 +187,31 @@ class VoiceCommandService extends ChangeNotifier {
     
     String userFriendlyMessage;
     bool overrideRetry = false;
+    bool playErrorSound = false;
     switch (error.errorMsg) {
       case 'error_speech_timeout':
         userFriendlyMessage = 'No speech detected. Please try again.';
         overrideRetry = true;
+        // Don't play error sound for timeout in wake word mode
+        playErrorSound = _listeningMode == ListeningMode.command;
         break;
       case 'error_no_match':
         userFriendlyMessage = 'Could not understand. Please speak clearly.';
         overrideRetry = true;
+        playErrorSound = true;
         break;
       case 'error_audio':
         userFriendlyMessage = 'Audio recording error. Please check your microphone.';
         overrideRetry = true;
+        playErrorSound = true;
         break;
       case 'error_network':
         userFriendlyMessage = 'Network error. Please check your connection.';
+        playErrorSound = true;
         break;
       case 'error_permission':
         userFriendlyMessage = 'Microphone permission denied.';
+        playErrorSound = true;
         break;
       case 'error_busy':
         userFriendlyMessage = 'Speech recognition is busy. Please wait a moment.';
@@ -206,9 +220,15 @@ class VoiceCommandService extends ChangeNotifier {
       default:
         userFriendlyMessage = 'Voice command error: ${error.errorMsg}';
         overrideRetry = true; // Default to retry for unknown errors
+        playErrorSound = true;
     }
     
     _setError(userFriendlyMessage);
+    
+    // Play error sound if appropriate and enabled
+    if (playErrorSound && _settingsService.audioCommandFeedback) {
+      _soundService.playCommandErrorSound();
+    }
     
     // For non-permanent errors or retryable errors, try to recover
     if ((!error.permanent || overrideRetry) && _settingsService.voiceCommandsEnabled && !_isDebugListening) {
@@ -249,6 +269,9 @@ class VoiceCommandService extends ChangeNotifier {
     try {
       _listeningMode = ListeningMode.wakeWord;
       _setState(VoiceCommandState.listening);
+      _currentTranscript = '';
+      _lastRecognizedCommand = null;
+      notifyListeners();
       
       await _speechToText.listen(
         onResult: _handleWakeWordResult,
@@ -256,20 +279,20 @@ class VoiceCommandService extends ChangeNotifier {
         cancelOnError: false,
         partialResults: true,
         listenMode: ListenMode.dictation,
+        // Use continuous listening for wake word
+        listenFor: const Duration(seconds: 60),
+        pauseFor: const Duration(seconds: 3),
+        onSoundLevelChange: (level) {
+          // Can be used for visual feedback of sound level
+        },
       );
       
-      // Set a safety timeout to prevent getting stuck in listening state
-      Future.delayed(const Duration(seconds: 30), () {
+      // Set a safety timeout to restart wake word listening periodically
+      // This helps with battery optimization and prevents getting stuck
+      Future.delayed(const Duration(seconds: 60), () {
         if (_state == VoiceCommandState.listening && _listeningMode == ListeningMode.wakeWord) {
-          debugPrint('Wake word listening timeout reached, restarting');
-          _stopListening();
-          _setState(VoiceCommandState.ready);
-          // Restart wake word listening after timeout, but not in debug mode
-          if (_settingsService.voiceCommandsEnabled && !_isDebugListening) {
-            Future.delayed(const Duration(milliseconds: 500), () {
-              _startWakeWordListening();
-            });
-          }
+          debugPrint('Wake word listening cycle complete, restarting');
+          _restartWakeWordListening();
         }
       });
     } catch (e) {
@@ -278,19 +301,86 @@ class VoiceCommandService extends ChangeNotifier {
     }
   }
   
-  void _handleWakeWordResult(SpeechRecognitionResult result) {
-    debugPrint('_handleWakeWordResult called with result: $result');
-    _currentTranscript = result.recognizedWords.toLowerCase();
-    notifyListeners();
+  Future<void> _restartWakeWordListening() async {
+    if (!_settingsService.voiceCommandsEnabled || _isDebugListening) return;
     
-    debugPrint('Wake word transcript: $_currentTranscript (final: ${result.finalResult})');
+    await _stopListening();
+    _setState(VoiceCommandState.ready);
     
-    // Check for wake word
-    if (_currentTranscript.contains('hey coach') || 
-        _currentTranscript.contains('hey coach')) {
-      _stopListening();
-      _startCommandListening();
+    // Small delay before restarting
+    await Future.delayed(const Duration(milliseconds: 500));
+    
+    if (_settingsService.voiceCommandsEnabled && !_isDebugListening) {
+      await _startWakeWordListening();
     }
+  }
+  
+  void _handleWakeWordResult(SpeechRecognitionResult result) {
+    final transcript = result.recognizedWords.toLowerCase();
+    debugPrint('Wake word transcript: "$transcript" (final: ${result.finalResult}, confidence: ${result.confidence})');
+    
+    // Update transcript for UI feedback
+    if (transcript != _currentTranscript) {
+      _currentTranscript = transcript;
+      notifyListeners();
+    }
+    
+    // Check for wake word with flexible matching
+    if (_containsWakeWord(transcript)) {
+      debugPrint('🎯 Wake word detected!');
+      
+      // Play wake word detection sound if audio feedback is enabled
+      if (_settingsService.audioCommandFeedback) {
+        _soundService.playWakeWordDetectedSound();
+      }
+      
+      // Stop wake word listening and switch to command mode
+      _stopListening();
+      _currentTranscript = ''; // Clear transcript for command mode
+      notifyListeners();
+      
+      // Small delay to ensure clean transition
+      Future.delayed(const Duration(milliseconds: 200), () {
+        _startCommandListening();
+      });
+    }
+    
+    // Clear transcript if it's getting too long (prevents memory issues)
+    if (transcript.length > 100) {
+      _currentTranscript = '';
+      notifyListeners();
+    }
+  }
+  
+  bool _containsWakeWord(String transcript) {
+    // List of wake word variations
+    final wakeWords = ['hey coach', 'hey coach', 'a coach', 'hey couch', 'hey code'];
+    
+    for (final word in wakeWords) {
+      if (transcript.contains(word)) {
+        return true;
+      }
+    }
+    
+    // Also check for phonetic similarity using fuzzy matching
+    // This handles slight pronunciation variations
+    final words = transcript.split(' ');
+    for (int i = 0; i < words.length - 1; i++) {
+      if (words[i] == 'hey' || words[i] == 'a' || words[i] == 'hey') {
+        final nextWord = words[i + 1];
+        if (_isSimilarToCoach(nextWord)) {
+          return true;
+        }
+      }
+    }
+    
+    return false;
+  }
+  
+  bool _isSimilarToCoach(String word) {
+    // Simple phonetic similarity check
+    final coachVariants = ['coach', 'couch', 'code', 'coaching', 'koach'];
+    return coachVariants.contains(word);
   }
   
   Future<void> _startCommandListening() async {
@@ -308,25 +398,46 @@ class VoiceCommandService extends ChangeNotifier {
       _listeningMode = ListeningMode.command;
       _setState(VoiceCommandState.listening);
       _currentTranscript = '';
+      _lastRecognizedCommand = null;
       notifyListeners();
+      
+      // Play listening start sound if audio feedback is enabled
+      if (_settingsService.audioCommandFeedback) {
+        _soundService.playListeningStartSound();
+      }
       
       await _speechToText.listen(
         onResult: _handleCommandResult,
         localeId: _currentLocaleId,
-        cancelOnError: false, // Don't cancel on error to be more resilient
-        listenOptions: SpeechListenOptions(listenMode: ListenMode.confirmation, partialResults: true), 
-        listenFor: const Duration(seconds: 5),
-        pauseFor: const Duration(seconds: 3), // Allow pauses in speech
+        cancelOnError: false,
+        partialResults: true,
+        listenMode: ListenMode.confirmation, 
+        listenFor: const Duration(seconds: 3), // 3-second timeout as per spec
+        pauseFor: const Duration(seconds: 2), // Allow brief pauses
+        onSoundLevelChange: (level) {
+          // Can be used for visual feedback
+        },
       );
       
-      // Set a safety timeout to prevent getting stuck in listening state
-      Future.delayed(const Duration(seconds: 8), () {
+      // Set a safety timeout with proper state transition
+      Future.delayed(const Duration(seconds: 4), () {
         if (_state == VoiceCommandState.listening && _listeningMode == ListeningMode.command) {
-          debugPrint('Command listening timeout reached, stopping');
+          debugPrint('Command timeout - returning to wake word mode');
+          
+          // Play end sound if enabled
+          if (_settingsService.audioCommandFeedback) {
+            _soundService.playListeningEndSound();
+          }
+          
           _stopListening();
           _setState(VoiceCommandState.ready);
-          // Reset debug flag on timeout
-          if (_isDebugListening) {
+          
+          // Return to wake word listening unless in debug mode
+          if (_settingsService.voiceCommandsEnabled && !_isDebugListening) {
+            Future.delayed(const Duration(milliseconds: 500), () {
+              _startWakeWordListening();
+            });
+          } else if (_isDebugListening) {
             _isDebugListening = false;
           }
         }
@@ -368,7 +479,6 @@ class VoiceCommandService extends ChangeNotifier {
   }
   
   void _processCommand(String command) {
-    debugPrint('_processCommand called with command: $command');
     debugPrint('=== PROCESSING COMMAND START ===');
     debugPrint('Raw command: "$command"');
     _setState(VoiceCommandState.processing);
@@ -382,33 +492,40 @@ class VoiceCommandService extends ChangeNotifier {
       // Reset failed attempts on successful recognition
       _failedAttempts = 0;
       
-      // Notify listeners about the recognized command
+      // Store the command for handling
       _lastRecognizedCommand = result;
-      debugPrint('Set lastRecognizedCommand to: ${_lastRecognizedCommand?.type}');
       notifyListeners();
-      debugPrint('Notified listeners about command');
       
-      // Play audio feedback if enabled
+      // Play success sound if enabled
       if (_settingsService.audioCommandFeedback) {
-        // Audio feedback will be implemented with AudioService integration
+        _soundService.playCommandRecognizedSound();
       }
+      
+      // Clear transcript after successful command
+      _currentTranscript = '';
     } else {
       debugPrint('❌ Command not recognized: $command');
-      _setError('Command not recognized. Please try again.');
+      _currentTranscript = "Didn't understand: \"$command\"";
+      notifyListeners();
+      
+      // Play error sound if enabled
+      if (_settingsService.audioCommandFeedback) {
+        _soundService.playCommandErrorSound();
+      }
     }
     
     debugPrint('=== PROCESSING COMMAND END ===');
     
-    // Return to appropriate listening mode
-    Future.delayed(const Duration(milliseconds: 500), () {
-      // Check if we're still in a processing/error state before changing
+    // Return to wake word listening after processing
+    Future.delayed(const Duration(milliseconds: 1000), () {
       if (_state == VoiceCommandState.processing || _state == VoiceCommandState.error) {
-        // Only start wake word listening if not in debug mode
+        _setState(VoiceCommandState.ready);
+        
+        // Return to wake word listening unless in debug mode
         if (_settingsService.voiceCommandsEnabled && !_isDebugListening) {
           _startWakeWordListening();
-        } else {
-          // In debug mode, just return to ready state
-          _setState(VoiceCommandState.ready);
+        } else if (_isDebugListening) {
+          _isDebugListening = false;
         }
       }
     });
@@ -416,7 +533,14 @@ class VoiceCommandService extends ChangeNotifier {
   
   Future<void> startListening() async {
     debugPrint('startListening called');
-    if (!_isInitialized || _state == VoiceCommandState.disabled) return;
+    if (!_isInitialized || _state == VoiceCommandState.disabled) {
+      debugPrint('Cannot start listening - initialized: $_isInitialized, state: $_state');
+      return;
+    }
+    
+    // Clear any debug flags
+    _isDebugListening = false;
+    _failedAttempts = 0;
     
     await _startWakeWordListening();
   }
@@ -548,89 +672,164 @@ class VoiceCommandService extends ChangeNotifier {
 class CommandProcessor {
   final SettingsService _settingsService;
   
+  // Command history for debugging
+  static final List<String> _commandHistory = [];
+  static const int _maxHistorySize = 50;
+  
+  // Command variations with fuzzy matching support
+  static final Map<CommandType, List<String>> _commandVariations = {
+    CommandType.previous: [
+      'go back', 'previous drill', 'previous', 'back', 'last', 'last drill',
+      'go to previous', 'prior', 'backward', 'backwards', 'before',
+    ],
+    CommandType.next: [
+      'next drill', 'next', 'skip', 'forward', 'forwards', 'advance',
+      'go to next', 'move on', 'continue to next',
+    ],
+    CommandType.reset: [
+      'start over', 'reset', 'restart', 'again', 'do over', 'redo',
+      'from the beginning', 'from the start', 'repeat',
+    ],
+    CommandType.pause: [
+      'pause', 'stop', 'hold', 'wait', 'freeze', 'halt',
+      'pause workout', 'stop workout', 'take a break',
+    ],
+    CommandType.resume: [
+      'resume', 'continue', 'start', 'go', 'play', 'unpause',
+      'keep going', 'resume workout', 'continue workout',
+    ],
+    CommandType.make: [
+      'make', 'made', 'bucket', 'in', 'yes', 'yep', 'yup', 'good',
+      'got it', 'swish', 'score', 'basket', 'made it',
+    ],
+    CommandType.miss: [
+      'miss', 'missed', 'brick', 'off', 'no', 'nope', 'out',
+      'missed it', 'no good', 'failed', 'fail',
+    ],
+  };
+  
   CommandProcessor(this._settingsService) {
-    debugPrint('CommandProcessor constructor called with _settingsService: $_settingsService');
+    debugPrint('CommandProcessor initialized');
   }
   
   CommandResult? processCommand(String command) {
-    debugPrint('processCommand called with command: $command');
     final normalizedCommand = command.toLowerCase().trim();
+    debugPrint('Processing command: "$normalizedCommand"');
     
-    // Check multi-word commands first (order matters!)
+    // Add to command history
+    _addToHistory(normalizedCommand);
     
-    // Previous command variations (check "go back" before "go")
-    if (_matchesAny(normalizedCommand, ['go back', 'previous drill', 'previous', 'back', 'last'])) {
-      return CommandResult(
-        type: CommandType.previous,
-        confidence: 1.0,
-      );
+    // Try exact matching first
+    final exactMatch = _findExactMatch(normalizedCommand);
+    if (exactMatch != null) {
+      debugPrint('✅ Exact match found: ${exactMatch.type}');
+      return exactMatch;
     }
     
-    // Next command variations (check "next drill" before "next")
-    if (_matchesAny(normalizedCommand, ['next drill', 'next', 'skip', 'forward'])) {
-      return CommandResult(
-        type: CommandType.next,
-        confidence: 1.0,
-      );
+    // Try fuzzy matching
+    final fuzzyMatch = _findFuzzyMatch(normalizedCommand);
+    if (fuzzyMatch != null && fuzzyMatch.confidence >= _settingsService.voiceConfidenceThreshold) {
+      debugPrint('✅ Fuzzy match found: ${fuzzyMatch.type} (confidence: ${fuzzyMatch.confidence})');
+      return fuzzyMatch;
     }
     
-    // Reset command variations (check "start over" before "start")
-    if (_matchesAny(normalizedCommand, ['start over', 'reset', 'restart', 'again'])) {
-      return CommandResult(
-        type: CommandType.reset,
-        confidence: 1.0,
-      );
+    // Check for made shots pattern
+    final madeShotsResult = _checkMadeShotsPattern(normalizedCommand);
+    if (madeShotsResult != null) {
+      return madeShotsResult;
     }
     
-    // Pause command variations
-    if (_matchesAny(normalizedCommand, ['pause', 'stop', 'hold', 'wait'])) {
-      return CommandResult(
-        type: CommandType.pause,
-        confidence: 1.0,
-      );
+    debugPrint('❌ No match found for: "$normalizedCommand"');
+    return null;
+  }
+  
+  void _addToHistory(String command) {
+    _commandHistory.add('${DateTime.now().toIso8601String()}: $command');
+    if (_commandHistory.length > _maxHistorySize) {
+      _commandHistory.removeAt(0);
+    }
+  }
+  
+  static List<String> getCommandHistory() {
+    return List.from(_commandHistory);
+  }
+  
+  CommandResult? _findExactMatch(String command) {
+    for (final entry in _commandVariations.entries) {
+      if (_matchesAny(command, entry.value)) {
+        return CommandResult(
+          type: entry.key,
+          confidence: 1.0,
+        );
+      }
+    }
+    return null;
+  }
+  
+  CommandResult? _findFuzzyMatch(String command) {
+    CommandType? bestMatch;
+    double bestScore = 0.0;
+    
+    for (final entry in _commandVariations.entries) {
+      for (final variation in entry.value) {
+        final score = _calculateSimilarity(command, variation);
+        if (score > bestScore) {
+          bestScore = score;
+          bestMatch = entry.key;
+        }
+      }
     }
     
-    // Resume command variations
-    if (_matchesAny(normalizedCommand, ['resume', 'continue', 'start', 'go', 'play'])) {
+    if (bestMatch != null && bestScore > 0.6) {
       return CommandResult(
-        type: CommandType.resume,
-        confidence: 1.0,
-      );
-    }
-    
-    // Made shots command (e.g., "made 5 shots", "made 3")
-    final madePattern = RegExp(r'made\s+(\d+)\s*(shots?)?');
-    final madeMatch = madePattern.firstMatch(normalizedCommand);
-    if (madeMatch != null) {
-      final shots = int.tryParse(madeMatch.group(1) ?? '0') ?? 0;
-      return CommandResult(
-        type: CommandType.madeShots,
-        data: shots,
-        confidence: 1.0,
-      );
-    }
-    
-    // Make command for single shot
-    if (_matchesAny(normalizedCommand, ['make', 'made', 'bucket', 'in', 'yes', 'yep', 'yup', 'good'])) {
-      return CommandResult(
-        type: CommandType.make,
-        confidence: 1.0,
-      );
-    }
-    
-    // Miss command for single shot
-    if (_matchesAny(normalizedCommand, ['miss', 'missed', 'brick', 'off', 'no', 'nope', 'out'])) {
-      return CommandResult(
-        type: CommandType.miss,
-        confidence: 1.0,
+        type: bestMatch,
+        confidence: bestScore,
       );
     }
     
     return null;
   }
   
+  CommandResult? _checkMadeShotsPattern(String command) {
+    // Enhanced pattern to handle more variations
+    final patterns = [
+      RegExp(r'made\s+(\d+)\s*(shots?)?'),
+      RegExp(r'(\d+)\s*made'),
+      RegExp(r'got\s+(\d+)'),
+      RegExp(r'scored\s+(\d+)'),
+      RegExp(r'made\s+(\w+)\s*shots?'), // handles "made five shots"
+    ];
+    
+    for (final pattern in patterns) {
+      final match = pattern.firstMatch(command);
+      if (match != null) {
+        final group1 = match.group(1);
+        if (group1 != null) {
+          // Try to parse as number
+          final shots = int.tryParse(group1) ?? _parseWordNumber(group1);
+          if (shots != null && shots > 0) {
+            return CommandResult(
+              type: CommandType.madeShots,
+              data: shots,
+              confidence: 1.0,
+            );
+          }
+        }
+      }
+    }
+    
+    return null;
+  }
+  
+  int? _parseWordNumber(String word) {
+    final wordNumbers = {
+      'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5,
+      'six': 6, 'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10,
+    };
+    return wordNumbers[word.toLowerCase()];
+  }
+  
   bool _matchesAny(String command, List<String> variations) {
-    debugPrint('_matchesAny called with command: $command, variations: $variations');
     // Sort variations by length (descending) to check longer phrases first
     final sortedVariations = List<String>.from(variations)
       ..sort((a, b) => b.length.compareTo(a.length));
@@ -640,7 +839,73 @@ class CommandProcessor {
       if (command.contains(' $variation ')) return true;
       if (command.startsWith('$variation ')) return true;
       if (command.endsWith(' $variation')) return true;
+      if (command == variation.replaceAll(' ', '')) return true; // Handle run-together words
     }
     return false;
+  }
+  
+  double _calculateSimilarity(String s1, String s2) {
+    // Simple similarity calculation based on:
+    // 1. Levenshtein distance
+    // 2. Common word matching
+    // 3. Phonetic similarity
+    
+    // Normalize strings
+    s1 = s1.toLowerCase().trim();
+    s2 = s2.toLowerCase().trim();
+    
+    // Exact match
+    if (s1 == s2) return 1.0;
+    
+    // Check if one contains the other
+    if (s1.contains(s2) || s2.contains(s1)) {
+      return 0.8;
+    }
+    
+    // Word-based similarity
+    final words1 = s1.split(' ').toSet();
+    final words2 = s2.split(' ').toSet();
+    final commonWords = words1.intersection(words2).length;
+    final totalWords = words1.union(words2).length;
+    
+    if (totalWords > 0) {
+      final wordSimilarity = commonWords / totalWords;
+      if (wordSimilarity > 0.5) return wordSimilarity;
+    }
+    
+    // Levenshtein distance for short strings
+    if (s1.length < 10 && s2.length < 10) {
+      final distance = _levenshteinDistance(s1, s2);
+      final maxLength = s1.length > s2.length ? s1.length : s2.length;
+      return 1.0 - (distance / maxLength);
+    }
+    
+    return 0.0;
+  }
+  
+  int _levenshteinDistance(String s1, String s2) {
+    final m = s1.length;
+    final n = s2.length;
+    final dp = List.generate(m + 1, (_) => List.filled(n + 1, 0));
+    
+    for (int i = 0; i <= m; i++) {
+      dp[i][0] = i;
+    }
+    for (int j = 0; j <= n; j++) {
+      dp[0][j] = j;
+    }
+    
+    for (int i = 1; i <= m; i++) {
+      for (int j = 1; j <= n; j++) {
+        if (s1[i - 1] == s2[j - 1]) {
+          dp[i][j] = dp[i - 1][j - 1];
+        } else {
+          dp[i][j] = 1 + [dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]]
+              .reduce((a, b) => a < b ? a : b);
+        }
+      }
+    }
+    
+    return dp[m][n];
   }
 }

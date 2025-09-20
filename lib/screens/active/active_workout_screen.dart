@@ -8,6 +8,8 @@ import 'package:flutter_bball_app/screens/active/widgets/read_and_react_drill_wi
 import 'package:flutter_bball_app/services/workout_state.dart';
 import 'package:flutter_bball_app/services/voice_command_service.dart';
 import 'package:flutter_bball_app/services/sound_effects_service.dart';
+import 'package:flutter_bball_app/services/audio_service.dart';
+import 'package:flutter_bball_app/services/settings_service.dart';
 import 'package:provider/provider.dart';
 
 class ActiveWorkoutScreen extends StatefulWidget {
@@ -18,8 +20,25 @@ class ActiveWorkoutScreen extends StatefulWidget {
 }
 
 class _ActiveWorkoutScreenState extends State<ActiveWorkoutScreen> {
-  bool _isListening = false;
-  String _transcript = '';
+  @override
+  void initState() {
+    super.initState();
+    // Start wake word listening when screen opens if voice commands are enabled
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final voiceService = Provider.of<VoiceCommandService>(context, listen: false);
+      if (voiceService.state == VoiceCommandState.ready) {
+        voiceService.startListening();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    // Stop listening when leaving the screen
+    final voiceService = Provider.of<VoiceCommandService>(context, listen: false);
+    voiceService.stopListening();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -51,25 +70,33 @@ class _ActiveWorkoutScreenState extends State<ActiveWorkoutScreen> {
 
         final drill = workoutState.currentDrill!;
 
+        // Listen for voice commands and update UI
+        if (voiceService.lastRecognizedCommand != null) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _handleVoiceCommand(voiceService, workoutState, soundService);
+          });
+        }
+
         // Drill widgets now handle their own complete layout via SplitPriorityLayout
         // No need for ActiveDrillLayout wrapper anymore
         return Stack(
           children: [
             _buildDrillView(drill),
-            // Debug voice command button (temporary for Phase 1)
+            // Voice command status indicator
             if (voiceService.state != VoiceCommandState.disabled)
               Positioned(
+                top: MediaQuery.of(context).padding.top + 10,
                 right: 20,
-                bottom: 100,
-                child: _buildVoiceCommandDebugButton(voiceService, workoutState, soundService),
+                child: _buildVoiceStatusIndicator(voiceService),
               ),
-            // Listening indicator
-            if (_isListening)
+            // Active listening overlay
+            if (voiceService.state == VoiceCommandState.listening && 
+                voiceService.listeningMode == ListeningMode.command)
               Positioned(
-                top: 100,
-                left: 0,
-                right: 0,
-                child: _buildListeningIndicator(),
+                top: MediaQuery.of(context).padding.top + 80,
+                left: 20,
+                right: 20,
+                child: _buildActiveListeningOverlay(voiceService),
               ),
           ],
         );
@@ -102,54 +129,110 @@ class _ActiveWorkoutScreenState extends State<ActiveWorkoutScreen> {
     }
   }
   
-  Widget _buildVoiceCommandDebugButton(VoiceCommandService voiceService, WorkoutState workoutState, SoundEffectsService soundService) {
-    return FloatingActionButton(
-      onPressed: (!_isListening) ? () async {
-        setState(() {
-          _isListening = true;
-          _transcript = '';
-        });
-        
-        // If not in ready state, reset the service first
-        if (voiceService.state != VoiceCommandState.ready) {
-          debugPrint("Voice service in state ${voiceService.state}, resetting first");
-          await voiceService.resetService();
-          await Future.delayed(const Duration(milliseconds: 500));
+  Widget _buildVoiceStatusIndicator(VoiceCommandService voiceService) {
+    IconData icon;
+    Color color;
+    String tooltip;
+    bool showPulse = false;
+    
+    switch (voiceService.state) {
+      case VoiceCommandState.listening:
+        if (voiceService.listeningMode == ListeningMode.wakeWord) {
+          icon = Icons.mic_none;
+          color = const Color(0xFF3b82f6);
+          tooltip = 'Say "Hey Coach" to give a command';
+        } else {
+          icon = Icons.mic;
+          color = const Color(0xFFef4444);
+          tooltip = 'Listening for command...';
+          showPulse = true;
         }
-        
-        // Start single command listening
-        await voiceService.startSingleCommandListening();
-        
-        // Listen for command results
-        voiceService.addListener(_handleVoiceCommand);
-        
-        // Auto-stop after 5 seconds
-        Future.delayed(const Duration(seconds: 5), () {
-          if (mounted && _isListening) {
-            _stopListening(voiceService);
-          }
-        });
-      } : () async {
-        debugPrint("Debug button pressed but it does nothing ,lastError=${voiceService.lastError} voiceService.state=${voiceService.state}, isListening=${_isListening}");
+        break;
+      case VoiceCommandState.processing:
+        icon = Icons.hearing;
+        color = const Color(0xFFf59e0b);
+        tooltip = 'Processing...';
+        break;
+      case VoiceCommandState.error:
+        icon = Icons.mic_off;
+        color = const Color(0xFFef4444);
+        tooltip = voiceService.lastError;
+        break;
+      case VoiceCommandState.ready:
+        icon = Icons.mic_none;
+        color = const Color(0xFF6b7280);
+        tooltip = 'Voice commands ready';
+        break;
+      default:
+        icon = Icons.mic_off;
+        color = const Color(0xFF374151);
+        tooltip = 'Voice commands unavailable';
+    }
+    
+    return GestureDetector(
+      onTap: () {
+        // Show voice command help or status
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(tooltip),
+            duration: const Duration(seconds: 2),
+            backgroundColor: const Color(0xFF1f2937),
+          ),
+        );
       },
-      backgroundColor: _isListening ? const Color(0xFFef4444) : const Color(0xFF3b82f6),
-      child: Icon(
-        _isListening ? Icons.mic : Icons.mic_none,
-        color: Colors.white,
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: color.withOpacity(0.3),
+            width: 1,
+          ),
+        ),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              if (showPulse)
+                Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.2),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              Icon(
+                icon,
+                color: color,
+                size: 20,
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
   
-  Widget _buildListeningIndicator() {
+  Widget _buildActiveListeningOverlay(VoiceCommandService voiceService) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: const Color(0xFF1f2937),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFF3b82f6), width: 2),
+        border: Border.all(color: const Color(0xFFef4444), width: 2),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFFef4444).withOpacity(0.3),
+            blurRadius: 12,
+            spreadRadius: 2,
+          ),
+        ],
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -180,10 +263,10 @@ class _ActiveWorkoutScreenState extends State<ActiveWorkoutScreen> {
               ),
             ],
           ),
-          if (_transcript.isNotEmpty) ...[
-            const SizedBox(height: 8),
+          if (voiceService.currentTranscript.isNotEmpty) ...[
+            const SizedBox(height: 12),
             Text(
-              '"$_transcript"',
+              '"${voiceService.currentTranscript}"',
               style: const TextStyle(
                 color: Color(0xFF9ca3af),
                 fontSize: 14,
@@ -191,90 +274,177 @@ class _ActiveWorkoutScreenState extends State<ActiveWorkoutScreen> {
               ),
             ),
           ],
+          const SizedBox(height: 8),
+          Text(
+            'Commands: pause, resume, next, previous, reset',
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.6),
+              fontSize: 12,
+            ),
+          ),
         ],
       ),
     );
   }
   
-  void _handleVoiceCommand() {
-    debugPrint('=== HANDLE VOICE COMMAND CALLED ===');
-    final voiceService = Provider.of<VoiceCommandService>(context, listen: false);
-    final workoutState = Provider.of<WorkoutState>(context, listen: false);
-    final soundService = Provider.of<SoundEffectsService>(context, listen: false);
+  void _handleVoiceCommand(VoiceCommandService voiceService, WorkoutState workoutState, SoundEffectsService soundService) {
+    final command = voiceService.lastRecognizedCommand;
+    if (command == null) return;
     
-    debugPrint('Voice service state: ${voiceService.state}');
-    debugPrint('Current transcript: "${voiceService.currentTranscript}"');
-    debugPrint('Last recognized command: ${voiceService.lastRecognizedCommand?.type}');
+    debugPrint('🎯 Processing voice command: ${command.type}');
     
-    // Update transcript
-    if (voiceService.currentTranscript.isNotEmpty) {
-      debugPrint('Updating transcript to: "${voiceService.currentTranscript}"');
-      setState(() {
-        _transcript = voiceService.currentTranscript;
-      });
+    // Clear the command to prevent duplicate processing
+    voiceService.clearLastCommand();
+    
+    // Get services
+    final audioService = AudioService();
+    final settingsService = Provider.of<SettingsService>(context, listen: false);
+    
+    // Check for valid workout state
+    if (!workoutState.isWorkoutStarted) {
+      _showCommandFeedback('No active workout', isError: true);
+      return;
     }
     
-    // Handle recognized command
-    final command = voiceService.lastRecognizedCommand;
-    if (command != null) {
-      debugPrint('🎯 Processing command: ${command.type} with data: ${command.data}');
-      setState(() {
-        _isListening = false;
-      });
-      _stopListening(voiceService);
-      
-      // Process the command
+    if (workoutState.isWorkoutComplete) {
+      _showCommandFeedback('Workout already complete', isError: true);
+      return;
+    }
+    
+    // Process the command with error handling
+    try {
       switch (command.type) {
         case CommandType.pause:
           if (!workoutState.isPaused) {
             workoutState.togglePause();
             soundService.playPauseSound();
+            _showCommandFeedback('Workout paused');
+            if (settingsService.audioCommandFeedback) {
+              audioService.speak('Workout paused');
+            }
+          } else {
+            _showCommandFeedback('Already paused', isError: true);
           }
           break;
+          
         case CommandType.resume:
           if (workoutState.isPaused) {
             workoutState.togglePause();
             soundService.playResumeSound();
+            _showCommandFeedback('Workout resumed');
+            if (settingsService.audioCommandFeedback) {
+              audioService.speak('Workout resumed');
+            }
+          } else {
+            _showCommandFeedback('Not paused', isError: true);
           }
           break;
+          
         case CommandType.next:
-          debugPrint('✅ Executing NEXT command');
-          workoutState.nextDrill();
-          soundService.playNextSound();
+          if (workoutState.currentDrillIndex < workoutState.totalDrills - 1) {
+            workoutState.nextDrill();
+            soundService.playNextSound();
+            final nextDrillName = workoutState.currentDrill?.name ?? 'Next drill';
+            _showCommandFeedback('Next: $nextDrillName');
+            if (settingsService.audioCommandFeedback && settingsService.announceDrillName) {
+              audioService.speak('Next drill: $nextDrillName');
+            }
+          } else {
+            _showCommandFeedback('Already on last drill', isError: true);
+            if (settingsService.audioCommandFeedback) {
+              audioService.speak('This is the last drill');
+            }
+          }
           break;
+          
         case CommandType.previous:
-          debugPrint('✅ Executing PREVIOUS command');
-          workoutState.previousDrill();
-          soundService.playPreviousSound();
+          if (workoutState.currentDrillIndex > 0) {
+            workoutState.previousDrill();
+            soundService.playPreviousSound();
+            final drillName = workoutState.currentDrill?.name ?? 'Previous drill';
+            _showCommandFeedback('Back to: $drillName');
+            if (settingsService.audioCommandFeedback && settingsService.announceDrillName) {
+              audioService.speak('Previous drill: $drillName');
+            }
+          } else {
+            _showCommandFeedback('Already on first drill', isError: true);
+            if (settingsService.audioCommandFeedback) {
+              audioService.speak('This is the first drill');
+            }
+          }
           break;
+          
         case CommandType.reset:
-          debugPrint('✅ Executing RESET command');
           workoutState.resetCurrentDrill();
           soundService.playResetSound();
-          break;
-        case CommandType.madeShots:
-          if (command.data != null && command.data is int) {
-            // This will be implemented in drill-specific widgets
-            debugPrint('Made ${command.data} shots');
+          _showCommandFeedback('Drill reset');
+          if (settingsService.audioCommandFeedback) {
+            final drillName = workoutState.currentDrill?.name ?? 'Drill';
+            audioService.speak('$drillName reset');
           }
           break;
+          
+        case CommandType.madeShots:
+          if (command.data != null && command.data is int) {
+            final shots = command.data as int;
+            // Check if current drill supports shot counting
+            final drillType = workoutState.currentDrill?.type;
+            if (drillType == 'REP_BASED') {
+              // This will be handled by the drill widget
+              _showCommandFeedback('Made $shots shots');
+              if (settingsService.audioCommandFeedback) {
+                audioService.speak('Logged $shots makes');
+              }
+            } else {
+              _showCommandFeedback('Current drill doesn\'t track shots', isError: true);
+            }
+          }
+          break;
+          
+        case CommandType.make:
+        case CommandType.miss:
+          // These will be handled in Phase 4 for always-listening mode
+          final drillType = workoutState.currentDrill?.type;
+          if (drillType == 'MAKE_TARGET_TIMED') {
+            _showCommandFeedback('Shot tracking coming soon');
+          } else {
+            _showCommandFeedback('Current drill doesn\'t track shots', isError: true);
+          }
+          break;
+          
         default:
-          debugPrint('❌ Unhandled command type: ${command.type}');
+          debugPrint('Unhandled command type: ${command.type}');
+          _showCommandFeedback('Command not available', isError: true);
       }
-    } else {
-      debugPrint('⚠️ No command to process (command is null)');
+    } catch (e) {
+      debugPrint('Error processing voice command: $e');
+      _showCommandFeedback('Command failed', isError: true);
     }
-    debugPrint('=== HANDLE VOICE COMMAND END ===');
   }
   
-  void _stopListening(VoiceCommandService voiceService) {
-    if (mounted) {
-      setState(() {
-        _isListening = false;
-        _transcript = '';
-      });
-    }
-    voiceService.removeListener(_handleVoiceCommand);
-    voiceService.stopListening(); // Ensure voice service stops
+  void _showCommandFeedback(String message, {bool isError = false}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            Icon(
+              isError ? Icons.error_outline : Icons.check_circle,
+              color: Colors.white,
+              size: 20,
+            ),
+            const SizedBox(width: 8),
+            Expanded(child: Text(message)),
+          ],
+        ),
+        duration: Duration(seconds: isError ? 2 : 1),
+        backgroundColor: isError ? const Color(0xFFdc2626) : const Color(0xFF059669),
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.all(20),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+    );
   }
+  
 }

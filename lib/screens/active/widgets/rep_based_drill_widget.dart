@@ -2,16 +2,95 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../models/drill.dart';
 import '../../../services/workout_state.dart';
+import '../../../services/voice_command_service.dart';
+import '../../../services/sound_effects_service.dart';
 import '../../../widgets/layout/split_priority_layout.dart';
 import '../../../widgets/layout/primary_action_bar.dart';
 import '../../../widgets/layout/secondary_control_bar.dart';
 import '../../../widgets/layout/responsive_content_area.dart';
 import '../../../utils/drill_types.dart';
 
-class RepBasedDrillWidget extends StatelessWidget {
+class RepBasedDrillWidget extends StatefulWidget {
   final Drill drill;
 
   const RepBasedDrillWidget({super.key, required this.drill});
+
+  @override
+  State<RepBasedDrillWidget> createState() => _RepBasedDrillWidgetState();
+}
+
+class _RepBasedDrillWidgetState extends State<RepBasedDrillWidget> {
+  @override
+  void initState() {
+    super.initState();
+    // Listen for voice commands when widget is active
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final voiceService = Provider.of<VoiceCommandService>(context, listen: false);
+      if (voiceService.state == VoiceCommandState.ready || 
+          voiceService.state == VoiceCommandState.listening) {
+        voiceService.addListener(_handleVoiceCommand);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    final voiceService = Provider.of<VoiceCommandService>(context, listen: false);
+    voiceService.removeListener(_handleVoiceCommand);
+    super.dispose();
+  }
+
+  void _handleVoiceCommand() {
+    final voiceService = Provider.of<VoiceCommandService>(context, listen: false);
+    final workoutState = Provider.of<WorkoutState>(context, listen: false);
+    final soundService = Provider.of<SoundEffectsService>(context, listen: false);
+    
+    final command = voiceService.lastRecognizedCommand;
+    if (command == null) return;
+    
+    // Check if this is a "made X shots" command
+    if (command.type == CommandType.madeShots && command.data != null && command.data is int) {
+      final shots = command.data as int;
+      debugPrint('REP_BASED drill handling "made $shots shots" command');
+      
+      // Clear the command to prevent duplicate processing
+      voiceService.clearLastCommand();
+      
+      // Log the shots and advance to next drill
+      workoutState.logRepBasedDrill(makes: shots);
+      workoutState.nextDrill();
+      soundService.playNextSound();
+      
+      // Show feedback
+      _showVoiceCommandFeedback('Logged $shots makes - advancing to next drill');
+    }
+  }
+
+  void _showVoiceCommandFeedback(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(
+              Icons.check_circle,
+              color: Colors.white,
+              size: 20,
+            ),
+            const SizedBox(width: 8),
+            Expanded(child: Text(message)),
+          ],
+        ),
+        duration: const Duration(seconds: 2),
+        backgroundColor: const Color(0xFF059669),
+        behavior: SnackBarBehavior.floating,
+        margin: const EdgeInsets.all(20),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+    );
+  }
 
   void _showLogSetDialog(BuildContext context, WorkoutState workoutState) {
     final makesController = TextEditingController();
@@ -34,6 +113,15 @@ class RepBasedDrillWidget extends StatelessWidget {
                 Text(
                   'How many shots did you make?',
                   style: Theme.of(ctx).textTheme.bodyMedium?.copyWith(color: Colors.grey[400]),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Or say "Hey Coach, made X shots"',
+                  style: TextStyle(
+                    color: Colors.blue[400],
+                    fontSize: 12,
+                    fontStyle: FontStyle.italic,
+                  ),
                 ),
                 const SizedBox(height: 20),
                 TextField(
@@ -83,7 +171,7 @@ class RepBasedDrillWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final targetMakes = drill.config['targetMakes'];
+    final targetMakes = widget.drill.config['targetMakes'];
     // We'll need to get the current makes from workoutState later
     const currentMakes = 0;
 
@@ -111,7 +199,7 @@ class RepBasedDrillWidget extends StatelessWidget {
               children: [
                 // Drill name
                 Text(
-                  drill.name.toUpperCase(),
+                  widget.drill.name.toUpperCase(),
                   style: const TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
@@ -168,8 +256,8 @@ class RepBasedDrillWidget extends StatelessWidget {
                 
                 // Instructions
                 Text(
-                  drill.description.isNotEmpty 
-                      ? drill.description
+                  widget.drill.description.isNotEmpty 
+                      ? widget.drill.description
                       : 'Complete your set, then tap LOG SET above to record your makes.',
                   style: const TextStyle(
                     fontSize: 18,
