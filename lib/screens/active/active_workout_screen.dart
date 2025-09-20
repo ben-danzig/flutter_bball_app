@@ -104,11 +104,18 @@ class _ActiveWorkoutScreenState extends State<ActiveWorkoutScreen> {
   
   Widget _buildVoiceCommandDebugButton(VoiceCommandService voiceService, WorkoutState workoutState, SoundEffectsService soundService) {
     return FloatingActionButton(
-      onPressed: voiceService.state == VoiceCommandState.ready ? () async {
+      onPressed: (!_isListening) ? () async {
         setState(() {
           _isListening = true;
           _transcript = '';
         });
+        
+        // If not in ready state, reset the service first
+        if (voiceService.state != VoiceCommandState.ready) {
+          debugPrint("Voice service in state ${voiceService.state}, resetting first");
+          await voiceService.resetService();
+          await Future.delayed(const Duration(milliseconds: 500));
+        }
         
         // Start single command listening
         await voiceService.startSingleCommandListening();
@@ -119,13 +126,12 @@ class _ActiveWorkoutScreenState extends State<ActiveWorkoutScreen> {
         // Auto-stop after 5 seconds
         Future.delayed(const Duration(seconds: 5), () {
           if (mounted && _isListening) {
-            setState(() {
-              _isListening = false;
-            });
-            voiceService.removeListener(_handleVoiceCommand);
+            _stopListening(voiceService);
           }
         });
-      } : null,
+      } : () async {
+        debugPrint("Debug button pressed but it does nothing ,lastError=${voiceService.lastError} voiceService.state=${voiceService.state}, isListening=${_isListening}");
+      },
       backgroundColor: _isListening ? const Color(0xFFef4444) : const Color(0xFF3b82f6),
       child: Icon(
         _isListening ? Icons.mic : Icons.mic_none,
@@ -191,12 +197,18 @@ class _ActiveWorkoutScreenState extends State<ActiveWorkoutScreen> {
   }
   
   void _handleVoiceCommand() {
+    debugPrint('=== HANDLE VOICE COMMAND CALLED ===');
     final voiceService = Provider.of<VoiceCommandService>(context, listen: false);
     final workoutState = Provider.of<WorkoutState>(context, listen: false);
     final soundService = Provider.of<SoundEffectsService>(context, listen: false);
     
+    debugPrint('Voice service state: ${voiceService.state}');
+    debugPrint('Current transcript: "${voiceService.currentTranscript}"');
+    debugPrint('Last recognized command: ${voiceService.lastRecognizedCommand?.type}');
+    
     // Update transcript
     if (voiceService.currentTranscript.isNotEmpty) {
+      debugPrint('Updating transcript to: "${voiceService.currentTranscript}"');
       setState(() {
         _transcript = voiceService.currentTranscript;
       });
@@ -205,10 +217,11 @@ class _ActiveWorkoutScreenState extends State<ActiveWorkoutScreen> {
     // Handle recognized command
     final command = voiceService.lastRecognizedCommand;
     if (command != null) {
+      debugPrint('🎯 Processing command: ${command.type} with data: ${command.data}');
       setState(() {
         _isListening = false;
       });
-      voiceService.removeListener(_handleVoiceCommand);
+      _stopListening(voiceService);
       
       // Process the command
       switch (command.type) {
@@ -225,14 +238,17 @@ class _ActiveWorkoutScreenState extends State<ActiveWorkoutScreen> {
           }
           break;
         case CommandType.next:
+          debugPrint('✅ Executing NEXT command');
           workoutState.nextDrill();
           soundService.playNextSound();
           break;
         case CommandType.previous:
+          debugPrint('✅ Executing PREVIOUS command');
           workoutState.previousDrill();
           soundService.playPreviousSound();
           break;
         case CommandType.reset:
+          debugPrint('✅ Executing RESET command');
           workoutState.resetCurrentDrill();
           soundService.playResetSound();
           break;
@@ -243,8 +259,22 @@ class _ActiveWorkoutScreenState extends State<ActiveWorkoutScreen> {
           }
           break;
         default:
-          debugPrint('Unhandled command type: ${command.type}');
+          debugPrint('❌ Unhandled command type: ${command.type}');
       }
+    } else {
+      debugPrint('⚠️ No command to process (command is null)');
     }
+    debugPrint('=== HANDLE VOICE COMMAND END ===');
+  }
+  
+  void _stopListening(VoiceCommandService voiceService) {
+    if (mounted) {
+      setState(() {
+        _isListening = false;
+        _transcript = '';
+      });
+    }
+    voiceService.removeListener(_handleVoiceCommand);
+    voiceService.stopListening(); // Ensure voice service stops
   }
 }
