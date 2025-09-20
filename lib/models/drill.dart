@@ -20,4 +20,20 @@ class Drill {
 
   factory Drill.fromJson(Map<String, dynamic> json) => _$DrillFromJson(json);
   Map<String, dynamic> toJson() => _$DrillToJson(this);
+
+  Drill copyWith({
+    String? drillId,
+    String? name,
+    String? description,
+    String? type,
+    Map<String, dynamic>? config,
+  }) {
+    return Drill(
+      drillId: drillId ?? this.drillId,
+      name: name ?? this.name,
+      description: description ?? this.description,
+      type: type ?? this.type,
+      config: config ?? this.config,
+    );
+  }
 }
