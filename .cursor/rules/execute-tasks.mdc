@@ -7,3 +7,30 @@ alwaysApply: false
 Execute the next task.
 
 Refer to the instructions located in @~/.agent-os/instructions/execute-tasks.md
+
+## Project-Specific Standards
+
+<testing>
+  <framework>Flutter Test Framework</framework>
+  <commands>
+    - flutter test (run all tests)
+    - flutter test test/specific_test.dart (run specific test file)
+    - flutter test --coverage (run tests with coverage)
+  </commands>
+  <requirements>
+    - Use Flutter CLI commands instead of generic test runners
+    - Only run tests that were created or modified during task execution
+    - Do NOT run the entire test suite as existing tests may have pre-existing errors
+    - Ensure all newly created/modified tests pass before committing
+    - Maintain test coverage for new code
+  </requirements>
+</testing>
+
+<development_server>
+  <framework>Flutter</framework>
+  <commands>
+    - flutter run (start development server)
+    - flutter run --hot (enable hot reload)
+  </commands>
+  <check_command>ps aux | grep "flutter.*run"</check_command>
+</development_server>

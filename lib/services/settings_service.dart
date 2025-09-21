@@ -12,11 +12,23 @@ class SettingsService extends ChangeNotifier {
   bool _announceDrillTargetMakes = true;
   bool _playTimerSounds = true;
 
+  // Voice command settings
+  bool _voiceCommandsEnabled = false;
+  bool _audioCommandFeedback = true;
+  double _voiceConfidenceThreshold = 0.7;
+  String _preferredAudioDeviceId = '';
+
   // Getters
   bool get announceDrillName => _announceDrillName;
   bool get announceDrillDescription => _announceDrillDescription;
   bool get announceDrillTargetMakes => _announceDrillTargetMakes;
   bool get playTimerSounds => _playTimerSounds;
+  
+  // Voice command getters
+  bool get voiceCommandsEnabled => _voiceCommandsEnabled;
+  bool get audioCommandFeedback => _audioCommandFeedback;
+  double get voiceConfidenceThreshold => _voiceConfidenceThreshold;
+  String get preferredAudioDeviceId => _preferredAudioDeviceId;
 
   SettingsService() {
     _loadSettings();
@@ -41,6 +53,12 @@ class SettingsService extends ChangeNotifier {
         _announceDrillTargetMakes = data['announceDrillTargetMakes'] ?? true;
         _playTimerSounds = data['playTimerSounds'] ?? true;
         
+        // Load voice command settings
+        _voiceCommandsEnabled = data['voiceCommandsEnabled'] ?? false;
+        _audioCommandFeedback = data['audioCommandFeedback'] ?? true;
+        _voiceConfidenceThreshold = data['voiceConfidenceThreshold'] ?? 0.7;
+        _preferredAudioDeviceId = data['preferredAudioDeviceId'] ?? '';
+        
         notifyListeners();
       }
     } catch (e) {
@@ -58,6 +76,11 @@ class SettingsService extends ChangeNotifier {
         'announceDrillDescription': _announceDrillDescription,
         'announceDrillTargetMakes': _announceDrillTargetMakes,
         'playTimerSounds': _playTimerSounds,
+        // Voice command settings
+        'voiceCommandsEnabled': _voiceCommandsEnabled,
+        'audioCommandFeedback': _audioCommandFeedback,
+        'voiceConfidenceThreshold': _voiceConfidenceThreshold,
+        'preferredAudioDeviceId': _preferredAudioDeviceId,
       };
       
       await file.writeAsString(json.encode(data));
@@ -86,6 +109,31 @@ class SettingsService extends ChangeNotifier {
 
   Future<void> setPlayTimerSounds(bool value) async {
     _playTimerSounds = value;
+    notifyListeners();
+    await _saveSettings();
+  }
+
+  // Voice command setters
+  Future<void> setVoiceCommandsEnabled(bool value) async {
+    _voiceCommandsEnabled = value;
+    notifyListeners();
+    await _saveSettings();
+  }
+
+  Future<void> setAudioCommandFeedback(bool value) async {
+    _audioCommandFeedback = value;
+    notifyListeners();
+    await _saveSettings();
+  }
+
+  Future<void> setVoiceConfidenceThreshold(double value) async {
+    _voiceConfidenceThreshold = value;
+    notifyListeners();
+    await _saveSettings();
+  }
+
+  Future<void> setPreferredAudioDeviceId(String value) async {
+    _preferredAudioDeviceId = value;
     notifyListeners();
     await _saveSettings();
   }
