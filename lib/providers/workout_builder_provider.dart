@@ -63,25 +63,25 @@ class WorkoutBuilderProvider extends ChangeNotifier {
     for (final drill in _drills) {
       switch (drill.type) {
         case 'TIMED':
-          final duration = drill.config['duration'] ?? 0;
-          final sets = drill.config['sets'] ?? 1;
-          totalSeconds += (duration * sets);
+          final duration = (drill.config['duration'] as num? ?? 0).toInt();
+          final sets = (drill.config['sets'] as num? ?? 1).toInt();
+          totalSeconds += duration * sets;
           break;
         case 'REP_BASED':
           // Estimate 3 seconds per rep
-          final targetMakes = drill.config['targetMakes'] ?? 0;
-          final sets = drill.config['sets'] ?? 1;
-          totalSeconds += (targetMakes * 3 * sets);
+          final targetMakes = (drill.config['targetMakes'] as num? ?? 0).toInt();
+          final sets = (drill.config['sets'] as num? ?? 1).toInt();
+          totalSeconds += targetMakes * 3 * sets;
           break;
         case 'MAKE_TARGET_TIMED':
           // Estimate based on target makes
-          final targetMakes = drill.config['targetMakes'] ?? 0;
-          totalSeconds += (targetMakes * 10); // 10 seconds per make average
+          final targetMakes = (drill.config['targetMakes'] as num? ?? 0).toInt();
+          totalSeconds += targetMakes * 10; // 10 seconds per make average
           break;
         case 'READ_AND_REACT':
-          final reps = drill.config['reps'] ?? 0;
-          final interval = drill.config['intervalSeconds'] ?? 0;
-          totalSeconds += (reps * interval);
+          final reps = (drill.config['reps'] as num? ?? 0).toInt();
+          final interval = (drill.config['intervalSeconds'] as num? ?? 0).toInt();
+          totalSeconds += reps * interval;
           break;
       }
     }
