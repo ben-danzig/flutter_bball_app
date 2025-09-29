@@ -5,6 +5,7 @@ class SoundEffectsService {
   static const String _timerEndSoundFile = 'timer-end-buzzer.mp3';
   static const String _timerTickSoundFile = 'timer-tick.mp3';
   static const String _fallbackSoundFile = 'buzzer.mp3';
+  static const String _whistleSoundFile = 'referee-whistle.mp3';
   
   static final SoundEffectsService _instance = SoundEffectsService._internal();
   factory SoundEffectsService() => _instance;
@@ -62,38 +63,72 @@ class SoundEffectsService {
 
   // Voice command feedback sounds
   Future<void> playPauseSound() async {
-    // Using tick sound for pause feedback
-    await playTimerTick();
+    try {
+      // Play whistle sound for pause
+      await _audioPlayer
+          .play(AssetSource(_whistleSoundFile), volume: 0.5)
+          .timeout(const Duration(seconds: 1));
+    } catch (e) {
+      debugPrint('Error playing pause sound: $e');
+      await playTimerTick();
+    }
   }
 
   Future<void> playResumeSound() async {
-    // Using tick sound for resume feedback
+    // Double tick for resume
+    await playTimerTick();
+    await Future.delayed(const Duration(milliseconds: 100));
     await playTimerTick();
   }
 
   Future<void> playNextSound() async {
-    // Using tick sound for next feedback
+    // Single tick for navigation
     await playTimerTick();
   }
 
   Future<void> playPreviousSound() async {
-    // Using tick sound for previous feedback
+    // Single tick for navigation
     await playTimerTick();
   }
 
   Future<void> playResetSound() async {
-    // Using timer complete sound for reset feedback
-    await playTimerComplete();
+    // Double tick for reset
+    await playTimerTick();
+    await Future.delayed(const Duration(milliseconds: 150));
+    await playTimerTick();
   }
 
   Future<void> playCommandRecognizedSound() async {
-    // Using tick sound for command recognition feedback
+    // Quick tick for successful command recognition
     await playTimerTick();
   }
 
   Future<void> playCommandErrorSound() async {
-    // Using timer complete sound for error feedback
-    await playTimerComplete();
+    try {
+      // Play buzzer for errors
+      await _audioPlayer
+          .play(AssetSource(_fallbackSoundFile), volume: 0.3)
+          .timeout(const Duration(seconds: 1));
+    } catch (e) {
+      debugPrint('Error playing error sound: $e');
+    }
+  }
+
+  Future<void> playWakeWordDetectedSound() async {
+    // Double quick tick for wake word detection
+    await playTimerTick();
+    await Future.delayed(const Duration(milliseconds: 50));
+    await playTimerTick();
+  }
+
+  Future<void> playListeningStartSound() async {
+    // Rising tone effect with two ticks
+    await playTimerTick();
+  }
+
+  Future<void> playListeningEndSound() async {
+    // Single tick to indicate end of listening
+    await playTimerTick();
   }
 
   void dispose() {
