@@ -10,7 +10,9 @@
             "type": "dart",
             "program": "lib/main.dart",
             "args": [
-                "--dart-define-from-file=config.dev.json"
+                "--dart-define-from-file=config.dev.json",
+            //    "--web-port","36969",
+            //    "--web-hostname", "0.0.0.0"
             ]
         },
         {
@@ -20,6 +22,8 @@
             "program": "lib/main.dart",
             "args": [
                 "--dart-define-from-file=config.dev.json",
+             //   "--web-port","36969",
+             //   "--web-hostname", "0.0.0.0",
                 "-d",
                 "web-server"
             ]

@@ -30,6 +30,8 @@ class ActiveDrillLayout extends StatelessWidget {
               Text(
                 'UP NEXT: ${nextDrillName ?? "Workout Complete"}',
                 style: const TextStyle(color: Color(0xFF9ca3af), fontSize: 14),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
               ),
               const SizedBox(height: 20),
 
