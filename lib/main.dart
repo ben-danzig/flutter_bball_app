@@ -5,14 +5,22 @@ import 'package:flutter_bball_app/services/settings_service.dart';
 import 'package:flutter_bball_app/services/workout_state.dart';
 import 'package:flutter_bball_app/services/sound_effects_service.dart';
 import 'package:flutter_bball_app/services/voice_command_service.dart';
+import 'package:flutter_bball_app/services/drill_library_service.dart';
+import 'package:flutter_bball_app/providers/workout_builder_provider.dart';
+import 'package:flutter_bball_app/repositories/custom_workout_repository.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform, // <-- This line is critical!
   );
+  
+  // Initialize SharedPreferences
+  final sharedPreferences = await SharedPreferences.getInstance();
   
   runApp(
     MultiProvider(
@@ -26,6 +34,20 @@ void main() async {
             Provider.of<SettingsService>(context, listen: false),
           ),
           update: (context, settings, voice) => voice ?? VoiceCommandService(settings),
+        ),
+        Provider<DrillLibraryService>(create: (context) => DrillLibraryService()),
+        Provider<CustomWorkoutRepository>(
+          create: (context) => CustomWorkoutRepository(
+            sharedPreferences: sharedPreferences,
+            firestore: FirebaseFirestore.instance,
+          ),
+        ),
+        ChangeNotifierProxyProvider<CustomWorkoutRepository, WorkoutBuilderProvider>(
+          create: (context) => WorkoutBuilderProvider(
+            repository: Provider.of<CustomWorkoutRepository>(context, listen: false),
+          ),
+          update: (context, repository, previous) => 
+              previous ?? WorkoutBuilderProvider(repository: repository),
         ),
       ],
       child: const BballTrainerApp(),

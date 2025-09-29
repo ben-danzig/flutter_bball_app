@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:flutter_bball_app/models/workout_blueprint.dart';
 import 'package:flutter_bball_app/repositories/workout_repository.dart';
 import 'package:flutter_bball_app/screens/detail/workout_detail_screen.dart';
 import 'package:flutter_bball_app/screens/history/workout_history_screen.dart';
+import 'package:flutter_bball_app/screens/workout_builder/workout_builder_screen.dart';
+import 'package:flutter_bball_app/providers/workout_builder_provider.dart';
 
 class WorkoutLibraryScreen extends StatefulWidget {
   const WorkoutLibraryScreen({super.key});
@@ -27,6 +30,23 @@ class _WorkoutLibraryScreenState extends State<WorkoutLibraryScreen> {
 
     return Scaffold(
       backgroundColor: const Color(0xFF111827),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          // Reset the workout builder provider state
+          final provider = Provider.of<WorkoutBuilderProvider>(context, listen: false);
+          provider.clearDraft();
+          
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => const WorkoutBuilderScreen(),
+            ),
+          );
+        },
+        backgroundColor: const Color(0xFF3B82F6),
+        foregroundColor: Colors.white,
+        icon: const Icon(Icons.add),
+        label: const Text('Build Workout'),
+      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
