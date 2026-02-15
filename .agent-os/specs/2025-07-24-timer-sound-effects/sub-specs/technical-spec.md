@@ -48,7 +48,13 @@ class SoundEffectsService {
   final AudioPlayer _audioPlayer = AudioPlayer();
 
   Future<void> playTimerComplete() async {
-    await _audioPlayer.play(AssetSource('timer-end.mp3'));
+    try {
+      // Keep non-blocking; do not await completion beyond start
+      await _audioPlayer.play(AssetSource('timer-end.mp3'));
+    } catch (_) {
+      // Fallback to buzzer if default asset fails
+      try { await _audioPlayer.play(AssetSource('buzzer.mp3')); } catch (_) {}
+    }
   }
 
   void dispose() {
@@ -64,9 +70,13 @@ class SoundEffectsService {
 - Add setter method `Future<void> setPlayTimerSounds(bool value)` with persistence
 - Update `_loadSettings()` and `_saveSettings()` methods to handle new field
 
+Notes:
+- Persist alongside existing announce settings in the same JSON file.
+- Notify listeners on change.
+
 ### 3. Update Settings Screen UI
 
-- Add new ListTile with SwitchListTile for "Timer Sound Effects"
+- Add new ListTile with Switch for "Timer Sound Effects"
 - Connect to SettingsService.playTimerSounds
 - Follow existing UI patterns and styling
 
@@ -76,11 +86,22 @@ class SoundEffectsService {
 - Add SoundEffectsService dependency injection through Provider or direct instantiation
 - Ensure sound plays before logging drill result and advancing to next drill
 
+Dependency Injection:
+- Provide `SoundEffectsService` at app level using `Provider` for easy access in widgets.
+
 ### 5. Timer Widget Integration
 
 - Update `CountdownTimerWidget` to accept optional sound completion callback
 - Maintain backward compatibility for other timer usages
 - Keep sound logic in consuming widget rather than generic timer component
+
+### 6. Performance & Latency
+- Initialize `AudioPlayer` on first use or early in app lifecycle to reduce first-play latency.
+- Keep audio files as small as practical; current assets are acceptable.
+
+### 7. Web Considerations
+- Ensure playback is triggered after a user gesture (e.g., starting a workout) to satisfy autoplay policies.
+- If blocked, fail silently and continue workout flow.
 
 ## File Changes Required
 
@@ -90,6 +111,7 @@ class SoundEffectsService {
 4. **Modify**: `lib/screens/active/widgets/timed_drill_widget.dart`
 5. **Create**: `test/services/sound_effects_service_test.dart`
 6. **Modify**: `test/services/settings_service_test.dart`
+7. **Modify**: `lib/screens/settings/settings_screen.dart` (add toggle)
 
 ## Error Handling
 

@@ -205,6 +205,78 @@
     ]
   },
   {
+    "id": "7_spot_3pt_challenge_accuracy",
+    "name": "7-Spots, 10 shots, 3pt Accuracy",
+    "objective": "Take 10 3-point shots from 7 positions on the court.",
+    "estimatedDuration": 15,
+    "drills": [
+      {
+        "drillId": "3pt_left_corner_makes",
+        "name": "3-Point: Left Corner",
+        "description": "Take 10 3-pointers from the left corner.",
+        "type": "REP_BASED",
+        "config": { "reps": 10 }
+      },
+      {
+        "drillId": "3pt_left_wing",
+        "name": "3-Point Challenge: Left Wing",
+        "description": "Take 10 3-point shots from the left wing.",
+        "type": "REP_BASED",
+        "config": { "reps": 10 }
+      },
+      {
+        "drillId": "3pt_left_elbow_extended",
+        "name": "3-Point Challenge: Left Elbow Extended",
+        "description": "Take 10 3-point shots from the left elbow extended.",
+        "type": "REP_BASED",
+        "config": { "reps": 10 }
+      },
+      {
+        "drillId": "3pt_top_of_key",
+        "name": "3-Point Challenge: Top of the Key",
+        "description": "Take 10 3-point shots from the top of the key.",
+        "type": "REP_BASED",
+        "config": { "reps": 10 }
+      },
+      {
+        "drillId": "3pt_right_elbow_extended",
+        "name": "3-Point Challenge: Right Elbow Extended",
+        "description": "Take 10 3-point shots from the right elbow extended.",
+        "type": "REP_BASED",
+        "config": { "reps": 10 }
+      },
+      {
+        "drillId": "3pt_right_wing",
+        "name": "3-Point Challenge: Right Wing",
+        "description": "Take 10 3-point shots from the right wing.",
+        "type": "REP_BASED",
+        "config": { "reps": 10 }
+      },
+      {
+        "drillId": "3pt_right_corner",
+        "name": "3-Point Challenge: Right Corner",
+        "description": "Take 10 3-point shots from the right corner.",
+        "type": "REP_BASED",
+        "config": { "reps": 10 }
+      }
+    ]
+  },
+  {
+    "id": "dribbling_for_time",
+    "name": "Dribbling Drills for Time",
+    "objective": "Dribbling drills for time.",
+    "estimatedDuration": 20,
+    "drills": [
+      {
+        "drillId": "dribbling",
+        "name": "Dribbling for time",
+        "description": "Dribble for as long as you want.",
+        "type": "MAKE_TARGET_TIMED",
+        "config": { "targetMakes": 1 }
+      }
+    ]
+  },
+  {
     "id": "7_spot_3pt_challenge",
     "name": "7-Spot 3-Point Challenge",
     "objective": "Make 5 3-point shots from 7 positions on the court in as little time as possible.",

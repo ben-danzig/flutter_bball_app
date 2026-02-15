@@ -10,11 +10,13 @@ class SettingsService extends ChangeNotifier {
   bool _announceDrillName = true;
   bool _announceDrillDescription = true;
   bool _announceDrillTargetMakes = true;
+  bool _playTimerSounds = true;
 
   // Getters
   bool get announceDrillName => _announceDrillName;
   bool get announceDrillDescription => _announceDrillDescription;
   bool get announceDrillTargetMakes => _announceDrillTargetMakes;
+  bool get playTimerSounds => _playTimerSounds;
 
   SettingsService() {
     _loadSettings();
@@ -37,6 +39,7 @@ class SettingsService extends ChangeNotifier {
         _announceDrillName = data['announceDrillName'] ?? true;
         _announceDrillDescription = data['announceDrillDescription'] ?? true;
         _announceDrillTargetMakes = data['announceDrillTargetMakes'] ?? true;
+        _playTimerSounds = data['playTimerSounds'] ?? true;
         
         notifyListeners();
       }
@@ -54,6 +57,7 @@ class SettingsService extends ChangeNotifier {
         'announceDrillName': _announceDrillName,
         'announceDrillDescription': _announceDrillDescription,
         'announceDrillTargetMakes': _announceDrillTargetMakes,
+        'playTimerSounds': _playTimerSounds,
       };
       
       await file.writeAsString(json.encode(data));
@@ -76,6 +80,12 @@ class SettingsService extends ChangeNotifier {
 
   Future<void> setAnnounceDrillTargetMakes(bool value) async {
     _announceDrillTargetMakes = value;
+    notifyListeners();
+    await _saveSettings();
+  }
+
+  Future<void> setPlayTimerSounds(bool value) async {
+    _playTimerSounds = value;
     notifyListeners();
     await _saveSettings();
   }

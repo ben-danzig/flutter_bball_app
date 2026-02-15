@@ -10,11 +10,14 @@ import '../../../widgets/layout/large_timer_display.dart';
 import '../../../widgets/layout/responsive_content_area.dart';
 import '../../../utils/drill_types.dart';
 import '../widgets/time_picker_dialog.dart' as custom_picker;
+import '../../../services/settings_service.dart';
+import '../../../services/sound_effects_service.dart';
 
 class TimedDrillWidget extends StatefulWidget {
   final Drill drill;
+  final Future<void> Function()? playSoundOverride;
 
-  const TimedDrillWidget({super.key, required this.drill});
+  const TimedDrillWidget({super.key, required this.drill, this.playSoundOverride});
 
   @override
   _TimedDrillWidgetState createState() => _TimedDrillWidgetState();
@@ -67,18 +70,61 @@ class _TimedDrillWidgetState extends State<TimedDrillWidget> {
         return;
       }
 
-      if (_remainingSeconds > 1) {
-        setState(() {
-          _remainingSeconds--;
-        });
-      } else {
-        _timer.cancel();
-        _onTimerComplete();
+      setState(() {
+        _remainingSeconds--;
+      });
+
+      // Play tick sound for final 3 seconds (but not at 1 second since completion sound plays then)
+      if (_remainingSeconds <= 3 && _remainingSeconds > 1) {
+        _playTickSound();
       }
+
+      // Trigger completion actions when timer reaches 1 second to eliminate delay
+      if (_remainingSeconds == 1) {
+        _handleTimerCompletion();
+      }
+
+        if (_remainingSeconds <= 0) {
+          _timer.cancel();
+          _finalizeTimerCompletion();
+        }
     });
   }
 
-  void _onTimerComplete() {
+  void _playTickSound() {
+    // Play tick sound for countdown (3, 2 seconds remaining)
+    final settings = Provider.of<SettingsService>(context, listen: false);
+    if (settings.playTimerSounds) {
+      try {
+        final soundEffects = Provider.of<SoundEffectsService>(context, listen: false);
+        // Fire-and-forget to avoid blocking UI/thread
+        soundEffects.playTimerTick();
+      } catch (_) {
+        // Ignore sound errors in this path
+      }
+    }
+  }
+
+  void _handleTimerCompletion() {
+    // Play sound when timer shows 1 second remaining to eliminate delay
+    final settings = Provider.of<SettingsService>(context, listen: false);
+    if (settings.playTimerSounds) {
+      try {
+        if (widget.playSoundOverride != null) {
+          widget.playSoundOverride!.call();
+        } else {
+          final soundEffects = Provider.of<SoundEffectsService>(context, listen: false);
+          // Fire-and-forget to avoid blocking UI/thread
+          soundEffects.playTimerComplete();
+        }
+      } catch (_) {
+        // Ignore sound errors in this path
+      }
+    }
+  }
+
+  void _finalizeTimerCompletion() {
+    // Handle the actual completion logic (logging and navigation)
     final workoutState = Provider.of<WorkoutState>(context, listen: false);
     workoutState.logTimedDrill();
     workoutState.nextDrill();
